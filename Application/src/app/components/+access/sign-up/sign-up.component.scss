@@ -1,0 +1,78 @@
+.page {
+	div.panel {
+	    .left-side {
+	    	.log-in-container {
+	    		margin-bottom: 35px;
+	    		.account-message {
+    			    padding-top: 20px;
+	    			.link {
+						font-weight: 600;
+						color: #0c4eff;
+						cursor: pointer;
+	    			}
+	    		}
+	    		input:focus::-webkit-contacts-auto-fill-button {
+	    		    // visibility: hidden;
+	    		    pointer-events: none;
+	    		    position: absolute;
+	    		    right: 0;
+	    		    opacity: 0;
+	    		}
+	    	}
+		    .page-header {
+		    	margin-top: 34px;
+		    }
+		}
+		.right-side {
+			position: relative;
+			margin-right: -1px;
+			.right-img-workless {
+				position: absolute;
+				left: 0;
+				right: 0;
+				bottom: 0;
+				top: 0;
+				background-image: url('assets/img/computer_shoot_more_work_less.png');
+				background-size: cover;
+				background-repeat: no-repeat;
+				background-position: 20% 0;
+				width: 100%;
+				min-height: 700px; 
+				height: 100%;
+			}
+		}
+	}
+	.panel {
+		&__item {
+			flex: 1;
+		}
+		&_flex {
+			display: flex;
+			flex-flow: row nowrap;
+			align-items: stretch;
+			height: auto;
+		}
+
+	}
+}
+
+.field {
+	input.ng-touched.ng-invalid, 
+	input.has-error, 
+	textarea.ng-touched.ng-invalid, 
+	textarea.has-error {
+		border: solid 1px #e4e8f0 !important;
+		-webkit-box-shadow: none !important;
+    	box-shadow: none !important;
+	}
+	&.is-validate {
+		input.ng-touched.ng-invalid,
+		input.has-error, 
+		textarea.ng-touched.ng-invalid, 
+		textarea.has-error {
+    		border: solid 1px #e94e4c !important;
+    		-webkit-box-shadow: 0 0 4px 1px rgba(233, 77, 75, 0.5) !important;
+    		box-shadow: 0 0 4px 1px rgba(233, 77, 75, 0.5) !important;
+    	}
+	}
+}

@@ -1,0 +1,53 @@
+// Form global styles
+// form group is usually contains label and input for a field
+.sq-form-group {
+  position: static;
+  margin-bottom: $form-group-margin-bottom;
+}
+
+// form control is a field control where the user changes the form field value
+.sq-form-control {
+  @include sq-base-form-control;
+
+  // make room for the label inside the input control
+  &[data-empty] {
+    padding: 15px 15px 0 20px;
+    height: 44px;
+  }
+
+  // For form controls with `data-empty` property is present, the label acts like
+  // a placeholder when the property is `true`. When the property set to `false`
+  // the label is placed above the field value within the input bounds.
+  &[data-empty="false"] + /deep/ngx-my-date-picker + label,
+  &[data-empty="false"] + label,
+  &:focus + label {
+    color: #898c9d;
+    font-size: 10px;
+    transform: translate3d(0, -10px, 0);
+  }
+
+  & + label {
+    position: absolute;
+    top: 15px;
+    left: 20px;
+    z-index: 2;
+    color: #9da0ad;
+    transform: translate3d(0, 0, 0);
+    transition: all 0.2s ease-in-out;
+    user-select: none;
+    pointer-events: none;
+    &.is-selected {
+      color: $input-color-placeholder;
+      font-size: 10px;
+      transform: translate3d(0, -10px, 0);
+    }
+  }
+
+}
+
+.sg-input-group {
+  margin-bottom: $form-group-margin-bottom;
+  position: relative;
+  display: table;
+  border-collapse: separate;
+}

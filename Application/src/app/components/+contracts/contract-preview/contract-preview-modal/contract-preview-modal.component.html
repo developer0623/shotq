@@ -1,0 +1,29 @@
+<div>
+  <app-contract-preview [contract]="context.contract"
+                        [classModifier]="true"
+                        [sign]="sign"
+                        [canSign]="context.canSign" (valid)="valid = $event" >
+
+  </app-contract-preview>
+
+  <div *ngIf="context.showFooter" class="">
+        <div class="row">
+          <div class="col-sm-12 padding-top-5">
+            <div class="row">
+              <div class="col-xs-12">
+                <button type="button"
+                        class="btn cancel-button" (click)="cancel()">
+                  CANCEL
+                </button>
+                <button type="button"
+                        (click)="edit()"
+                        [disabled]="!(!context.canSign || context.canSign && valid)"
+                        class="btn submit-button margin-right-0">
+                  {{ this.context.confirmText || 'EDIT' }}
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+</div>

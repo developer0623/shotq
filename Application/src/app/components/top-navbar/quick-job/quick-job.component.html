@@ -1,0 +1,161 @@
+<div class="modal-header">
+  <div class="modal-header-in">
+    <div class="h3">{{ job.id ? 'Edit a Job' : 'Create a New Job' }}</div>
+  </div>
+</div>
+<div class="modal-body">
+  <div class="loading-ripple divRipple" *ngIf="isLoading"></div>
+  <form [formGroup]="jobForm" *ngIf="!isLoading">
+    <div class="modal-body-row" *ngIf="newContactForm.disabled">
+      <div class="form-group">
+        <label class="form-group__label">Primary Contact</label>
+        <div class="form-group__fields">
+          <div class="form-select is-selected" [ngClass]="{'has-error': jobForm.controls.external_owner.errors && showFormErrors}">
+            <label for="">Contact Name</label>
+            <div class="dropdown-select_wrap">
+              <app-dropdown-select [options]="contacts"
+                                   formControlName="external_owner"
+                                   [valueKey]="'value'"
+                                   [labelKey]="'label'"
+                                   [enableSearch]="true"
+                                   [customActions]="dropdownSelectCustomActions"
+                                   [selectFirstAsDefault]="false">
+              </app-dropdown-select>
+
+            </div>
+          </div>
+          <validation-messages class="error" [showWhen]="showFormErrors" [control]="jobForm.controls.external_owner"></validation-messages>
+        </div>
+      </div>
+    </div>
+    <div class="modal-body-row" *ngIf="newContactForm.enabled">
+      <div class="form-group">
+        <div class="row">
+          <div class="col-sm-4 form-group__col">
+            <label class="form-group__label">New Contact</label>
+          </div>
+          <div class="col-sm-8 form-group__col form-group__col_right">
+            <div class="checkbox-custom checkbox-custom_top checkbox-default">
+              <span (click)="hideNewContactForm()" class="icon-close cursor-pointer"></span>
+            </div>
+          </div>
+        </div>
+        <div class="form-group__fields" [formGroup]="newContactForm">
+          <div class="row">
+            <div class="form-group__col col-sm-6">
+              <div class="field" [ngClass]="{'has-error': newContactForm.controls.first_name.errors && showFormErrors}">
+                <input id="id_contact_first_name" type="text"
+                       [class.has-error]="newContactForm.controls.first_name.touched && newContactForm.controls.first_name.errors"
+                       [attr.data-empty]="!newContactForm.controls.first_name.value"
+                       formControlName="first_name">
+                <label for="id_contact_first_name">First name *</label>
+                <validation-messages class="error" [showWhen]="showFormErrors" [control]="newContactForm.controls.first_name"></validation-messages>
+              </div>
+            </div>
+            <div class="form-group__col form-group__col_right col-sm-6">
+              <div class="field" [ngClass]="{'has-error': newContactForm.controls.last_name.errors && showFormErrors}">
+                <input id="id_contact_last_name" type="text"
+                       [class.has-error]="newContactForm.controls.last_name.touched && newContactForm.controls.last_name.errors"
+                       [attr.data-empty]="!newContactForm.controls.last_name.value"
+                       formControlName="last_name">
+                <label for="id_contact_last_name">Last name *</label>
+                <validation-messages class="error" [showWhen]="showFormErrors" [control]="newContactForm.controls.last_name"></validation-messages>
+              </div>
+            </div>
+          </div>
+          <div class="row">
+            <div class="field" [ngClass]="{'has-error': newContactForm.controls.default_email.errors && showFormErrors}">
+              <input id="id_contact_default_email" type="text"
+                     [class.has-error]="newContactForm.controls.default_email.touched && newContactForm.controls.default_email.errors"
+                     [attr.data-empty]="!newContactForm.controls.default_email.value"
+                     formControlName="default_email">
+              <label for="id_contact_default_email">Email *</label>
+              <validation-messages class="error" [showWhen]="showFormErrors" [control]="newContactForm.controls.default_email"></validation-messages>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="modal-body-row">
+      <div class="form-group">
+        <label class="form-group__label">Job Details</label>
+        <div class="form-group__fields">
+          <div class="field" [ngClass]="{'has-error': jobForm.controls.name.errors && showFormErrors}">
+            <input id="id_job_name" type="text"
+                   [class.has-error]="jobForm.controls.name.touched && jobForm.controls.name.errors"
+                   [attr.data-empty]="!jobForm.controls.name.value"
+                   formControlName="name">
+            <label for="id_job_name">Job name *</label>
+            <validation-messages class="error" [showWhen]="showFormErrors" [control]="jobForm.controls.name"></validation-messages>
+          </div>
+          <div class="form-group__field margin-bottom-5">
+            <div class="form-select is-selected" [ngClass]="{'has-error': jobForm.controls.job_type.errors && showFormErrors}">
+              <label for="">Job Type</label>
+              <div class="dropdown-select_wrap">
+                <app-dropdown-select [options]="jobTypes"
+                                     formControlName="job_type"
+                                     [valueKey]="'value'"
+                                     [labelKey]="'label'"
+                                     [selectFirstAsDefault]="false">
+                </app-dropdown-select>
+
+              </div>
+            </div>
+            <validation-messages class="error" [showWhen]="showFormErrors" [control]="jobForm.controls.job_type"></validation-messages>
+          </div>
+          <div class="field" formGroupName="main_event_group" [ngClass]="{'has-error': jobForm.controls.main_event_group.controls.address.errors && showFormErrors}">
+            <input id="id_main_event_group__address" type="text"
+                   [class.has-error]="jobForm.controls.main_event_group.controls.address.touched && jobForm.controls.main_event_group.controls.address.errors"
+                   [attr.data-empty]="!jobForm.controls.main_event_group.controls.address.value"
+                   formControlName="address">
+            <label for="id_main_event_group__address">Job Address *</label>
+            <validation-messages class="error" [showWhen]="showFormErrors" [control]="jobForm.controls.main_event_group.controls.address"></validation-messages>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="modal-body-row" formGroupName="main_event_group">
+      <div class="form-group">
+        <div class="row">
+          <div class="col-sm-4 form-group__col">
+            <label class="form-group__label">When</label>
+          </div>
+          <div class="col-sm-8 form-group__col form-group__col_right">
+            <div class="checkbox-custom checkbox-custom_top checkbox-default">
+              <input type="checkbox" formControlName="to_be_determined" [checked]="jobForm.controls.main_event_group.controls.to_be_determined.value" /><label>To Be Determined</label>
+            </div>
+          </div>
+        </div>
+        <div class="row">
+          <div class="col-sm-5 form-group__col form-group__datepicker" [ngClass]="{'has-error': jobForm.controls.main_event_group.controls.start.errors && showFormErrors}">
+            <label>Start *</label>
+            <sq-datetimepicker [options]="{}" formControlName="start" [readOnly]="jobForm.controls.main_event_group.controls.to_be_determined.value"></sq-datetimepicker>
+            <validation-messages class="error" [showWhen]="showFormErrors" [control]="jobForm.controls.main_event_group.controls.start"></validation-messages>
+          </div>
+          <div class="col-sm-5 form-group__col form-group__datepicker" [ngClass]="{'has-error': jobForm.controls.main_event_group.controls.end.errors && showFormErrors}">
+            <label>End *</label>
+            <sq-datetimepicker [options]="{}" formControlName="end" [readOnly]="jobForm.controls.main_event_group.controls.to_be_determined.value"></sq-datetimepicker>
+            <validation-messages class="error" [showWhen]="showFormErrors" [control]="jobForm.controls.main_event_group.controls.end"></validation-messages>
+          </div>
+          <div class="col-sm-2 form-group__col">
+            <label>&nbsp;</label>
+            <div class="checkbox-custom checkbox-default">
+              <input type="checkbox" formControlName="all_day" [checked]="jobForm.controls.main_event_group.controls.all_day.value" /><label>All Day</label>
+            </div>
+          </div>
+        </div>
+        <div class="row" *ngIf="jobForm.controls.main_event_group.errors?.invalidInterval">
+          <div class="col-sm-12">
+            <div class="alert alert-danger" role="alert">
+              End value must be less than start value
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </form>
+</div>
+<div class="modal-footer bg">
+  <button type="button" class="btn btn_xs btn_transparent " data-dismiss="modal" (click)="close()">Cancel</button>
+  <button type="button" class="btn btn_xs btn_blue tt-capitalize" [ngClass]="{'disabled': jobForm.invalid || newContactForm.invalid}" (click)="createOrUpdate()">{{ method }} Job</button>
+</div>

@@ -1,0 +1,40 @@
+.page {
+	div.panel {
+	    .left-side {
+	    	.log-in-container {
+	    		.legend {
+	    			margin-top: 30px;
+	    		}
+	    		.account-message {
+					font-size: 16px;
+	    		}
+	    		.field {
+	    			position: relative;
+	    			span.forgot {
+	    				opacity: 0.5;
+	    				font-size: 14px;
+						font-weight: 600;
+						font-style: normal;
+						font-stretch: normal;
+						line-height: normal;
+						letter-spacing: normal;
+						text-align: left;
+						color: #3a405b;
+						position: absolute;
+					    right: 110px;
+    					top: 13px;
+    					cursor: pointer;
+	    			}
+	    		}
+	    	}
+		}
+		.right-side {
+			.right-img-workless {
+				background-image: url('assets/img/login_work_less_guy.png');
+				width: 587px;
+				height: 700px;
+			}
+		}
+	}
+}
+

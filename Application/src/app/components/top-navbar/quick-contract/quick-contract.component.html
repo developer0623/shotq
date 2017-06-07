@@ -1,0 +1,73 @@
+<div class="modal-header">
+  <div class="modal-header-in">
+    <div class="h3">New Contract</div>
+
+  </div>
+</div>
+<div class="modal-body">
+  <!--<form [formGroup]="form">-->
+  <div class="form-group">
+    <div class="modal-body-row modal-body-row_padding bg">
+      <!--<div class="modal-body-cell modal-body-cell_280">-->
+      <div class="form-group">
+        <label class="form-group__label">Associate to Contact*</label>
+        <div class="input">
+
+          <input type="text"
+                 placeholder="Type a name*"
+                 [(ngModel)]="clientName"
+                 [typeahead]="clientSuggestions"
+                 typeaheadWaitMs="500"
+                 typeaheadOptionField="full_name"
+                 (typeaheadOnSelect)="onContactSelect($event)">
+        </div>
+      </div>
+      <!--</div>-->
+      <!--<div class="modal-body-cell"><span class="modal-body-text">Or</span></div>-->
+      <!--<div class="modal-body-cell">-->
+      <!--<button type="button" class="btn btn_md btn_green">Add New Contact</button>-->
+      <!--</div>-->
+    </div>
+  </div>
+  <div class="form-group modal-body-row">
+    <label for="" class="form-group__label">Associate to Job (optional)</label>
+    <div class="input is-active">
+      <input type="text" id="exampleInputEmail1" placeholder="Job Name"
+             [(ngModel)]="jobName"
+             [disabled]="jobInitialized"
+             [typeahead]="jobSuggestions"
+             typeaheadWaitMs="500"
+             typeaheadOptionField="name"
+             (typeaheadOnSelect)="onJobSelect($event)">
+    </div>
+    <div class="dropdown-select_wrap">
+      <app-dropdown-select [(ngModel)]="jobType"
+                           [disabled]="jobInitialized"
+                           [placeholder]="'Job Type'"
+                           [options]="jobTypes">
+      </app-dropdown-select>
+    </div>
+  </div>
+  <div class="form-group modal-body-row">
+    <label class="form-group__label">Choose Contract template*</label>
+    <!--<div class="form-group__right">-->
+    <!--<button type="button" class="modal-body-link">Build a New Questionnaire</button>-->
+    <!--</div>-->
+
+    <div class="dropdown-select_wrap">
+      <app-dropdown-select [placeholder]="'Choose Template'"
+                           [(ngModel)]="contractTemplateId"
+                           (optionSelected)="contractTemplate = $event"
+                           [labelKey]="'name'"
+                           [valueKey]="'id'"
+                           [options]="contractTemplates">
+      </app-dropdown-select>
+      <!-- select insert here -->
+    </div>
+  </div>
+  <!--</form>-->
+</div>
+<div class="modal-footer bg">
+  <button type="button" class="btn btn_xs btn_transparent " data-dismiss="modal" (click)="close()">Cancel</button>
+  <button type="button" class="btn btn_xs btn_blue" [disabled]="!valid()" (click)="save()">Done</button>
+</div>

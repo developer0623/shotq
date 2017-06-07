@@ -1,0 +1,19 @@
+.breadcrumb {
+  padding: 8px 15px;
+  list-style: none;
+  background-color: transparent;
+  border-radius: 3px;
+  > {
+    li {
+      display: inline-block;
+      + li:before {
+        content: "/";
+        padding: 0 5px;
+        color: #999999;
+      }
+    }
+    .active {
+      color: #555555;
+    }
+  }
+}

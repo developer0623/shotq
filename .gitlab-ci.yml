@@ -1,0 +1,45 @@
+image: ubuntu:16.04
+
+stages:
+  - test
+#  - dev
+
+variables:
+  APP_NAME: shootq-ui
+
+before_script:
+  - apt-get update -y
+  - apt-get install -y fabric openssh-client
+#  -  bzip2  default-jre wget
+#  - wget -qO- https://raw.githubusercontent.com/creationix/nvm/v0.33.1/install.sh | bash
+#  - source ~/.nvm/nvm.sh
+#  - nvm install 6.9.1
+#  - nvm use 6.9.1
+  - eval $(ssh-agent -s)
+  - ssh-add <(echo "$SSH_PRIVATE_KEY")
+
+test.e2e:
+  stage: test
+  script:
+    - cd Application
+#    - npm i -g webpack webpack-dev-server typings gulp karma-cli protractor typescript
+#    - npm i
+#    - cd src/app/assets/theme/
+#    - npm i
+#    - cd ../../../../
+#    - npm i phantomjs-prebuilt
+#    - node_modules/protractor/bin/webdriver-manager update
+#    - webdriver-manager update
+#    - npm run e2e:ci
+
+#deploy:
+#  stage: dev
+#  variables:
+#    CI_ENVIRONMENT_URL: http://shootq-ui.test.gearheart.io
+#  script:
+#    - fab update
+#  environment:
+#    name: dev
+#    url: http://shootq-ui.test.gearheart.io
+#  only:
+#    - gh-develop

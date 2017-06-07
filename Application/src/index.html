@@ -1,0 +1,97 @@
+<!DOCTYPE html>
+<html lang="">
+<!-- Bootstrap and site stylesheets -->
+<link rel="stylesheet" href="app/assets/theme/assets/css/bootstrap.min.css">
+<link rel="stylesheet" href="app/assets/theme/assets/css/bootstrap-extend.min.css">
+<link rel="stylesheet" href="app/assets/theme/assets/css/site.min.css">
+<link rel="stylesheet" href="index-styles.css">
+<!-- ng2 select -->
+<link rel="stylesheet" href="assets/css/ng2-select.css">
+<!-- Necessary plugin stylesheets -->
+<link rel="stylesheet" href="app/assets/theme/assets/vendor/waves/waves.min.css">
+<!-- Alerify stylesheets -->
+<link rel="stylesheet" href="app/assets/theme/assets/vendor/alertify-js/alertify.css">
+<!-- Toaster stylesheets -->
+<link rel="stylesheet" href="app/assets/theme/assets/vendor/toastr/toastr.css">
+<!-- Slick stylesheets -->
+<link rel="stylesheet" href="app/assets/theme/assets/vendor/slick-carousel/slick.min.css">
+<link rel="stylesheet" href="app/assets/theme/assets/vendor/slick-carousel/slick-theme.css">
+<!-- Icon stylesheets -->
+<link rel="stylesheet" href="app/assets/theme/assets/fonts/titillium-web/css/titillium-web.css">
+<link rel="stylesheet" href="app/assets/theme/assets/fonts/arial-narrow/css/arial-narrow.css">
+<link rel="stylesheet" href="app/assets/theme/assets/fonts/material-design/material-design.min.css">
+<link rel="stylesheet" href="app/assets/theme/assets/fonts/glyphicons/glyphicons.min.css">
+<link rel="stylesheet" href="app/assets/theme/assets/fonts/web-icons/web-icons.min.css">
+<link rel="stylesheet" href="app/assets/theme/assets/fonts/brand-icons/brand-icons.css">
+<link rel="stylesheet" href="app/assets/theme/assets/fonts/font-awesome/font-awesome.css">
+<link rel="stylesheet" href="app/assets/theme/assets/fonts/simple-line-icons/css/simple-line-icons.css">
+<link rel="stylesheet" href="app/assets/theme/assets/fonts/icomoon/style.css">
+<link rel="stylesheet" href="app/assets/theme/assets/fonts/brush-script/brush-script.css">
+<link rel="stylesheet" href="app/assets/theme/assets/fonts/snellRoundhand/SnellRoundhandScript.css">
+<link rel="stylesheet" href="app/assets/theme/assets/fonts/savoye-let-plain/SavoyeLETPlain1.0.css">
+<!-- Font stylesheets -->
+<link rel='stylesheet' href='http://fonts.googleapis.com/css?family=Roboto:300,400,500,300italic'>
+<link href="http://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+<!--[if lt IE 10]>
+  <script src="app/assets/theme/assets/vendor/media-match/media.match.min.js"></script>
+  <script src="app/assets/theme/assets/vendor/respond/respond.min.js"></script>
+<![endif]-->
+<link rel="stylesheet" href="assets/css/uikit.min.css">
+<script type="text/javascript" src="https://js.squareup.com/v2/paymentform"></script>
+<script src="https://code.jquery.com/jquery-2.2.4.min.js"></script>
+<script src="app/assets/theme/assets/js/components/uikit.min.js"></script>
+<script src="app/assets/theme/assets/js/components/autocomplete.js"></script>
+<script src="app/assets/theme/assets/js/components/timepicker.js"></script>
+<head>
+  <meta charset="utf-8">
+  <meta http-equiv="x-ua-compatible" content="ie=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+
+  <title><%= htmlWebpackPlugin.options.title %></title>
+
+  <meta name="description" content="<%= htmlWebpackPlugin.options.title %>">
+
+  <% if (webpackConfig.htmlElements.headTags) { %>
+  <!-- Configured Head Tags  -->
+  <%= webpackConfig.htmlElements.headTags %>
+  <% } %>
+
+  <!-- base url -->
+  <base href="<%= htmlWebpackPlugin.options.metadata.baseUrl %>">
+
+
+</head>
+
+<body>
+
+  <app>
+    <div class="loadSpinn">
+      <img class="spinSvg" src="/assets/img/shootq-loader.gif">
+    </div>
+  </app>
+
+
+  <!-- Google Analytics: change UA-71073175-1 to be your site's ID -->
+  <script>
+    (function(A,n,g,u,l,a,r){A.GoogleAnalyticsObject=r;A[l]=A[l]||function(){
+    (A[l].q=A[l].q||[]).push(arguments)},A[l].l=1*new Date();a=n.createElement(g),
+    r=n.getElementsByTagName(g)[0];a.async=1;a.src=u;r.parentNode.insertBefore(a,r)
+    })(window,document,'script','https://www.google-analytics.com/analytics.js','ga');
+
+    ga('create', 'UA-71073175-1', 'auto');
+    ga('send', 'pageview');
+  </script>
+  <script type="text/javascript">
+  if(navigator.userAgent.indexOf('MSIE')!==-1
+  || navigator.appVersion.indexOf('Trident/7.0') > 0){ /*IE 11*/
+     document.write('<link rel="stylesheet" href="assets/theme/assets/css/site-ie.min.css">');
+  }
+  </script>
+  <% if (htmlWebpackPlugin.options.metadata.isDevServer && htmlWebpackPlugin.options.metadata.HMR !== true) { %>
+  <!-- Webpack Dev Server reload -->
+  <script src="/webpack-dev-server.js"></script>
+  <% } %>
+  <!-- Google Map Api -->
+  <script src="https://maps.googleapis.com/maps/api/js?libraries=places&key=<%= htmlWebpackPlugin.options.metadata.googleMapsKey %>"></script>
+</body>
+</html>

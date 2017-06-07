@@ -1,0 +1,169 @@
+.h3 {
+	font-size: 24px;
+	font-weight: 600;
+	color: #3a405b;
+	font-family: 'Titillium Web';
+	margin: 0;
+}
+
+.modal-body {
+	padding: 0!important;
+}
+.modal-header-in {
+	//padding: 20px 40px;
+}
+.modal-footer {
+	//border-top: 1px solid #e4e8f0;
+	height: 50px;
+	padding: 7px 40px;
+	.btn {
+		margin-right: 10px;
+		&:last-child {
+			margin-right: 0;
+		}
+	}
+}
+.input {
+	background: #FFF;
+	border-radius: 2px;
+	background-color: #ffffff;
+	border: solid 1px #b6c1cf;
+	padding-left: 0;
+	width: 100%;
+	height: 44px;
+	padding: 0 10px;
+	margin-bottom: 10px;
+	&.is-active {
+		border-color: #086aff;
+	}
+	input {
+		background: transparent;
+		border: none;
+		width: 100%;
+		height: 100%;
+		font-size: 14px;
+		&::placeholder {
+			font-weight: 300;
+			color: rgba(#3a405b, .5);
+		}
+		&:focus {
+			outline: none;
+		}
+		& + /deep/.dropdown {
+			z-index: 2050 !important;
+		}
+	}
+}
+.modal  {
+	//&-content {
+	//	width: 100% !important;
+	//}
+	&-body-row {
+		padding: 0 40px;
+		margin-bottom: 20px;
+	}
+	&-body-row_padding {
+		padding-top: 20px;
+		padding-bottom: 20px;
+		.form-group {
+			margin-bottom: 0;
+		}
+	}
+	&-body-cell {
+		display: inline-block;
+		vertical-align: middle;
+		padding-top: 20px;
+		&_280 {
+			width: 280px;
+		}
+	}
+	&-body-text {
+		padding: 0 27px;
+	}
+	&-body-link {
+		font-size: 14px;
+		background: transparent;
+		border: none;
+		color: #086aff;
+	}
+	.save-setting-confirm {
+    max-width: 588px;
+    background: #FFF;
+    padding: 0;
+    margin: 20vh auto !important;
+
+		.btn {
+			background: transparent;
+			border-color: transparent;
+			border-radius: 4px;
+			font-size: 14px;
+			width: auto;
+			text-transform: capitalize;
+			&_xs {
+				padding: 5px 30px;
+			}
+			&_md {
+				padding: 10px 19px;
+			}
+			&_transparent {
+				background: transparent;
+				color: rgba(55, 57, 76, 0.5);
+			}
+			&_blue {
+				background-color: #086aff;
+				color: #fff;
+			}
+			&_green {
+				background-color: #57cd75;
+				color: #fff;
+			}
+			&_shadow {
+				box-shadow: 0 30px 50px 0 rgba(0, 0, 0, 0.2);
+			}
+		}
+	}
+
+}
+.bg {
+	background: #FAFBFB;
+}
+.form-group {
+	clear: both;
+	&__label {
+		font-size: 18px;
+		color: #3a405b;
+	}
+	&__right {
+		float: right;
+	}
+	.dropdown-select_wrap {
+		/deep/.dropdown {
+			width: 100%;
+			height: 44px;
+			border: solid 1px #b6c1cf;
+		}
+		/deep/.icon-down-arrow,
+		/deep/.icon-up-arrow  {
+			top: 18px;
+		}
+	}
+}
+.new_modal {
+
+}
+
+
+.modal-footer {
+	.btn {
+		&_transparent {
+			background-color: transparent;
+			color: rgba(55, 57, 76, 0.5);
+		}
+		&_blue {
+			background-color: #086aff;
+			color: #fff;
+		}
+	}
+}
+
+

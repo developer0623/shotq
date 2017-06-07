@@ -1,0 +1,9 @@
+# WebStorm configs directory
+.idea
+*.sublime-project
+*.sublime-workspace
+npm-debug.log
+*.pyc
+.env
+venv
+__pycache__

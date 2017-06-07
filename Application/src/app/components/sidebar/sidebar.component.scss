@@ -1,0 +1,16 @@
+.site-menu-title {
+  margin-left: -6px;
+}
+
+@media (max-width: 767px) {
+  .site-menubar.collapsed {
+    -ms-transform: translate(-140px, 0);
+    -ms-transform: translate3d(-140px, 0, 0);
+    -webkit-transform: translate3d(-140px, 0, 0);
+    transform: translate3d(-140px, 0, 0);
+  }
+}
+
+.site-menubar {
+  position: initial;
+}

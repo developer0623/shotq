@@ -1,0 +1,12 @@
+.cursor-pointer {
+	position: relative;
+	i {
+	    position: absolute;
+	    top: 8px;
+	    right: 2px;
+	}
+
+	i.new-style {
+		font-size: 6px;
+	}
+}

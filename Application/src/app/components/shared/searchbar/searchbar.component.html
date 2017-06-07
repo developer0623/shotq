@@ -1,0 +1,64 @@
+<div class="input-search">
+	<i class="input-search-icon icon-search"></i>
+	<input id="search-box" type="text" class="form-control search-box on-focus-searchbar"
+           name="search_box" placeholder="Search"
+           [(ngModel)]="search_box" (ngModelChange)="isLoading = !!$event;"
+           (keyup)="sendSearch($event)"
+           (focus)="onFocus($event)" (blur)="clearSearchInput()">
+	<button type="button" *ngIf="search_box" class=" input-search-close icon-close op0 "
+            (click)="clearSearchInput()" aria-label="Close"></button>
+	<div class="search-results" *ngIf="search_box">
+        <div class="loading-ripple position-relative" *ngIf="isLoading"></div>
+
+        <ng-container *ngIf="!isLoading">
+            <ng-container *ngIf="!contactResults.length && !jobResults.length">
+                <div class="no-items-to-display">There are no results to display.</div>
+            </ng-container>
+            <ng-container *ngIf="contactResults.length || jobResults.length">
+                <div class="left-side">
+                    <h5 *ngIf="contactResults.length" [class.hide]="!contactResults.length">Contacts</h5>
+                    <ul>
+                        <ng-template ngFor let-contact [ngForOf]="contactResults">
+                            <li (mouseover)="modifyEntityInfo(contact)"
+                                (click)="doContactAction(contact)">
+                                {{ getContactFullName(contact) }}
+                            </li>
+                        </ng-template>
+                    </ul>
+                    <h5 *ngIf="jobResults.length" [class.hide]="!jobResults.length">Jobs</h5>
+                    <ul>
+                        <ng-template ngFor let-job [ngForOf]="jobResults">
+                            <li (mouseover)="modifyEntityInfo(job)" (click)="doJobAction(job)">{{ job.name }}</li>
+                        </ng-template>
+                    </ul>
+                </div>
+                <div class="right-side">
+                    <div class="right-top">
+					<span *ngIf="entityInfo" class="avatar avatar-online">
+		              <img alt="user-image" [src]="entityInfo.avatar_url || 'assets/img/avatar.png'">
+		            </span>
+                        <div *ngIf="entityInfo" class="entityInfo">
+                            <ul>
+                                <li>{{ getJobName(entityInfo) }}</li>
+                                <li class="name">{{ getContactFullName(entityInfo) }}</li>
+                                <li class="email">{{ getContactEmailAddress(entityInfo) }}</li>
+                                <li>{{ getContactPhoneNumber(entityInfo) }}</li>
+                                <li>{{ getJobStatus(entityInfo) }}</li>
+                            </ul>
+                        </div>
+                    </div>
+                    <div *ngIf="entityInfo" class="right-bottom">
+                        <div>
+                            <span class="label">Created</span>
+                            <span>{{ entityInfo.created  | date: 'fullDate' }}</span>
+                        </div>
+                        <div>
+                            <span class="label">Modified</span>
+                            <span>{{ entityInfo.modified | date: 'fullDate' }}</span>
+                        </div>
+                    </div>
+                </div>
+            </ng-container>
+        </ng-container>
+	</div>
+</div>

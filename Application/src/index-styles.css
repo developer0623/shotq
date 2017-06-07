@@ -1,0 +1,16 @@
+html, body {
+  height: 100%;
+}
+
+span.active {
+  background-color: gray;
+}
+
+.loadSpinn {
+  text-align: center !important;
+  margin-top: 15%;
+}
+
+.spinSvg {
+  vertical-align: middle !important;
+}

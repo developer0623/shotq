@@ -1,0 +1,177 @@
+<div class="page">
+  <div class="heading" *ngIf="proposal">
+    <div class="row">
+      <div class="col-sm-6">
+        <a href="#" class="back">back</a>
+      </div>
+      <div class="col-sm-6">
+        <div class="text-right">
+          <a href="" class="btn btn_preview">
+            <i class="icon-left-arrow"></i>
+            Preview Booking Site
+          </a>
+
+        </div>
+      </div>
+    </div>
+
+  </div>
+  <div class="contract-send">
+
+    <!-- col -->
+    <div class="loading-ripple" *ngIf="isLoading"></div>
+
+    <div class="contract-send__left" *ngIf="contract">
+      <div class="page-header page-header_mod">
+        <div class="row">
+          <div class="col-md-6 col-sm-6">
+            <!--<a href [routerLink]="['../']" class="btn btn-link btn-link_back"> <i class="fa fa-angle-left"></i> Back</a>-->
+          </div>
+          <div class="col-md-6 col-sm-6 " *ngIf="!isDisabled">
+            <div class="text-right">
+              <a class="btn btn-link btn_md btn_margin pointer" [routerLink]="['/contracts', contract.id]">EDIT CONTRACT</a>
+            </div>
+          </div>
+        </div>
+        <div class="row">
+          <div class="col-md-12">
+            <h1 class="page-title">Send Contract</h1>
+          </div>
+        </div>
+      </div>
+      <div class="page-content page-content_padding position-relative">
+        <div class="row">
+          <div class="col-md-12 col-sm-12">
+            <div class="row">
+              <div class="col-md-12">
+                <a class="btn btn-link btn_md pointer" (click)="addFromContacts()" *ngIf="!isDisabled">MODIFY CONTACTS</a>
+              </div>
+            </div>
+            <div class="row">
+              <div class="col-md-12">
+                <div class="text">As the sender, you automatically receive a copy of the completed documents.</div>
+              </div>
+            </div>
+            <div *ngFor="let signature of signatures">
+
+              <div class="row">
+                <div class="col-md-6">
+                  <div class="iinput input_text">
+                    <div class="iinput__title">Name: </div>
+                    <input type="text" [(ngModel)]="signature.name" disabled>
+                  </div>
+                </div>
+                <div class="col-md-6">
+                  <div class="iinput input_text">
+                    <div class="iinput__title">Email: </div>
+                    <input type="email" [(ngModel)]="signature.email" disabled>
+                  </div>
+                </div>
+              </div>
+              <div class="row">
+                <div class="col-md-12">
+                  <div class="select ">
+                    <select [(ngModel)]="signature.sig_requirement" [disabled]="isDisabled">
+                      <option value="required" >​Signature Required</option>
+                      <option value="review" >Review Only</option>
+                    </select>
+                  </div>
+                </div>
+              </div>
+            </div>
+            <!--<div class="row">-->
+              <!--<div class="col-md-12">-->
+                <!--<div class="button-icon">-->
+                  <!--<div class="button-icon__wrap">-->
+                    <!--<div class="button-icon__that">+</div>-->
+                  <!--</div>-->
+                  <!--<button (click)="addContactInline()">add another recipient</button>-->
+                <!--</div>-->
+
+              <!--</div>-->
+            <!--</div>-->
+            <!-- line -->
+            <hr>
+
+            <div class="row">
+              <div class="col-sm-7"></div>
+              <div class="col-sm-5">
+                <div class="text-right">
+                  <div class="select ">
+                    <select [(ngModel)]="emailTemplate" disabled>
+                      <!--<option [ngValue]="template" *ngFor="let template of emailTemplates">{{ template.name }}</option>-->
+                    </select>
+                  </div>
+
+                </div>
+              </div>
+            </div>
+            <div class="row">
+              <div class="col-md-12">
+                <div class="iinput input_text">
+                  <div class="iinput__title">Subject:</div>
+                  <input type="text" [(ngModel)]="contract.email_subject" [disabled]="isDisabled">
+                </div>
+              </div>
+            </div>
+
+            <div class="row">
+              <div class="col-md-12">
+                <div class="block-content">
+                  <!-- <label>Subject: <input type="text" [(ngModel)]="emailSubject"></label> -->
+                  <tinymce
+
+                    [elementId]="'template-contents'"
+                    [noteBody]="contract.email_contents"
+                    [editableMode]="'active'"
+                    [class]="'template-contents-body is-active'"
+                    [name]="'template-contents'"
+                    [readonly]="isDisabled"
+                    [toolbar]="'bold italic | bullist numlist | fontsizeselect | link image'"
+                    [theme]="'inlite'"
+                    (onEditorBlur)="contract.email_contents = $event"
+                    [placeholder]="'Begin typing here'">
+                  </tinymce>
+                </div>
+
+
+              </div>
+
+            </div>
+          </div>
+        </div>
+
+      </div>
+
+    </div>
+    <!-- col -->
+    <div class="contract-send__right" *ngIf="contract">
+      <app-contract-preview [contract]="contract" [canSign]="false"></app-contract-preview>
+    </div>
+  </div>
+
+  <!-- fixed-footer -->
+  <div class="row">
+    <div class="modal-footer padding-right-60  modal-footer_border">
+      <div class="row">
+        <div class="col-sm-12 padding-top-5">
+          <div class="row">
+            <div class="col-xs-12">
+              <button type="button"
+                      class="btn cancel-button" [routerLink]="['/contracts']">
+                CANCEL
+              </button>
+              <button type="button"
+                      class="btn submit-button margin-right-0"
+                      (click)="save()" [disabled]="isDisabled">
+                CONFIRM & SEND
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+
+</div>

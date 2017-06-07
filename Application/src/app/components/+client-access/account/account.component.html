@@ -1,0 +1,84 @@
+<div class="page">
+	<div class="page-content" >
+		<div class="panel panel-shadow">
+			<div class="panel-body">
+				<h2 class="page-title">
+					My Contact Information
+				</h2>
+				<span *ngIf="!isUserInfoLoading && userInfo"
+                      class="edit-link" (click)="editContactInfo()">EDIT</span>
+				<div class="row">
+					<div class="rippleContainer" *ngIf="isUserInfoLoading">
+						<div class="loading-ripple"></div>
+					</div>
+					<div class="contact-information" *ngIf="!isUserInfoLoading">
+						<table class="table" *ngIf="userInfo">
+							<thead>
+								<tr>
+									<th>NAME</th>
+									<th>
+                                        <span *ngIf="userInfo.default_phone_details?.phone_type">
+                                            {{ userInfo.default_phone_details.phone_type_details.name | uppercase }}
+                                        </span> PHONE
+									</th>
+									<th>EMAIL*</th>
+									<th>ADDRESS</th>
+								</tr>
+							</thead>
+							<tbody>
+								<tr>
+									<td>{{ (userInfo.full_name || '-') | capitalize }}</td>
+									<td>{{ userInfo.default_phone_details?.number || '-' }}</td>
+									<td>{{ userInfo.default_email_details?.address || '-' }}</td>
+									<td>{{ userInfo.default_address_details?.address1 || '-' }}</td>
+								</tr>
+							</tbody>
+						</table>
+                        <p *ngIf="!userInfo">No user info.</p>
+					</div>
+				</div>
+			</div>
+		</div>
+		<div class="panel panel-shadow">
+			<div class="panel-body list-custom-padding">
+				<h2 class="page-title no-bottom-border custom-padding">
+					Contracts
+				</h2>
+				<div class="row">
+					<div class="rippleContainer" *ngIf="isContractsLoading">
+                        <div class="loading-ripple"></div>
+					</div>
+					<div class="text-center m-t-20 no-items-message"
+                         *ngIf="!contractsInfo.length && !isContractsLoading">
+                        There are no items to display.
+                    </div>
+					<div class="contract-list contract-list-extend"
+                         *ngIf="contractsInfo.length">
+						<table class="table">
+							<thead>
+								<tr>
+								    <th>&nbsp;</th>
+									<th>CONTRACT NAME</th>
+									<th>SENT DATE</th>
+									<th>LAST VIEWED</th>
+									<th>STATUS</th>
+								</tr>
+							</thead>
+							<tbody>
+                                <tr *ngFor="let contract of contractsInfo">
+                                    <td>&nbsp;</td>
+                                    <td (click)="openContract(contract)" class="bold cursor-pointer">
+                                        {{ contract.job_name | capitalize }}
+                                    </td>
+                                    <td>{{ contract.sent }}</td>
+                                    <td>{{ contract.last_viewed }}</td>
+                                    <td class="bold">{{ contract.status | capitalize }}</td>
+                                </tr>
+							</tbody>
+						</table>
+					</div>
+				</div>
+			</div>
+		</div>
+	</div>
+</div>

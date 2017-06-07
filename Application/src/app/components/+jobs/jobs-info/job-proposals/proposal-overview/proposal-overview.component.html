@@ -1,0 +1,129 @@
+<div class="rippleContainer" *ngIf="isLoading">
+    <div class="loading-ripple"></div>
+</div>
+<div class="proposal-overview row" *ngIf="proposal">
+	<!-- begin package box -->
+	<div class="col-sm-4">
+		<div class="proposal-box">
+			<div class="proposal-box__header">
+				<h3 class="proposal-box__ttl">{{ package.name }}</h3>
+			</div>
+			<div class="proposal-box__content">
+				<div *ngIf="package.description"
+                     class="proposal-box__pack">
+					<h4 class="proposal-box__pack-ttl">PACKAGE DESCRIPTION</h4>
+					<div class="proposal-box__pack-item">
+						{{ package.description }}
+					</div>
+				</div>
+				<div class="proposal-box__pack">
+					<h4 class="proposal-box__pack-ttl">PACKAGE CONTENTS</h4>
+					<ul class="proposal-box__pack-list">
+						<li class="proposal-box__pack-item"
+                            *ngFor="let item of package.items">
+							<span class="proposal-box__pack-txt">
+                                <span *ngIf="item.quantity > 1">({{ item.quantity }}) </span>
+                                {{item.item_data.name}}
+                            </span>
+                            <ng-container *ngFor="let option of item.item_data.option_groups">
+                                <span class="proposal-box__pack-extra" *ngIf="option.selected_data">
+                                    {{ option.name }}: {{ option.selected_data?.name }}
+                                </span>
+                            </ng-container>
+						</li>
+					</ul>
+				</div>
+			</div>
+			<div class="proposal-box__footer">
+				<div class="proposal-box__footer-in">
+                    <div class="proposal-box__sum"
+                         *ngIf="package.shipping || package.discount || package.tax">
+                        ${{ package.price | number: '1.2-2' }}
+                    </div>
+                    <div class="proposal-box__discount">
+                        <span *ngIf="package.shipping">
+                            Shipping ${{ package.shipping | number: '1.2-2' }}
+                            <br/>
+                        </span>
+
+                        <span *ngIf="package.discount">
+                            Discount (${{ package.discount | number: '1.2-2' }})
+                            <br/>
+                        </span>
+
+                        <span *ngIf="package.tax">
+                            Tax ${{ package.tax | number: '1.2-2' }}
+                            <br/>
+                        </span>
+                    </div>
+					<div class="proposal-box__final">
+                        ${{ package.total | number: '1.2-2'}}
+                    </div>
+				</div>
+			</div>
+		</div>
+	</div>
+	<!-- end package box -->
+
+	<!-- begin addons box -->
+	<div class="col-sm-4" *ngIf="package.addons.length">
+		<div class="proposal-box">
+			<div class="proposal-box__header">
+				<h3 class="proposal-box__ttl">Add Ons</h3>
+			</div>
+			<div class="proposal-box__content">
+				<div class="proposal-box__addons">
+					<ul class="proposal-box__addons-list">
+						<li class="proposal-box__addon"
+                            *ngFor="let item of package.addons">
+							<img [src]="item.images[0]?.url || 'http://lorempixel.com/40/40/cats/'"
+                                 alt="" class="proposal-box__addon-img">
+							<div class="proposal-box__addon-txt">
+								<h4 class="proposal-box__addon-name">
+                                    {{ item.name }}
+                                </h4>
+								<span class="proposal-box__addon-desc">
+                                    {{ item.description }}
+                                </span>
+							</div>
+						</li>
+					</ul>
+				</div>
+			</div>
+		</div>
+	</div>
+	<!-- end addons box -->
+
+	<!-- begin addons box -->
+	<div class="col-sm-4" *ngIf="workers.length">
+		<div class="proposal-box">
+			<div class="proposal-box__header">
+				<h3 class="proposal-box__ttl">Personnel</h3>
+			</div>
+			<div class="proposal-box__content">
+				<div class="proposal-box__personnel">
+					<ul class="proposal-box__personnel-list">
+						<li class="proposal-box__person" *ngFor="let worker of workers">
+							<div class="proposal-box__person-photo">
+								<div class="proposal-box__person-img">
+									<img [src]="worker.avatar || 'assets/img/avatar.png'" alt="">
+								</div>
+							</div>
+							<div class="proposal-box__person-txt">
+								<h4 class="proposal-box__person-name">{{ worker.name }}</h4>
+								<div class="proposal-box__person-post"
+                                     *ngIf="worker.role">{{ worker.role | humanize }}</div>
+								<div class="proposal-box__person-mail"
+                                     *ngIf="worker.email">{{ worker.email }}</div>
+								<div class="proposal-box__person-phone"
+                                     *ngIf="worker.phone">{{ worker.phone }}</div>
+							</div>
+						</li>
+					</ul>
+				</div>
+			</div>
+		</div>
+	</div>
+	<!-- end addons box -->
+
+</div>

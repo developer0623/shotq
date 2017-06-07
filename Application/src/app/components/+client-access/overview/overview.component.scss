@@ -1,0 +1,221 @@
+.public-overview {
+	&.page {
+		margin-left: 0 !important;
+		.loading-ripple {
+			top: 40%;
+		}
+		.page-content {
+			padding: 30px 80px 10px 80px;
+			span {
+				font-weight: normal;
+				font-style: normal;
+				font-stretch: normal;
+				line-height: normal;
+				letter-spacing: normal;
+				color: #3a405b;
+				font-size: 14px;
+				font-family: "Titillium Web";
+				&.paid-label {
+					font-weight: bold;
+					letter-spacing: 0.5px;
+					color: #57cd75;
+				}
+				&.paid-date {
+					opacity: 0.5;
+					letter-spacing: 0.5px;
+				}
+				&.non-paid-date {
+					letter-spacing: 0.5px;
+				}
+			}
+			h1 {
+				font-family: "Titillium Web";
+				font-size: 24px;
+			    font-weight: bold;
+			    font-style: normal;
+				font-stretch: normal;
+				line-height: normal;
+				letter-spacing: normal;
+				color: #3a405b;
+			    margin: 0;
+			    &.price {
+			    	font-weight: 600;
+			    }
+			    &.next-payment {
+			    	letter-spacing: 0.9px;
+			    }
+			}
+			h2 {
+				font-family: "Titillium Web";
+				font-size: 18px;
+				font-style: normal;
+				font-stretch: normal;
+				line-height: normal;
+				font-weight: normal;
+				letter-spacing: 0.6px;
+				color: #3a405b;
+				&.price {
+					font-weight: 600;
+					letter-spacing: -0.5px;
+					&.total {
+						font-weight: bold;
+						color: #57cd75;
+					}
+					&.payment {
+			    		margin: 3px 0;
+			    	}
+				}
+				&.paid-amount {
+					opacity: 0.5;
+					letter-spacing: -0.5px;
+				}
+				&.non-paid-amount {
+					letter-spacing: -0.5px;
+				}
+				&.no-payments {
+				    opacity: 0.5;
+				}
+			}
+			h3 {
+				font-family: "Titillium Web";
+				font-style: normal;
+				font-stretch: normal;
+				line-height: normal;
+				letter-spacing: normal;
+				color: #3a405b;
+				font-size: 14px;
+				font-weight: 600;
+				letter-spacing: 0.5px;
+				&.add-ons {
+					opacity: 0.5;
+				}
+				&.total {
+					font-weight: bold;
+					color: #57cd75;
+				}
+			}
+			h4 {
+				font-family: "Titillium Web";
+				opacity: 0.65;
+				font-size: 12px;
+				letter-spacing: 0.4px;
+				margin: 0;
+				color: #3a405b;
+				&.roles {
+					opacity: 0.5;
+					letter-spacing: normal;
+				}
+			}
+			.panel {
+				background-color: #fff;
+				border-top: 3.2px solid #3a405b;
+				margin-top: 40px;
+				margin-bottom: 0;
+				border-radius: 0;
+				box-shadow: 0 1px 2px 0 rgba(181, 193, 207, 0.5);
+				padding: 0 25px 25px 25px;
+				.panel-heading {
+					padding: 25px 0 15px 0;
+				}
+				.panel-body {
+					padding: 0;
+				}
+			}
+			.event-details {
+				.panel {
+					.panel-body {
+						h4.roles {
+							opacity: 0.5;
+							letter-spacing: normal;
+						}
+						.location {
+							padding-bottom: 35px;
+						}
+						.personnel {
+							.personnel-container {
+								padding-bottom: 25px;
+								.personnel-name {
+									padding-bottom: 15px;
+									span {
+										font-weight: bold;
+									}
+								}
+								.personnel-email {
+									padding-bottom: 15px;
+								}
+							}
+						}
+					}
+				}
+			}
+			.package-details {
+				.panel {
+					padding: 0;
+					.panel-heading {
+						padding: 25px 30px 30px 25px;
+						border-bottom: solid 2px #e4e8f0;
+						h1 {
+							padding-bottom: 18px;
+						}
+					}
+					.panel-body {
+						.default-padding {
+							padding: 20px 30px 30px 25px;
+						}
+						.first-panel {
+							border-bottom: solid 1px #e4e8f0;
+							.add-on-item {
+								padding-left: 8px;
+    							border-left: solid 2px #086aff;
+							}
+						}
+						.second-panel {
+							.second-panel-header {
+							    position: relative;
+								padding-bottom: 25px;
+								i {
+									position: absolute;
+									top: 7px;
+									color: #3a405b;
+								}
+								.next-payment {
+									padding-left: 23px;
+								}
+							}
+							.second-panel-body {
+							    padding-left: 25px;
+							}
+							.pay-now {
+								letter-spacing: -0.4px;
+								font-weight: normal;
+							}
+						}
+						.third-panel {
+							background-color: #fafbfb;
+							padding: 20px 30px 20px 25px;
+							.icon-confirm {
+								color: #57cd75;
+								font-size: 16px;
+							}
+							.paid-date {
+								padding-left: 7px;
+							}
+							.paid-amount {
+								padding-left: 40px;
+							}
+							.non-paid-payment {
+							    padding-left: 25px;
+								.non-paid-amount {
+								    margin: 3px 0;
+								}
+							}
+							.no-payments {
+								margin: 0;
+							}
+						}
+					}
+				}
+			}
+		}
+	}
+}

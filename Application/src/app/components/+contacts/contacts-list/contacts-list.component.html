@@ -1,0 +1,120 @@
+<div class="page">
+    <div class="page-content">
+        <div class="panel panel-shadow">
+            <div class="panel-body">
+                <div class="row">
+                    <h2 class="page-title">
+                        All Contacts
+                        <ng-template [ngIf]="contacts != undefined">({{ this.contactsOnInitCounter }})</ng-template>
+                    </h2>
+                    <div class="col-xs-6 first-column padding-left-0">
+                        <div class="btn-group contact-actions">
+                            <button type="button" class="btn btn-default delete" [disabled]="!actionsBar.enabled"
+                                    (click)="archiveAction($event)">
+                                <i class="icon-archive"></i>
+                                <span tooltip="Archive" placement="bottom" class="action-option action-option-delete"></span>
+                            </button>
+                            <button type="button" class="btn btn-default second" [disabled]="twoNotSelected"
+                                    (click)="navigateTo('contacts/merge')">
+                                <i class="icon-merge"></i>
+                            </button>
+                            <button type="button" class="btn btn-default second {{ dropdownOpenedClass }}"
+                                    [disabled]="!actionsBar.enabled">
+                                <dropdown [button]="false" iconClass="icon-export"
+                                          [class.disabled]="!actionsBar.enabled" [disabled]="!actionsBar.enabled"
+                                          [actions]="exportActions" (optionSelected)="exportActionsHandler($event)"
+                                          (openCloseEvent)="dropdownOpenCloseHandler($event)"></dropdown>
+                            </button>
+                            <button type="button" class="btn btn-default third"
+                                    (click)="navigateTo('contacts/import-csv')">
+                                <i class="fa fa-upload"></i>
+                            </button>
+                        </div>
+                    </div>
+                    <div class="col-xs-6 second-column text-right contact-type-list" [class.scroll]="scroll">
+                        <div class="input-search input-search-dark search-contact scroll">
+                            <i class="input-search-icon icon-search"></i>
+                            <input type="text" [ngModel]="searchTerm" (ngModelChange)="searchContacts($event)" class="form-control"
+                                   name="" placeholder="Search">
+                        </div>
+                        <div class="add-new-contact">
+                            <button type="button" class="btn btn-success" (click)="addContact()">
+                                <span class="btn-name">New Contact</span>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="row contact-list position-relative">
+                        <div class="rippleContainer" *ngIf="isLoading">
+                            <div class="loading-ripple"></div>
+                        </div>
+                        <div class="col-md-12 pl-0 pr-0">
+                            <div class="text-center m-t-20 no-items-message"
+                                 *ngIf="paginator.totalItems === 0 && !isLoading">There are no items to display
+                            </div>
+                            <div id="table-container" class="table-responsive">
+                                <table class="table table-hover scroll"
+                                       [class.hide]="paginator.totalItems === 0 || totalItems === 0 || updateTable || isLoading">
+                                    <thead>
+                                    <tr>
+                                        <th>
+                                            <div class="checkbox-custom checkbox-default"><input type="checkbox"
+                                                                                                 (click)="checkAll()"
+                                                                                                 [checked]="selectAllChecked"/><label></label>
+                                            </div>
+                                        </th>
+                                        <th class="sorted-col" (click)="changeSortBy('name')">
+                                            <div class="head-name">Name</div>
+                                            <i class="{{ getSortNameIcon()}}"></i>
+                                        </th>
+                                        <th class="sorted-col" (click)="changeSortBy('email')">Email<i
+                                                class="{{ getSortEmailIcon()}}"></i></th>
+                                        <th>Phone</th>
+                                        <th>Type</th>
+                                        <th class="text-middle icon"></th>
+                                    </tr>
+                                    </thead>
+                                    <tbody>
+                                    <tr *ngFor="let contact of contacts; let last = last">
+                                      <td class="text-middle">
+                                          <div class="checkbox-custom checkbox-default"
+                                          ><input type="checkbox" [checked]="isChecked(contact)"
+                                                  (click)="toggleCheckContact(contact)"/><label></label></div>
+                                      </td>
+                                      <td class="text-middle bold contact-name"
+                                          (click)="router.navigate(['contacts/profile/', contact.id])"
+                                      >{{ contact.$fullName }}</td>
+                                      <td class="text-middle">{{ contact.$default_email }}</td>
+                                      <td class="text-middle phone"><a href="tel:{{ contact.phone }}">{{ contact.$default_phone }}</a></td>
+                                      <td class="text-middle bold text-uppercase"> {{ contact.$contactTypesString }}</td>
+                                      <td class="text-middle action-button">
+                                          <dropdown [button]="false" listClass="blue-circle pad"
+                                                    iconClass="icon-more-icon-o font-size-10"
+                                                    [actions]="singleActions.enabledContact"
+                                                    (optionSelected)="singleContactAction($event, contact)"
+                                          ></dropdown>
+                                      </td>
+                                      {{ last ? setTableWidth() : ''}}
+                                    </tr>
+                                    <tr class="paginate-container" [class.has-pages]="hasPages">
+                                        <td colspan="6">
+                                            <paginate [totalItems]="paginator.totalItems"
+                                                      [currentPage]="paginator.currentPage" [newDesign]="true"
+                                                      (ngChange)="handlePageChange($event)"
+                                                      [perPageOptions]="[5, 10, 50, 100]"
+                                                      [perPage]="paginator.perPage"
+                                                      customClass="contacts-pagination"
+                                            ></paginate>
+                                        </td>
+                                    </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
