@@ -25,4 +25,5 @@ export const paymentScheduleSettings = [
 
 export class TaxTemplate extends DiscountTemplate {
   tax?: Tax;
+  additional_rates?: number[];
 }

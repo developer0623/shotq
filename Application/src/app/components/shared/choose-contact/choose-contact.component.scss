@@ -1,3 +1,6 @@
+@import "../../../../assets/css/variables";
+@import "../../../../assets/css/mixins";
+
 .modal-body {
     padding: 0!important;
     border: 0;
@@ -229,6 +232,19 @@ div.list-group {
     color: #fff;
   }
 }
-
-
+.contacts-modal {
+    &__dropdown {
+        /deep/.dropdown-menu {
+            width: 300px;
+            left: auto;
+            right: 0;
+            overflow: hidden;
+        }
+        /deep/.form-field__text {
+            max-width: 75%;
+            overflow: hidden;
+            margin-top: 8px;
+        }
+    }
+}
 

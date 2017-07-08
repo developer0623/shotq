@@ -1,5 +1,6 @@
 .settings-component {
 	min-height: 100%;
+  padding-bottom: 10px;
 	&.page {
 	    padding-left: 80px;
 	    padding-right: 80px;
@@ -111,6 +112,10 @@
 			    	i.icon-payment-settings {
 			    	  padding-left: 11px;
 			    	}
+			    	i.md-camera {
+			    		font-size: 30px;
+			    		padding-left: 8px;
+			    	}
 
 			    	img.icon-open, i.icon-close {
 			    		padding: 10px;
@@ -217,4 +222,3 @@
 .openedPanel {
 	box-shadow: 0 0 20px 0 rgba(181, 193, 207, 0.5) !important;
 }
-

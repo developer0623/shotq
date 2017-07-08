@@ -21,4 +21,16 @@ export class InvoiceService extends RestClientService<Invoice> {
     return this.getList(search)
       .map(response => response.results);
   }
+
+  public getInvoicesByContact(id: number, search: any = {}) {
+    Object.assign(search, {
+      billing_order__contact: id
+    });
+    return this.getList(search)
+      .map(response => response.results);
+  }
+
+  getOutstanding(): Observable<{amount: number, invoices_count: number}> {
+    return this.listGet('outstanding');
+  }
 }

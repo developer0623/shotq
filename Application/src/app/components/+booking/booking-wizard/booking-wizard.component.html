@@ -28,14 +28,16 @@
     </booking-overview>
 
     <app-booking-sign *ngIf="currentStep.name === 'sign'"
-                      [proposal]="proposal" (onSign)="onNext()">
+                      [proposal]="proposal"
+                      (onSign)="onNext()">
 
     </app-booking-sign>
 
 
     <booking-payment *ngIf="currentStep.name === 'payment'"
                      [proposal]="proposal"
-                     [overview]="overview"></booking-payment>
+                     [overview]="overview"
+                     (onPay)="onNext()"></booking-payment>
   </div>
   <div class="booking-wizard-footer" *ngIf="currentStep.options?.hasFooter">
     <div class="text-right">

@@ -37,7 +37,7 @@
                     <div id="table-container">
                         <table class="table table-hover">
                             <tbody>
-                            <tr *ngFor="let worker of workers">
+                            <tr *ngFor="let worker of workers" [ngClass]="{'td-line-through': !worker.active}">
                                 <td>
                                     <div class="checkbox-custom checkbox-default">
                                         <input type="checkbox" (click)="toggleSelected(worker)"

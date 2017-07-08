@@ -1,16 +1,15 @@
-import { NgModule, CUSTOM_ELEMENTS_SCHEMA } from '@angular/core';
+import { NgModule } from '@angular/core';
 /* Components */
-import { SearchbarComponent }               from '../shared/searchbar/searchbar.component';
+import { SearchbarComponent }               from '../shared/searchbar';
 import { TimelineComponent }                from '../shared/timeline/timeline.component';
-import { NotesComponent }                   from '../shared/notes/notes.component';
-import { ActivityFeedComponent }            from '../shared/activity-feed/activity-feed.component';
-import { TinymceComponent }                 from '../shared/tinymce-editor/tinymce-editor.component';
+import { NotesComponent }                   from '../shared/notes';
+import { ActivityFeedComponent }            from '../shared/activity-feed';
+import { TinymceComponent }                 from '../shared/tinymce-editor';
 import { ConfirmDialogComponent }           from './confirm-dialog/confirm-dialog.component';
 
 import { AlertComponent }                   from '../shared/alert/';
-import { DropdownComponent }                from '../shared/dropdown/dropdown.component';
-import { PaginateComponent }                from '../shared/paginate/paginate.component';
-import { CpagerComponent }                  from '../shared/pager/cpager.component';
+import { PaginateComponent }                from '../shared/paginate';
+import { CpagerComponent }                  from '../shared/pager';
 import { SortBtnComponent }                 from '../shared/sort-btn';
 import { OpenModalByUrlComponent }          from '../shared/open-modal-by-url';
 import { MdCheckboxModule }                 from '@angular2-material/checkbox';
@@ -34,12 +33,16 @@ import {
 }                                           from 'ngx-bootstrap';
 /* Pipes */
 import { CanDeactivateChangesGuard } from './guards/can-deactivate-changes.guard';
-import { DropdownSelectComponent } from './dropdown-select/dropdown-select.component';
 import { DropdownSelectModule } from './dropdown-select/dropdown-select.module';
 import { ClickOutsideDirective } from '../../directives/click-outside/click-outside.directive';
 import { StepIndicatorComponent } from './step-indicator';
 import { ValidationMessagesDirective } from './validation-messages/validation-messages.directive';
 import { CorrespondenceListComponent } from './correspondence-list/correspondence-list.component';
+import { InjectedContractsListComponent } from './contracts-list/contracts-list.component';
+import { TextEditorComponent } from './text-editor/text-editor.component';
+import { ActivityItemComponent } from './activity-feed/activity-item/activity-item.component';
+import { ActivitiesModalComponent } from './activity-feed/activities-modal/activities-modal.component';
+
 
 const SHARED_COMPONENTS = [
   AlertComponent,
@@ -51,11 +54,16 @@ const SHARED_COMPONENTS = [
   CpagerComponent,
   OpenModalByUrlComponent,
   NotesComponent,
+  TextEditorComponent,
   TinymceComponent,
   ClickOutsideDirective,
   ConfirmDialogComponent,
   StepIndicatorComponent,
-  ValidationMessagesDirective
+  ValidationMessagesDirective,
+  InjectedContractsListComponent,
+  ActivityFeedComponent,
+  ActivityItemComponent,
+  ActivitiesModalComponent
 ];
 
 @NgModule({
@@ -85,6 +93,9 @@ const SHARED_COMPONENTS = [
   ],
   providers: [
     CanDeactivateChangesGuard
+  ],
+  entryComponents: [
+    ActivitiesModalComponent
   ]
 })
 export class SharedModule {

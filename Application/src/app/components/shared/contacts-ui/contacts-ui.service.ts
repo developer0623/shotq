@@ -19,11 +19,9 @@ import {
   ContactDialogComponent, ContactDialogContext
 } from './contact-dialog.component';
 import { EmailTypeService } from '../../../services/email-type/email-type.service';
-import { AddressTypeService } from '../../../services/address-type/address-type.service';
 import { PhoneTypeService } from '../../../services/phone-type/phone-type.service';
 import { EmailType } from '../../../models/email-type';
 import { PhoneType } from '../../../models/phone-type';
-import { AddressType } from '../../../models/address-type';
 import { BaseAddress } from '../../../models/address';
 import { DatePickerValue } from '../../../models/mydatepicker-model';
 import {
@@ -31,6 +29,7 @@ import {
 } from '../../../models/contact-date';
 import { JobRole } from '../../../models/job-role';
 import { JobRoleService } from '../../../services/job-role/job-role.service';
+import { AccessService } from '../../../services/access/access.service';
 
 interface PageCursor<T> {
   results: T[];
@@ -56,35 +55,13 @@ function emailOrEmpty(control: AbstractControl): ValidationErrors | null {
   return Validators.email(control);
 }
 
-function postalAddressOrEmpty(control: AbstractControl): ValidationErrors | null {
-  if (!control || !control.value)
-    return null;
-  let errors = {};
-  let parsedAddress = BaseAddress.parse(control.value);
-  if (!parsedAddress)
-    errors['address'] = true;
-  if (parsedAddress) {
-    errors['zip'] = !parsedAddress.zip;
-    errors['state'] = !parsedAddress.state;
-    errors['city'] = !parsedAddress.city;
-    errors['address1'] = !parsedAddress.address1;
-  }
-  let hasErrors = _.values(errors).reduce((l, r) => !!l || !!r);
-  if (!hasErrors)
-    return null;
-  errors['any'] = true;
-  return {postalAddress: errors};
-}
-
 class ContactFormContext {
   private content: Contact;
-  private addressTypes: AddressType[];
   private contactTypes: ContactType[];
   private dateTypes: DateType[];
   private emailTypes: EmailType[];
   private phoneTypes: PhoneType[];
 
-  private defaultAddressType: AddressType;
   private defaultContactType: ContactType;
   private defaultEmailType: EmailType;
   private defaultPhoneType: PhoneType;
@@ -97,23 +74,25 @@ class ContactFormContext {
   private birthday: ContactDate;
 
   static createForContact(
-      contactData$: Observable<object>, addressTypes$: Observable<AddressType[]>,
+      contactData$: Observable<object>,
       contactTypes$: Observable<ContactType[]>, dateTypes$: Observable<DateType[]>,
       emailTypes$: Observable<EmailType[]>, phoneTypes$: Observable<PhoneType[]>
       ): Observable<ContactFormContext> {
     let retval = new Subject<ContactFormContext>();
     //noinspection JSIgnoredPromiseFromCall
-    Observable.forkJoin(
-          contactData$, addressTypes$, contactTypes$, dateTypes$,
-          emailTypes$, phoneTypes$)
+    Observable.zip(
+        contactData$,
+        contactTypes$.filter(res => !!res.length),
+        dateTypes$.filter(res => !!res.length),
+        emailTypes$.filter(res => !!res.length),
+        phoneTypes$.filter(res => !!res.length)
+      )
       .subscribe(results => {
         let result = new ContactFormContext();
-        result.addressTypes = results[1];
-        result.contactTypes = results[2];
-        result.dateTypes = results[3];
-        result.emailTypes = results[4];
-        result.phoneTypes = results[5];
-        result.defaultAddressType = _.head(result.addressTypes) || new AddressType();
+        result.contactTypes = results[1];
+        result.dateTypes = results[2];
+        result.emailTypes = results[3];
+        result.phoneTypes = results[4];
         result.defaultContactType = _.head(result.contactTypes) || new ContactType();
         result.defaultEmailType = _.head(result.emailTypes) || new EmailType();
         result.defaultPhoneType = _.head(result.phoneTypes) || new PhoneType();
@@ -145,9 +124,10 @@ class ContactFormContext {
       lastName: this.content.last_name || '',
       email: this.defaultEmail.address || '',
       phone: this.defaultPhone.number || '',
-      postalAddress: this.defaultAddress.toString(),
+      postalAddress: this.defaultAddress.address1 || '',
       anniversary: DatePickerValue.fromDateString(this.anniversary ? this.anniversary.date : '') || '',
       birthday: DatePickerValue.fromDateString(this.birthday ? this.birthday.date : '') || '',
+      default_address: this.defaultAddress
     }, extra || {});
     form.setValue(value);
   }
@@ -155,17 +135,15 @@ class ContactFormContext {
   getFormSubmitValue(form: FormGroup): Contact {
     // make sure that existing array values are not truncated
     // remove duplicate values from the form data
-    let shouldSubmitAddress = !!form.value.postalAddress && !!this.defaultAddressType;
+    let shouldSubmitAddress = !!form.value.postalAddress;
     let newAddress = (form.value.postalAddress || '').trim().toLocaleLowerCase();
     let addresses: object[] = _(this.content.addresses)
       .reject(item => item.toString().toLocaleLowerCase() === newAddress)
       .value();
     if (shouldSubmitAddress) {
-      let parsedAddress = BaseAddress.parse(form.value.postalAddress) || {};
-      addresses.push(Object.assign(parsedAddress, {
+      addresses.push(Object.assign(form.value.default_address || {}, {
         'default': true,
-        visible: true,
-        address_type: this.defaultAddressType.id
+        visible: true
       }));
     }
 
@@ -245,7 +223,6 @@ class ContactFormContext {
 export class ContactsUiService {
   detailContent$: Observable<Contact>;
   masterContent$: Observable<ContactPageCursor>;
-  addressTypes$: Observable<AddressType[]>;
   contactTypes$: Observable<ContactType[]>;
   dateTypes$: Observable<DateType[]>;
   emailTypes$: Observable<EmailType[]>;
@@ -254,12 +231,11 @@ export class ContactsUiService {
 
   private masterViewContent = new Subject<ContactPageCursor>();
   private detailViewContent = new BehaviorSubject<Contact>(Contact.Empty);
-  private addressTypesSubject = new AsyncSubject<AddressType[]>();
   private contactTypesSubject = new AsyncSubject<ContactType[]>();
   private dateTypesSubject = new AsyncSubject<DateType[]>();
-  private emailTypesSubject = new AsyncSubject<EmailType[]>();
-  private jobRolesSubject = new AsyncSubject<JobRole[]>();
-  private phoneTypesSubject = new AsyncSubject<PhoneType[]>();
+  private emailTypesSubject = new BehaviorSubject<EmailType[]>([]);
+  private jobRolesSubject = new BehaviorSubject<JobRole[]>([]);
+  private phoneTypesSubject = new BehaviorSubject<PhoneType[]>([]);
   private isLoading: boolean = false;
   private contactDialog: DialogRef<any>;
 
@@ -280,16 +256,15 @@ export class ContactsUiService {
         Validators.maxLength(30),
         CustomValidators.phone
       ])),
-      postalAddress: new FormControl('', Validators.compose([
-        postalAddressOrEmpty, Validators.maxLength(255)
-      ])),
+      postalAddress: new FormControl('', Validators.maxLength(255)),
       birthday: new FormControl('', datePickerDateOrEmpty),
       anniversary: new FormControl('', datePickerDateOrEmpty),
+      default_address: new FormControl(null)
     });
   }
 
-  constructor(private alertify: AlertifyService,
-              private addressTypeService: AddressTypeService,
+  constructor(private accessService: AccessService,
+              private alertify: AlertifyService,
               private contactService: ContactService,
               private emailTypeService: EmailTypeService,
               private flash: FlashMessageService,
@@ -298,28 +273,21 @@ export class ContactsUiService {
               private modal: Modal) {
     this.detailContent$ = this.detailViewContent.asObservable();
     this.masterContent$ = this.masterViewContent.asObservable();
-    this.addressTypes$ = this.addressTypesSubject.asObservable();
     this.contactTypes$ = this.contactTypesSubject.asObservable();
     this.dateTypes$ = this.dateTypesSubject.asObservable();
     this.emailTypes$ = this.emailTypesSubject.asObservable();
     this.jobRoles$ = this.jobRolesSubject.asObservable();
     this.phoneTypes$ = this.phoneTypesSubject.asObservable();
-    this.addressTypeService.getList()
-      .map(response => _.map(response.results, AddressTypeService.newObject))
-      .subscribe(this.addressTypesSubject);
-    this.contactService.getRequestContactTypes()
-      .map(results => _.map(results, item => Object.assign(new ContactType(), item)))
-      .subscribe(this.contactTypesSubject);
-    this.contactService.getDateTypes().subscribe(this.dateTypesSubject);
-    this.emailTypeService.getList()
-      .map(response => _.map(response.results, EmailTypeService.newObject))
-      .subscribe(this.emailTypesSubject);
-    this.jobRoleService.getList()
-      .map(response => _.map(response.results, JobRoleService.newObject))
-      .subscribe(this.jobRolesSubject);
-    this.phoneTypeService.getList()
-      .map(response => _.map(response.results, PhoneTypeService.newObject))
-      .subscribe(this.phoneTypesSubject);
+
+    this.accessService.currentUser$
+      .filter(_.identity)  // ignore the anonymous user
+      .subscribe(() => this.resetData());
+    this.jobRoleService.remoteDataHasChanged
+      .subscribe(this.fetchJobRoles.bind(this));
+    this.emailTypeService.remoteDataHasChanged
+      .subscribe(this.fetchEmailTypes.bind(this));
+    this.phoneTypeService.remoteDataHasChanged
+      .subscribe(this.fetchPhoneTypes.bind(this));
   }
 
   get detailContent(): Contact {
@@ -332,7 +300,7 @@ export class ContactsUiService {
 
   createContactFormContext(contact$: Observable<object>): Observable<ContactFormContext> {
     return ContactFormContext.createForContact(
-        contact$, this.addressTypes$, this.contactTypes$, this.dateTypes$,
+        contact$, this.contactTypes$, this.dateTypes$,
         this.emailTypes$, this.phoneTypes$);
   }
 
@@ -422,4 +390,31 @@ export class ContactsUiService {
 
   // TODO: pagination management
 
+  private resetData() {
+    this.contactService.getRequestContactTypes()
+      .map(results => _.map(results, item => Object.assign(new ContactType(), item)))
+      .subscribe(this.contactTypesSubject);
+    this.contactService.getDateTypes().subscribe(this.dateTypesSubject);
+    this.fetchEmailTypes();
+    this.fetchJobRoles();
+    this.fetchPhoneTypes();
+  }
+
+  private fetchEmailTypes() {
+    this.emailTypeService.getList()
+      .map(response => _.map(response.results, EmailTypeService.newObject))
+      .subscribe(value => this.emailTypesSubject.next(value));
+  }
+
+  private fetchJobRoles() {
+    this.jobRoleService.getList()
+      .map(response => _.map(response.results, JobRoleService.newObject))
+      .subscribe(value => this.jobRolesSubject.next(value));
+  }
+
+  private fetchPhoneTypes() {
+    this.phoneTypeService.getList()
+      .map(response => _.map(response.results, PhoneTypeService.newObject))
+      .subscribe(value => this.phoneTypesSubject.next(value));
+  }
 }

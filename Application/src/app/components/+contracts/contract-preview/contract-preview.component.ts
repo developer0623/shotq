@@ -17,7 +17,7 @@ import { Observable, Subject } from 'rxjs';
 })
 export class ContractPreviewComponent {
 
-  @Input() contract: Contract = {};
+  @Input() contract: Contract|any = {};
   @Input() classModifier: boolean = false;
   @Input() canSign = true;
   @Input() sign: Subject<any>;
@@ -32,6 +32,7 @@ export class ContractPreviewComponent {
   private continueEnabled: boolean = false;
   private agreement = false;
   private currentSignature: Signature;
+  private currentSignatureCompleted: boolean = false;
 
   constructor(private contractService: ContractService,
               private signatureService: SignatureService,
@@ -83,6 +84,7 @@ export class ContractPreviewComponent {
           sig.selected = this.isCurrentSignature(mySignature, sig);
           if (sig.selected) {
             this.currentSignature = sig;
+            this.currentSignatureCompleted = sig.completed;
           }
           return sig;
         });
@@ -101,7 +103,6 @@ export class ContractPreviewComponent {
     if (this.currentSignature && this.canSign) {
       setTimeout(() => {
         this.valid.emit(this.currentSignature.completed && this.agreement);
-
       }, 0);
     }
 

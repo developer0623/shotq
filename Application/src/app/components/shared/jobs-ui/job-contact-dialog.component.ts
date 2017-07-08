@@ -1,3 +1,4 @@
+import { } from '@types/googlemaps'; // tslint:disable-line
 import { Component, OnInit } from '@angular/core';
 import { FormGroup, Validators, FormControl, AbstractControl } from '@angular/forms';
 import { DialogRef, ModalComponent } from 'single-angular-modal';
@@ -5,6 +6,7 @@ import { BSModalContext } from 'single-angular-modal/plugins/bootstrap';
 import { IMyInputFieldChanged } from 'ngx-mydatepicker';
 import { JobApiJobContact } from '../../../models/job';
 import { JobRole } from '../../../models/job-role';
+import { BaseAddress } from '../../../models/address';
 import { ContactService } from '../../../services/contact/contact.service';
 import { JobRoleService } from '../../../services/job-role/job-role.service';
 import { ContactsUiService } from '../contacts-ui/contacts-ui.service';
@@ -40,6 +42,14 @@ export class JobContactDialogComponent
   ngOnInit(): void {
     this.presenter.jobRoles$.subscribe(this.resetRoles.bind(this));
     this.setViewValue(this.context.content);
+  }
+
+  updateLocation(place: google.maps.places.PlaceResult) {
+    let address = BaseAddress.extractFromGooglePlaceResult(place);
+    this.form.patchValue({
+      postalAddress: address.address1,
+      default_address: address
+    });
   }
 
   private setViewValue(jobContact: JobApiJobContact) {

@@ -1,19 +1,25 @@
-import { Component } from '@angular/core';
+import moment from 'moment';
+import { Component, ViewChild } from '@angular/core';
+import {  } from '@types/googlemaps';
 import { FormBuilder, FormGroup, Validators } from '@angular/forms';
-import { Job } from '../../../models/job';
 import { BSModalContext } from 'single-angular-modal/plugins/bootstrap';
+import { Job } from '../../../models/job';
+import { EventGroup } from '../../../models/event-group';
+import { BaseAddress } from '../../../models/address';
 import { DialogRef, ModalComponent } from 'single-angular-modal';
 import { JobTypeService } from '../../../services/job-type/job-type.service';
 import { FlashMessageService } from '../../../services/flash-message/flash-message.service';
 import { ApiService } from '../../../services/api/api.service';
 import { JobService } from '../../../services/job/job.service';
 import * as _ from 'lodash';
-import { ContactService } from '../../../services/contact/contact.service';
-import { EmailTypeService } from '../../../services/email-type/email-type.service';
-import { EmailType } from '../../../models/email-type';
 import { datesIntervalValidator } from '../../../validators';
 import { Observable } from 'rxjs/Observable';
 import { Router } from '@angular/router';
+import { ContactSetOrCreateComponent } from '../../+contacts/contact-set-or-create/contact-set-or-create.component';
+import { JobRole } from '../../../models/job-role';
+import { JobType } from '../../../models/job-type';
+import { JobRoleService } from 'app/services';
+import { JobContact } from '../../../models/job-contact';
 
 
 export class QuickJobWindowData extends BSModalContext {
@@ -26,19 +32,18 @@ export class QuickJobWindowData extends BSModalContext {
   styleUrls: [
     './quick-job.component.scss'
   ],
-  providers: [JobService, JobTypeService]
+  providers: [ContactSetOrCreateComponent, JobService, JobTypeService, JobRoleService]
 })
 export class QuickJobComponent implements ModalComponent<QuickJobWindowData> {
   private jobForm: FormGroup;
-  private newContactForm: FormGroup;
   private method: string;
   private job: Job;
-  private emailTypes: EmailType[] = [];
-  private jobTypes: any = [];
-  private contacts: any = [];
-  private dropdownSelectCustomActions: any = [];
+  private roles: any[] = [];
+  private jobTypes: any[] = [];
+  private jobContact: JobContact;
   private showFormErrors: boolean = false;
   private isLoading: boolean = false;
+  @ViewChild(ContactSetOrCreateComponent) private childContactSetOrCreateComponent: ContactSetOrCreateComponent;
 
   static patchFormValue(form, data, markTouched: boolean = false) {
     form.patchValue(data);
@@ -53,42 +58,67 @@ export class QuickJobComponent implements ModalComponent<QuickJobWindowData> {
 
 
   constructor(private fb: FormBuilder,
-              private contactService: ContactService,
               private jobService: JobService,
               private jobTypeService: JobTypeService,
               private flash: FlashMessageService,
               private apiService: ApiService,
-              private emailTypeService: EmailTypeService,
+              private jobRoleService: JobRoleService,
               private router: Router,
               public dialog: DialogRef<QuickJobWindowData>
   ) {
     this.job = this.dialog.context.job;
+    this.jobContact = _.first(_.get(this.job, 'job_contacts', [])) || {};
     this.method = this.job.id ? 'update' : 'create';
-    this.dropdownSelectCustomActions = [
-      {label: '+ Add a New Contact', action: this.showNewContactForm.bind(this)}
-    ];
   }
 
   ngOnInit() {
     this.isLoading = true;
-    this.initNewContactForm();
     this.initJobForm();
-    this.initMainEventForm();
-    this.initData();
 
-    this.jobForm['controls'].main_event_group['controls'].to_be_determined.valueChanges.subscribe((to_be_determined) => {
-      if (to_be_determined) {
-        this.jobForm.controls.main_event_group.patchValue({start: null, end: null});
-        this.jobForm['controls'].main_event_group['controls'].start.clearValidators();
-        this.jobForm['controls'].main_event_group['controls'].end.clearValidators();
-      } else {
-        this.jobForm['controls'].main_event_group['controls'].start.setValidators(Validators.required);
-        this.jobForm['controls'].main_event_group['controls'].end.setValidators(Validators.required);
-      }
-      this.jobForm['controls'].main_event_group['controls'].start.updateValueAndValidity();
-      this.jobForm['controls'].main_event_group['controls'].end.updateValueAndValidity();
-      this.jobForm.updateValueAndValidity();
-    });
+    if (!this.job.id) {
+      this.jobForm['controls'].main_event_group['controls'].start
+        .valueChanges
+        .subscribe((start) => {
+          this.onStartDateChange(start);
+        });
+
+      this.jobForm['controls'].main_event_group['controls'].end
+        .valueChanges
+        .subscribe((end) => {
+          this.onEndDateChange(end);
+        });
+    }
+  }
+
+  onStartDateChange(value) {
+    this.jobForm['controls'].main_event_group['controls'].start.clearValidators();
+    if (value) {
+      this.jobForm['controls'].main_event_group['controls'].end.setValidators(Validators.required);
+    } else {
+      this.jobForm['controls'].main_event_group['controls'].end.clearValidators();
+      this.jobForm['controls'].main_event_group['controls'].end.reset(null, {emitEvent: false});
+    }
+    this.updateDatepickerValidity();
+  }
+
+  onEndDateChange(value) {
+    this.jobForm['controls'].main_event_group['controls'].end.clearValidators();
+    if (value) {
+      this.jobForm['controls'].main_event_group['controls'].start.setValidators(Validators.required);
+    } else {
+      this.jobForm['controls'].main_event_group['controls'].start.clearValidators();
+    }
+    this.updateDatepickerValidity();
+  }
+
+  updateDatepickerValidity() {
+    this.jobForm['controls'].main_event_group['controls'].start.updateValueAndValidity({emitEvent: false});
+    this.jobForm['controls'].main_event_group['controls'].end.updateValueAndValidity({emitEvent: false});
+    this.jobForm.updateValueAndValidity();
+  }
+
+  ngAfterViewInit() {
+    this.initData();
   }
 
   initJobForm() {
@@ -100,52 +130,34 @@ export class QuickJobComponent implements ModalComponent<QuickJobWindowData> {
           Validators.maxLength(200)
         ])
       ],
-      job_type: ['', Validators.required],
-      external_owner: ['', Validators.required],
-      main_event_group: this.initMainEventForm()
+      job_type: [''],
+      job_contact_role: [_.get(this.jobContact, 'roles[0]', ''), Validators.required]
     });
+    if (!this.job.id) {
+      let mainEventGroup = this.initMainEventForm();
+      EventGroup.setInitialStartTime(mainEventGroup);
+      this.jobForm.addControl('main_event_group', mainEventGroup);
+      console.log("main_event_group_init", this.jobForm['controls'].main_event_group['controls'].value);
+    }
   }
 
-  initNewContactForm() {
-    this.newContactForm = this.fb.group({
-      first_name: [
-        '',
-        Validators.compose([
-          Validators.required,
-          Validators.maxLength(200)
-        ])
-      ],
-      last_name: [
-        '',
-        Validators.compose([
-          Validators.required,
-          Validators.maxLength(200)
-        ])
-      ],
-      default_email: [
-        '',
-        Validators.compose([
-          Validators.required,
-          Validators.maxLength(200)
-        ])
-      ],
-    });
-    this.newContactForm.disable();
-  }
-
-  initMainEventForm() {
-    let is_determined = _.get(this.job, 'main_event_details.to_be_determined', false);
+  initMainEventForm(): FormGroup {
     return this.fb.group({
       address: [
         _.get(this.job, 'main_event_group.address', ''),
         Validators.compose([
-          Validators.required,
           Validators.maxLength(200)
         ])
       ],
-      start: is_determined ? [null] : [_.get(this.job, 'main_event_group.start', null), Validators.required],
-      end: is_determined ? [null] : [_.get(this.job, 'main_event_group.end', null), Validators.required],
-      to_be_determined: [is_determined],
+      location_name: [
+        _.get(this.job, 'main_event_group.location_name', ''),
+        Validators.compose([
+          Validators.maxLength(120)
+        ])
+      ],
+      location: this.job.main_event_group,
+      start: [_.get(this.job, 'main_event_group.start', null)],
+      end: [_.get(this.job, 'main_event_group.end', null)],
       all_day: [_.get(this.job, 'main_event_details.all_day', false)],
     }, {validator: datesIntervalValidator('start', 'end')});
   }
@@ -159,66 +171,46 @@ export class QuickJobComponent implements ModalComponent<QuickJobWindowData> {
       .map(res => res.results.map(item => ({value: item.id, label: item.name})));
   }
 
-  getContacts() {
-    return this.contactService.getContactList({page_size: 1000})
-      .map(res => res.page.map(item => ({value: item.id, label: item.full_name})));
-  }
-
-  getEmailTypes() {
-    return this.emailTypeService.getList()
-      .map(res => res.results);
-  }
-
   initData() {
     Observable.forkJoin([
       this.getJobTypes(),
-      this.getContacts(),
-      this.getEmailTypes()
+      this.jobRoleService.getList().map(res => res.results.map(jobRole => (JobRoleService.newObject(jobRole)))),
+      this.childContactSetOrCreateComponent.initData(),
     ]).finally(() => { this.isLoading = false; })
-      .subscribe(([jobTypes, contacts, emailTypes]) => {
+      .subscribe(([jobTypes, jobRoles, nill]: [JobType[], JobRole[], null]) => {
         this.jobTypes = jobTypes;
         setTimeout(() => {
           this.patchForm('jobForm', _.pick(this.job, ['job_type']));
         });
-
-        this.contacts = contacts;
-        if (this.job.external_owner)
-          setTimeout(() => {
-            this.patchForm('jobForm', {external_owner: this.job.external_owner.id});
-          });
-
-        this.emailTypes = emailTypes;
+        this.roles = jobRoles;
       });
   }
 
   formatMainEventGroup() {
-    let data = this.jobForm.value['main_event_group'];
-    return {
-      address: data.address,
-      start: data.start,
-      end: data.end
-    };
+    return _.pick(
+      this.jobForm.value['main_event_group'],
+      'location_name', 'address', 'start', 'end', 'location');
   }
 
   formatJobDataToSave() {
-    let data = _.clone(this.jobForm.value);
-    data['main_event'] = _.clone(this.jobForm.controls['main_event_group'].value);
-    data['main_event_group'] = this.formatMainEventGroup();
-    data['account'] = this.apiService.getAccount();
-    return data;
-  }
-
-  formatNewContactDataToSave() {
-    let data = _.clone(this.newContactForm.value);
-    return {
-      first_name: data.first_name,
-      last_name: data.last_name,
-      emails: [{
-        'default': true,
-        address: data.default_email,
-        email_type: (_.head(this.emailTypes) || new EmailType()).id,
-      }],
-    };
+    return Observable.create(observer => {
+      let data = _.clone(this.jobForm.value);
+      if (!this.job.id) {
+        data['main_event'] = _.clone(this.jobForm.controls['main_event_group'].value);
+        data['main_event_group'] = this.formatMainEventGroup();
+      }
+      data['account'] = this.apiService.getAccount();
+      data['job_contact'] = {
+        id: this.jobContact.id,
+        role: this.jobForm.controls.job_contact_role.value.id
+      };
+      this.childContactSetOrCreateComponent.getValue().subscribe((contactID) => {
+          data['external_owner'] = contactID;
+          observer.next(data);
+          observer.complete();
+        }
+      );
+    });
   }
 
   update(data) {
@@ -226,32 +218,25 @@ export class QuickJobComponent implements ModalComponent<QuickJobWindowData> {
   }
 
   create(data) {
+    console.log("create", data);
     return this.jobService.create(data);
   }
 
   createOrUpdate() {
-    if (this.jobForm.invalid || this.newContactForm.invalid) {
+    // console.log("main-event-group", this.jobForm.controls['main_event_group'].value);
+    if (this.jobForm.invalid || this.childContactSetOrCreateComponent.isInvalid()) {
       this.showFormErrors = true;
       return;
     }
 
-    let observableArray = [Observable.of(null)];
     this.isLoading = true;
-    let data = this.formatJobDataToSave();
-    if (!data.external_owner)
-      observableArray.push(this.createNewContact());
-
-    Observable.forkJoin(observableArray)
+    this.formatJobDataToSave()
       .finally(() => { this.isLoading = false; })
-      .subscribe((success) => {
-          let newContact = _.last(success);
-          if (newContact)
-            data.external_owner = newContact.id;
-
+      .subscribe((data) => {
+        console.log("newjob", data);
           this[this.method](data).subscribe(
             result => {
               this.flash.success(`The job has been ${this.method}d.`);
-              this.router.navigate(['/jobs', result.id]);
               this.dialog.close(result);
             }
           );
@@ -262,28 +247,22 @@ export class QuickJobComponent implements ModalComponent<QuickJobWindowData> {
       );
   }
 
-  showNewContactForm() {
-    this.patchForm('jobForm', {'external_owner': null});
-    this.jobForm.controls.external_owner.clearValidators();
-    this.jobForm.controls.external_owner.updateValueAndValidity();
-    this.newContactForm.enable();
-  }
-
-  hideNewContactForm() {
-    this.patchForm('jobForm', {external_owner: this.job.external_owner ? this.job.external_owner.id : null});
-    this.jobForm.controls.external_owner.setValidators(Validators.required);
-    this.jobForm.controls.external_owner.updateValueAndValidity();
-    this.newContactForm.patchValue({'first_name': '', 'last_name': '', 'default_email': ''});
-    this.newContactForm.disable();
-  }
-
-  createNewContact() {
-    let data = this.formatNewContactDataToSave();
-    return this.contactService.create(data);
-  }
-
   close() {
     this.dialog.dismiss();
+    // On safari modal-open(which hide scrollbar) class not removed from body tag
+    document.querySelector('body').classList.remove('modal-open');
+  }
+
+  updateLocation(place: google.maps.places.PlaceResult) {
+    let address = BaseAddress.extractFromGooglePlaceResult(place);
+    this.jobForm.controls['main_event_group'].patchValue({
+      address: address.address1,
+      location: address
+    });
+  }
+
+  onEndDateTimePickerShow(mainEventGroupForm: FormGroup) {
+    EventGroup.setInitialEndTime(mainEventGroupForm);
   }
 
 }

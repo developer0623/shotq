@@ -1,5 +1,5 @@
 import * as _ from 'lodash';
-import { Component, OnInit, ViewEncapsulation } from '@angular/core';
+import { Component, OnInit, ViewEncapsulation, ViewChild } from '@angular/core';
 import { Location } from '@angular/common';
 import { ActivatedRoute, Router } from '@angular/router';
 import { DragulaService } from 'ng2-dragula/ng2-dragula';
@@ -15,6 +15,7 @@ import { PackageService } from '../../../../services/product/package';
 import { JobService } from '../../../../services/job';
 import { FlashMessageService } from '../../../../services/flash-message';
 import { StateSaverService } from '../../../../services/state-saver';
+import { PackageContentsComponent } from './package-contents';
 
 
 @Component({
@@ -39,6 +40,7 @@ export class PackageEditorComponent implements OnInit {
   currentProposal: Proposal;
   toBackPath = ['../'];
   selectedItems: Item[] = [];
+  @ViewChild(PackageContentsComponent) contentsComponent: PackageContentsComponent;
 
   constructor(private route: ActivatedRoute,
               private router: Router,
@@ -106,6 +108,7 @@ export class PackageEditorComponent implements OnInit {
       } else {
         this.package.addons = _.concat(this.package.addons, item);
       }
+      this.contentsComponent.toggleItemOptions(item);
       this.recalculate();
     });
   }
@@ -130,24 +133,9 @@ export class PackageEditorComponent implements OnInit {
     setTimeout(toggle, 0);
   }
 
-  getItemPrice(itemId: number, quantity: number): number {
-    let item = _.find(this.allItems, {id: itemId});
-    return parseFloat(item.price) * quantity;
-  }
-
-  getItemCostPrice(itemId: number, quantity: number): number {
-    let item = _.find(this.allItems, {id: itemId});
-    return parseFloat(item.cost_of_goods_sold) * quantity;
-  }
-
-  getItemShippingCost(itemId: number, quantity: number): number {
-    let item = _.find(this.allItems, {id: itemId});
-    return parseFloat(item.shipping_cost) * quantity;
-  }
-
   recalculate() {
     let itemsPrice = _.sum(this.package.items.map(
-      i => parseFloat(i.item_data.price) * i.quantity
+      i => parseFloat(i.item_data.price) + parseFloat(<string>i.item_data.addons_price) * i.quantity
     ));
     let costItemsPrice = _.sum(this.package.items.map(
       i => parseFloat(i.item_data.cost_of_goods_sold) * i.quantity
@@ -166,11 +154,7 @@ export class PackageEditorComponent implements OnInit {
 
   save() {
     if (!this.package.name) {
-      this.flashMessageService.error('Title is required field');
-      return;
-    }
-    if (this.package.items.length < 1) {
-      this.flashMessageService.error('Please add at least one item to contents list');
+      this.flashMessageService.error('Name is required field');
       return;
     }
     this.packageTemplateService.save(this.package).subscribe((packageTemplate) => {

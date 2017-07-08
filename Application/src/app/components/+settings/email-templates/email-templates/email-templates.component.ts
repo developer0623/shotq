@@ -22,6 +22,9 @@ export class EmailTemplatesComponent extends BaseTemplateListComponent<EmailTemp
   @ViewChild('modifyEmailTemplate') public modifyEmailTemplate: EmailTemplateAddComponent;
 
   modelName = 'Email';
+  inlineMode = true;
+  prependAddButton = true;
+  sliderContainerId = 'emailTemplateSlider';
 
   constructor(emailTemplateService: EmailTemplateService,
               router: Router,
@@ -48,6 +51,7 @@ export class EmailTemplatesComponent extends BaseTemplateListComponent<EmailTemp
 
         if (message.type === 'add') {
           this.templates.push(message.instance);
+          this.getTemplates();
         }
       });
   }

@@ -3,7 +3,7 @@ export class ItemTemplateOption {
   created: Date;
   modified: Date;
   name: string; /*(required)*/
-  extra_price: number; /*(required)*/
+  extra_price: number | string; /*(required)*/
   extra_cogs: number; /*(required)*/
   account: number; /*(required)*/
   group: number; /*(required)*/

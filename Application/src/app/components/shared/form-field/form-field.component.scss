@@ -1,3 +1,6 @@
+@import "../../../../assets/css/variables";
+@import "../../../../assets/css/mixins";
+
 span.input-group-addon.primary {
 	margin-right: 2px;
 	text-align: right;
@@ -9,5 +12,22 @@ span {
 	    right: 7px;
 	    padding: 0;
 	    height: 40px;
+	}
+}
+
+.form-field {
+	&__text {
+		font-size: 14px!important;
+		position: static!important;
+		display: inline-block;
+		vertical-align: middle;
+	}
+}
+
+.dropdown-menu {
+	li {
+		white-space: nowrap;
+  		overflow: hidden;
+		text-overflow: ellipsis;
 	}
 }

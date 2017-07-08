@@ -1,173 +1,21 @@
-<!-- Jobs -->
-<div class="activityBlock">
-    <div class="titleBlock">
-        <h4>Activity</h4>
-        <div class="selectStyle hidden">
-            <div class="activityType"><label >Activity Type</label></div>
-                <form-field 
-                [onlySelect]="true"  
-                [ngSelectValue]="currentTab.id" 
-                (ngSelectValueChange)="setTab($event)" 
-                [options]="tabs">  
-                </form-field>  
-        </div>
-        <div class="clearfix"></div>
-    </div>
-    <div class="activities-block" (scroll)="onScroll($event)">
+<div class="activity">
+    <div class="activity__in">
         <div class="loading-ripple" *ngIf="isLoading"></div>
-        <ng-template [ngIf]="currentStatus == 'all'">
-            <ul>
-                <li *ngIf="activityFeedListUpcoming.length > 0">
-                    <h5><span>UPCOMING</span></h5>
-                    <ul>
-                        <ng-template ngFor let-activity [ngForOf]="activityFeedListUpcoming">
-                            <li >
-                                <div class="iconBlock">
-                                    <span>
-                                        <i class="{{activity.icon}}"></i>
-                                    </span>
-                                </div>
-                                <div class="infoBlock">
-                                    <p class="text">{{ activity.title }}</p>
-                                    <p class="date">{{ activity.date | date: 'EEEE, MMMM d'}} at {{ activity.date | date: 'h:mm a'}}</p>
-                                </div>
-                                <div *ngIf="activity.activity_type == 'invoice'" class="paidButton">
-                                    <span>
-                                        <i class=paid>Paid</i>
-                                    </span>
-                                </div>
-                            </li>
-                        </ng-template>
-                    </ul>
-                </li>
-                <li *ngIf="activityFeedListToday.length > 0">
-                    <h5><span>TODAY - {{ activityFeedListToday[0].date | date: 'MMMM d, yyyy'}} </span></h5>
-                    <ul>
-                        <ng-template ngFor let-activity [ngForOf]="activityFeedListToday">
-                            <li>
-                                <div class="iconBlock">
-                                    <span>
-                                        <i class="{{activity.icon}}"></i>
-                                    </span>
-                                </div>
-                                <div class="infoBlock">
-                                    <p class="text">{{ activity.title }}</p>
-                                    <p class="date">{{ activity.date | date: 'EEEE, MMMM d'}} at {{ activity.date | date: 'h:mm a'}}</p>
-                                </div>
-                                <div *ngIf="activity.activity_type == 'invoice'" class="paidButton">
-                                    <span>
-                                        <i class=paid>Paid</i>
-                                    </span>
-                                </div>
-                            </li>
-                        </ng-template>
-                    </ul>
-                </li>
-                <li *ngIf="activityFeedListPast.length > 0">
-                    <h5><span>PAST</span></h5>
-                    <ul>
-                        <ng-template ngFor let-activity [ngForOf]="activityFeedListPast">
-                            <li>
-                                <div class="iconBlock">
-                                    <span>
-                                        <i class="{{ activity.icon }}"></i>
-                                    </span>
-                                </div>
-                                <div class="infoBlock">
-                                    <p class="text">{{ activity.title }}</p>
-                                    <p class="date">{{ activity.date | date: 'EEEE, MMMM d'}} at {{ activity.date | date: 'h:mm a'}}
-                                    </p>
-                                </div>
-                                <div *ngIf="activity.activity_type == 'invoice'" class="paidButton">
-                                    <span>
-                                        <i class=paid>Paid</i>
-                                    </span>
-                                </div>
-                            </li>
-                        </ng-template>
-                    </ul>
-                </li>
-            </ul>
-            <div *ngIf="activityFeedListToday.length == 0 && activityFeedListPast.length == 0 && !isLoading" class="no-recent-activity">There are no activities to display.</div>
-        </ng-template>
-        <ng-template [ngIf]="currentStatus == 'recent'">
-            <ul>
-                <li *ngIf="activityFeedListToday.length > 0">
-                    <h5><span>TODAY - {{ activityFeedListToday[0].date | date: 'MMMM d, yyyy'}}</span></h5>
-                    <ul>
-                        <ng-template ngFor let-activity [ngForOf]="activityFeedListToday">
-                            <li>
-                                <div class="iconBlock">
-                                    <span>
-                                        <i class="{{activity.icon}}"></i>
-                                    </span>
-                                </div>
-                                <div class="infoBlock">
-                                    <p class="text">{{ activity.title }}</p>
-                                    <p class="date">{{ activity.date | date: 'EEEE, MMMM d'}} at {{ activity.date | date: 'h:mm a'}}</p>
-                                </div>
-                                <div *ngIf="activity.activity_type == 'invoice'" class="paidButton">
-                                    <span>
-                                        <i class=paid>Paid</i>
-                                    </span>
-                                </div>
-                            </li>
-                        </ng-template>
-                    </ul>
-                </li>
-                <li *ngIf="activityFeedListYesterday.length > 0">
-                    <h5><span>YESTERDAY - {{ activityFeedListYesterday[0].date | date: 'MMMM d, yyyy'}}</span></h5>
-                    <ul>
-                        <ng-template ngFor let-activity [ngForOf]="activityFeedListYesterday">
-                            <li>
-                                <div class="iconBlock">
-                                    <span>
-                                        <i class="{{activity.icon}}"></i>
-                                    </span>
-                                </div>
-                                <div class="infoBlock">
-                                    <p class="text">{{ activity.title }}</p>
-                                    <p class="date">Yesterday at {{ activity.date | date: 'h:mm a'}}</p>
-                                </div>
-                                <div *ngIf="activity.activity_type == 'invoice'" class="paidButton">
-                                    <span>
-                                        <i class=paid>Paid</i>
-                                    </span>
-                                </div>
-                            </li>
-                        </ng-template>
-                    </ul>
-                </li>
-            </ul>
-            <div *ngIf="activityFeedListYesterday.length == 0 && activityFeedListToday.length == 0 && !isLoading" class="no-recent-activity">There are no recent activities to display.</div>
-        </ng-template>
-        <ng-template [ngIf]="currentStatus == 'upcoming'">
-            <ul>
-                <li *ngIf="activityFeedListUpcoming.length > 0">
-                    <h5><span>UPCOMING</span></h5>
-                    <ul>
-                        <ng-template ngFor let-activity let-i="index" [ngForOf]="activityFeedListUpcoming">
-                            <li>
-                                <div class="iconBlock">
-                                    <span>
-                                        <i class="{{activity.icon}}"></i>
-                                    </span>
-                                </div>
-                                <div class="infoBlock">
-                                    <p class="text">{{ activity.title }}</p>
-                                    <p class="date">{{ activity.date | date: 'EEEE, MMMM d'}} at {{ activity.date | date: 'h:mm a'}}</p>
-                                </div>
-                                <div *ngIf="activity.activity_type == 'invoice'" class="paidButton">
-                                    <span>
-                                        <i class=paid>Paid</i>
-                                    </span>
-                                </div>
-                            </li>
-                        </ng-template>
-                    </ul>
-                </li>
-            </ul>
-            <div *ngIf="activityFeedListUpcoming.length == 0 && !isLoading" class="no-recent-activity">There are no upcoming activities to display.</div>
-        </ng-template>
+        <div *ngIf="!feed.length" class="no-activities">
+            <span>There are no activities to display.</span>
+        </div>
+        <ul *ngIf="feed.length" class="activity-list">
+            <!-- begin list item -->
+            <li class="activity-item" *ngFor="let activity of feed | slice:0:10">
+                <activity-item [item]="activity"></activity-item>
+            </li>
+            <!-- end list item -->
+        </ul>
     </div>
+    <!-- begin footer -->
+    <div *ngIf="feed.length" class="activity__footer">
+        <a (click)="seeAll()"
+           class="see-all">See all activities (<span>{{ feed.length }}</span>)</a>
+    </div>
+    <!-- end footer -->
 </div>

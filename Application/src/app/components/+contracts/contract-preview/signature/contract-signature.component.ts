@@ -18,6 +18,7 @@ export class ContractSignatureComponent {
   @Output() onChange = new EventEmitter<Signature>();
   @Output() onSigned = new EventEmitter<Signature>();
   editing = false;
+  completed: boolean = false;
   selectingStyle = false;
   fontStyles = [
     'savoye',
@@ -45,6 +46,7 @@ export class ContractSignatureComponent {
 
     }
     this.signatureName = this.signature.worker ? `Photographer Signature (${this.signature.name})` : this.signature.name;
+    this.completed = this.signature.completed;
   }
 
   clear(e) {
@@ -56,6 +58,9 @@ export class ContractSignatureComponent {
   }
 
   onSignatureClick() {
+    if (this.completed)
+      return;
+
     if (this.selected) {
       this.editing = true;
       if (!this.signature.completed) {

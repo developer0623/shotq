@@ -1,5 +1,5 @@
 export * from './job-note';
-export * from './template-email';
+// export * from './template-email';
 export * from './signature.model';
 export * from './contract';
 export * from './discount.model';

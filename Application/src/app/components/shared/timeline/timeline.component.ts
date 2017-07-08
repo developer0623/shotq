@@ -227,8 +227,6 @@ export class TimelineComponent {
       if (e.events && e.events.length > 0) {
         aux.past = this.eventPass(e.events[e.events.length - 1].end);
         aux.hasSubevents = true;
-        aux.date.start = e.events[0].start;
-        aux.date.end = e.events[0].end;
       }
       aux['subevents'] = [];
       for (let subevent of e.events) {
@@ -245,11 +243,7 @@ export class TimelineComponent {
             state: '',
             zip: ''
           },
-          expanded: false,
-          date: {
-            start: subevent.start,
-            end: subevent.end
-          }
+          expanded: false
         };
 
         if (subevent.location) {

@@ -218,10 +218,14 @@ div.input-search.input-search-dark.search-contact {
 }
 .contract-table tbody td {
 	border-bottom: 1px solid rgba(58, 64, 91 , 0.2);
+	a {
+		text-decoration: none;
+		color: #3a405b;
+	}
 }
 .contract-table tbody td {
 	border-top: 1px solid transparent;
-	height: 62px;
+	height: 42px;
 	font-size: 14px;
 	color: $text_color;
 }

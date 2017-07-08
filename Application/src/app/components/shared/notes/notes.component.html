@@ -1,29 +1,22 @@
 <div class="notes">
   <div class="notes-header">
-    <div class="notes-header__title-text">
-      <h1>Notes</h1>
-    </div>
-    <div class="notes-header__add-button">
+    <div class="notes-header__title">Notes</div>
+    <div class="notes-header__actions">
       <button
-        type="button" class="sq-btn-default"
+        type="button" class="sq-btn-add"
         [disabled]="noteChangeBuffer.id >= 0"
         (click)="startChanges(null)"
       >New Note</button>
     </div>
     <div class="add-note-form" *ngIf="noteChangeBuffer.id === 0">
       <input
-        type="text" class="add-note-form__name" placeholder="Note Name" required
+        type="text" class="add-note-form__title-input" placeholder="Note Name" required
         [(ngModel)]="noteChangeBuffer.subject" #ctrl="ngModel"
       />
-      <tinymce
-        [class]="'add-note-form__body'"
-        [elementId]="'id_add-note-form__body'"
-        (onEditorBlur)="onNoteBodyChanged($event)"
-        [editableMode]="'active-first'"
-        [readonly]="false"
-        [noteBody]="noteChangeBuffer.body"
-        [placeholder]="'Note Body'"
-      ></tinymce>
+      <sq-text-editor
+        class="note-card__editor"
+        [(ngModel)]="noteChangeBuffer.body"
+      ></sq-text-editor>
       <div class="add-note-form__action-buttons">
         <button class="sq-btn-dismiss" (click)="stopChanges()">Cancel</button>
         <button class="sq-btn-submit" (click)="commitChanges()">Post Note</button>
@@ -87,16 +80,12 @@
                 <a (click)="toggleNote($event, note)" *ngIf="note.$isLongNote && !note.$isExpanded">See&nbsp;more</a>
               </div>
             </div>
-            <tinymce
+            <sq-text-editor
               *ngIf="noteChangeBuffer.id === note.id"
-              [class]="'note-card__editor'"
-              [elementId]="'id_note_body'"
-              (onEditorBlur)="onNoteBodyChanged($event)"
-              [editableMode]="'active'"
-              [readonly]="false"
-              [noteBody]="noteChangeBuffer.body"
+              class="note-card__editor"
+              [(ngModel)]="noteChangeBuffer.body"
             >
-            </tinymce>
+            </sq-text-editor>
           </div>
         </div>
       </ng-template>

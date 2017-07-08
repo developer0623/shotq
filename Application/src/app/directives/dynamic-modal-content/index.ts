@@ -1,1 +1,1 @@
-export { DynamicModalContent } from './dynamic-modal-content'
+export { DynamicModalContent } from './dynamic-modal-content';

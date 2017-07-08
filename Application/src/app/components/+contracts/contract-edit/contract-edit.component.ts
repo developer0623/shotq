@@ -1,17 +1,17 @@
-import { Component, ViewChild, ElementRef, ViewContainerRef } from '@angular/core';
+import { Component, ViewContainerRef } from '@angular/core';
 import { ContractService } from '../../../services/contract/contract.service';
+import { ContractTemplateService } from '../../../services/contract-template';
 import { ActivatedRoute, Router } from '@angular/router';
 import { Contract } from '../../../models/contract';
 import { FlashMessageService } from '../../../services/flash-message/flash-message.service';
 import { TemplateVariable } from '../../../models/template-variable.model';
-import { TemplateVariableService } from '../../../services/template-variable/template-variable.service';
 import { Subscription } from 'rxjs';
 import {
   ContractPreviewModalComponent,
   ContractPreviewModalContext
 } from '../contract-preview/contract-preview-modal/contract-preview-modal.component';
-import { overlayConfigFactory } from 'single-angular-modal';
-import { Modal } from 'single-angular-modal/plugins/bootstrap';
+import { Overlay, overlayConfigFactory } from 'single-angular-modal';
+import { StickyButtonsModal } from '../../sq-modal/base-modal-components/sticky-buttons/sticky-buttons-modal.service';
 
 
 @Component({
@@ -36,11 +36,15 @@ export class ContractEditComponent {
   private isDisabled: boolean;
 
   constructor(private contractService: ContractService,
+              private contractTemplateService: ContractTemplateService,
               private router: Router,
-              public modal: Modal,
-              private templateVariableService: TemplateVariableService,
+              public modal: StickyButtonsModal,
+              private overlay: Overlay,
+              private vcRef: ViewContainerRef,
               private route: ActivatedRoute,
               private flash: FlashMessageService) {
+    overlay.defaultViewContainer = vcRef;
+
 
   }
 
@@ -48,9 +52,10 @@ export class ContractEditComponent {
     this.isLoading = true;
     this.contractSub$ = this.route.params
       .switchMap((params: { id: string }) => this.contractService.get(parseInt(params.id, 10)))
+      .map(ContractService.newObject)
       .subscribe((contract: Contract) => {
         this.contract = contract;
-        if (contract.status !== 'draft') {
+        if (!contract.isDraft && !contract.isPending && !contract.isSent) {
           this.router.navigate(['/contracts', contract.id, 'send']);
         }
 
@@ -60,7 +65,9 @@ export class ContractEditComponent {
       }, () => {
         this.isLoading = false;
       });
-
+    this.contractTemplateService.variables().subscribe((result) => {
+      this.templateVariables = result;
+    });
   }
 
   ngOnDestroy() {
@@ -107,13 +114,14 @@ export class ContractEditComponent {
 
   showPreview() {
     this.contractService.save(this.contract)
+      .map(ContractService.newObject)
       .subscribe((contract: Contract) => {
 
         this.modal
           .open(ContractPreviewModalComponent,
             overlayConfigFactory({
               isBlocking: false,
-              canSign: contract.status === 'sent',
+              canSign: contract.isSent,
               contract: this.contract
             }, ContractPreviewModalContext)
           );

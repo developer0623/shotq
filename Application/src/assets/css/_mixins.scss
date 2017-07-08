@@ -1,4 +1,5 @@
 @import "mixins/border-radius";
+@import "mixins/clearfix";
 @import "mixins/hover";
 @import "mixins/breakpoints";
 @import "mixins/hover";
@@ -143,6 +144,7 @@
   font-weight: $btn-font-weight;
   line-height: $btn-line-height;
   text-align: center;
+  text-transform: capitalize;
   white-space: nowrap;
   vertical-align: middle;
   cursor: pointer;
@@ -156,7 +158,8 @@
   &.active {
     &:focus,
     &.focus {
-      @include tab-focus();
+      //@include tab-focus();
+      outline: none;
     }
   }
 
@@ -498,6 +501,8 @@
 
   form, fieldset {
     .row {
+      margin-left: 0;
+      margin-right: 0;
       & > div:first-child {
         padding-left: 0;
       }
@@ -527,4 +532,52 @@
   fieldset:nth-child(even) {
     background-color: $modal-content-bg;
   }
+}
+
+// media queries
+
+// width
+@mixin r($width) {
+  @media only screen and (max-width: $width+ "px") {
+    @content;
+  }
+}
+
+@mixin rmin($width) {
+  @media only screen and (min-width: $width+ "px") {
+    @content;
+  }
+}
+
+// height
+@mixin rh($height) {
+  @media only screen and (max-height: $height + "px") {
+    @content;
+  }
+}
+
+@mixin rhmin($height) {
+  @media only screen and (min-height: $height + "px") {
+    @content;
+  }
+}
+
+// alignment
+@mixin vertical {
+  text-align: center;
+  font-size: 0;
+  &:before {
+    content: "";
+    display: inline-block;
+    vertical-align: middle;
+    width: 0;
+    height: 100%;
+  }
+}
+
+@mixin vcenter {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
 }

@@ -16,6 +16,9 @@
           [isOpened]="openedCategoryIndex === i"
           (onOpen)="openCategory(category)"
           *ngFor="let category of categories; let i = index">
+          <div class="rippleContainer" *ngIf="isLoading">
+              <div class="loading-ripple"></div>
+          </div>
           <category-items [items]="products"
             [itemsCount]="productsCount"
             [searchParams]="searchParams"
@@ -26,7 +29,7 @@
             [baseProductUrl]="baseProductUrl"
             (updateSearchParams)="updateSearchParams($event)"
             (doProductsAction)="doProductsActions($event)"
-            *ngIf="products && openedCategoryIndex === i"></category-items>
+            *ngIf="products && openedCategoryIndex === i && !isLoading"></category-items>
         </accordion-group>
       </div>
     </accordion>

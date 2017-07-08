@@ -19,7 +19,8 @@
   }
 }
 
-div.page-content .panel-shadow .panel-body .row h2.page-title {
+div.page-content .panel-shadow .panel-body .row h2.page-title{
+    padding-left: 0;
     margin-bottom: 0;
 }
 
@@ -92,6 +93,8 @@ div.btn-group.list-actions {
                     border-bottom: 0;
                     position: relative;
                     min-height: 30px;
+                    padding-top: 4px!important;
+                    min-width:40px;
                     .head-name {
                         display: inline-block;
                     }
@@ -100,12 +103,18 @@ div.btn-group.list-actions {
                         top: 9px;
                         right: 12px;
                     }
+                    @media screen and (max-width: 768px) {
+                        line-height: 10px;
+                    }
                 }
                 th:first-child {
                     border-right: 0 !important;
                     .checkbox-custom {
                         padding-left: 32px !important;
                         padding-right: 5px;
+                    }
+                    .sq-checkbox {
+                        left: 5px;
                     }
                 }
             }
@@ -133,14 +142,17 @@ div.btn-group.list-actions {
                     }
                 }
                 td {
-                    height: 70px;
                     dropdown {
                         ul.dropdown-menu {
                             right: 0;
                             left: auto;
                         }
                     }
+                    a {
+                        text-decoration: none;
+                    }
                 }
+
             }
         }
         &.scroll {
@@ -158,36 +170,36 @@ div.btn-group.list-actions {
             }
             thead {
                 overflow: hidden;
+                margin: 0px 3px;
             }
             tbody {
-                overflow:auto;
+                // overflow:auto;
             }
             tbody {
                 tr {
+                    // height: 55px;
                     td {
+
                         &:nth-child(1) {
-                            min-width:60px
+                            min-width:40px;
+                            .sq-checkbox {
+                                left: 8px;
+                            }
                         }
                         &:nth-child(2) {
-                            min-width:180px;
+                            min-width:100px;
                         }
                         &:nth-child(3) {
-                            min-width:120px;
+                            min-width:60px;
                         }
                         &:nth-child(4) {
-                            min-width:120px;
+                            min-width:100px;
                         }
                         &:nth-child(5) {
-                            min-width:100px;
+                            min-width:60px;
                         }
                         &:nth-child(6) {
-                            min-width:100px;
-                        }
-                        &:nth-child(7) {
-                            min-width:80px;
-                        }
-                        &:nth-child(8) {
-                            min-width:80px;
+                            min-width:60px;
                         }
                     }
                 }
@@ -203,7 +215,12 @@ div.action-container {
 }
 .page-content {
     .panel-shadow {
-        margin-top: 56px;
+        margin-top: 24px;
+        .panel-body {
+            .contact-actions {
+                padding-left: 0px;
+            }
+        }
     }
     padding-top: 9px;
     padding: 30px 80px;
@@ -294,9 +311,15 @@ div.action-container {
 .paginate-container {
   height: 50px !important;
   position: inherit;
-
+  background: inherit;
+  td {
+    padding-top: 0;
+  }
   &:hover {
     background: inherit;
+  }
+  /deep/.paginate-size ul {
+    padding-left: 8px;
   }
 }
 div.input-search.input-search-dark.search-contact {
@@ -331,3 +354,5 @@ div.input-search.input-search-dark.search-contact {
 .no-items-message {
     min-height: 150px !important;
 }
+
+

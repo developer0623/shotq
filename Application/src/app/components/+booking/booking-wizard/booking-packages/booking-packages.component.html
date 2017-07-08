@@ -17,6 +17,8 @@
         </div>
       </div>
       <div class="booking-package-item-body">
+        <div *ngIf="pack.description" class="booking-package-caption"> PACKAGE DESCRIPTION</div>
+        <p *ngIf="pack.description" class="text-trancate text-left">{{ pack.description }}</p>
         <div class="booking-package-caption"> PACKAGE CONTENTS</div>
         <ul class="booking-package-product-list">
           <li class="booking-package-product"
@@ -59,7 +61,7 @@
       </div>
       <div class="booking-package-item-footer">
         <button type="button" class="booking-package-item-select-btn"
-                (click)="packageSelect(pack)">select packages</button>
+                (click)="packageSelect(pack)">select package</button>
       </div>
     </div>
   </div>

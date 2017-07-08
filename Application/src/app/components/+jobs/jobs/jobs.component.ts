@@ -17,11 +17,9 @@ import { FlashMessageService }     from '../../../services/flash-message';
 import { ApiService }              from '../../../services/api';
 import { GeneralFunctionsService } from '../../../services/general-functions';
 /* Models */
-import { archivedJobStatus, deletedJobStatus, Job }                     from '../../../models/job';
-import { EventType }               from '../../../models/event-type';
+import { archivedJobStatus, deletedJobStatus, activeJobStatus, Job } from '../../../models/job';
+import { EventType } from '../../../models/event-type';
 /* Modules */
-import { JobsContactAddModule }    from '../jobs-contact-add/jobs-contact-add.module';
-import { SaveChangesModule }       from '../../+contracts/save-changes/save-changes.module';
 import { QuickJobComponent, QuickJobWindowData } from '../../top-navbar/quick-job/quick-job.component';
 import { overlayConfigFactory, Overlay } from 'single-angular-modal';
 import { Modal } from 'single-angular-modal/plugins/bootstrap';
@@ -122,6 +120,7 @@ export class JobsComponent implements OnInit {
     private modal: Modal,
     private overlay: Overlay,
     private vcRef: ViewContainerRef,
+    private router: Router
   ) {
     overlay.defaultViewContainer = vcRef;
   }
@@ -185,6 +184,7 @@ export class JobsComponent implements OnInit {
           this.totalItems = total;
           this.checkedJobIds = [];
           this.hasPages = (this.perPage !== 0 && this.totalItems > this.perPage);
+          this.setTableWidth();
         },
         (err) => {
           console.error(err);
@@ -217,20 +217,6 @@ export class JobsComponent implements OnInit {
     this.loadJobs();
   }
 
-  /**
-   * Return the type name
-   * @param {number} optionId [type id]
-   */
-  public mapTypeId(job: any) {
-    let optionId = job.job_type;
-    let typeLabel = 'No Type';
-    for (let i = 0; i < this.jobTypes.length; i++) {
-      if (optionId === this.jobTypes[i].id) {
-          typeLabel = this.jobTypes[i].name;
-      }
-    }
-    return typeLabel;
-  }
   /**
    * [handleTabChange description]
    * @param {[type]} index [description]
@@ -278,6 +264,27 @@ export class JobsComponent implements OnInit {
         dialogRef.result
           .then(result => {
             this.updateSelected(deletedJobStatus);
+          })
+          .catch(() => {});
+      });
+  }
+
+  confirmRestore() {
+    this.modal
+      .confirm()
+      .isBlocking(true)
+      .showClose(false)
+      .title('Restore jobs?')
+      .dialogClass('modal-dialog modal-confirm')
+      .body('Are you sure you want to restore selected jobs?')
+      .okBtn('Restore')
+      .okBtnClass('btn btn_xs btn_blue pull-right')
+      .cancelBtnClass('btn btn_xs btn_transparent')
+      .open()
+      .then(dialogRef => {
+        dialogRef.result
+          .then(result => {
+            this.updateSelected(activeJobStatus);
           })
           .catch(() => {});
       });
@@ -405,7 +412,9 @@ export class JobsComponent implements OnInit {
   private setTableWidth() {
     if (!this.document)
       return;
-    this.generalFunctions.setTableWidth(this.document);
+    setTimeout(() => {
+      this.generalFunctions.setTableWidth(this.document);
+    });
   }
   /**
    * Function to set the height of the th element of the table.
@@ -422,7 +431,9 @@ export class JobsComponent implements OnInit {
       .then(dialogRef => {
         dialogRef.result
           .then(result => {
-            this.loadJobs();
+            setTimeout(() => {
+              this.router.navigate(['/jobs', result.id]);
+            }, 300);
           })
           .catch(() => {});
       });
@@ -483,6 +494,7 @@ export class JobsComponent implements OnInit {
           this.jobs = response.jobs;
           this.checkedJobIds = [];
           this.actionsBar.enabled = false;
+          this.setTableWidth();
         },
         err => {
           console.error(`ERROR: ${err}`);

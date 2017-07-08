@@ -23,6 +23,19 @@ export class GeneralFunctionsService {
     'black',
   ];
 
+  static parseUrl(value) {
+    let match = value.match(/^(https?\:)\/\/(([^:\/?#]*)(?:\:([0-9]+))?)([\/]{0,1}[^?#]*)(\?[^#]*|)(#.*|)$/);
+    return match && {
+        protocol: match[1],
+        host: match[2],
+        hostname: match[3],
+        port: match[4],
+        pathname: match[5],
+        search: match[6],
+        hash: match[7]
+      };
+  }
+
   constructor(_router?: Router,
               activatedRoute?: ActivatedRoute) {
     this.router = _router;
@@ -534,7 +547,26 @@ export class GeneralFunctionsService {
      let sizes = ['Bytes', 'KB', 'MB', 'GB', 'TB'],
        i = Math.floor(Math.log(bytes) / Math.log(1024));
      return (bytes / Math.pow(1024, i)).toFixed(2) + ' ' + sizes[i];
-  };
+  }
+
+  public isString(value: any) {
+    return typeof value === 'string';
+  }
+
+  public isUndefined(value: any) {
+    return typeof value === 'undefined';
+  }
+
+  public extractDeepPropertyByMapKey(obj: any, map: string): any {
+    const keys = map.split('.');
+    const key = keys.shift();
+
+    return keys.reduce((prop: any, k: string) => {
+      return !this.isUndefined(prop) && !this.isUndefined(prop[k])
+        ? prop[k]
+        : undefined;
+    }, obj[key || '']);
+  }
 
   /**
    * Generic function to return isocode2 from country or state.

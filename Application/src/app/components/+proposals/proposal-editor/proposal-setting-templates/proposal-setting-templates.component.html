@@ -34,7 +34,7 @@
       </div>
       <div class="stepBlock step2">
         <div class="title">
-          <h2>2. Schedule payment</h2>
+          <h2>2. Payment Schedule Templates</h2>
           <a href="" (click)="applyAndEdit($event, 5)">EDIT</a>
         </div>
         <div class="infoBlock">
@@ -56,7 +56,7 @@
           <a href="" (click)="applyAndEdit($event, 3)">EDIT</a>
         </div>
         <div class="infoBlock">
-          <p *ngFor="let tax of selectedTemplate.tax_templates">{{ tax.name }}</p>
+          <p>{{ selectedTemplate.tax_template?.name }}</p>
         </div>
       </div>
       <div class="stepBlock step5">

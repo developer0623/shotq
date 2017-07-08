@@ -4,12 +4,15 @@ import { BookingWelcomeScreenComponent } from './welcome-screen/welcome-screen.c
 import { ProposalResolver } from './proposal.resolver';
 import { ClientAccessAuthGuard } from '../../services/access';
 import { SignatureResolver } from './client-signature.service';
+import { ProposalScheduleResolver } from './proposal-schedule.resolver';
+import { BookingExpiredScreenComponent } from './welcome-screen/expired-screen/expired-screen.component';
 
 export const BOOKING_ROUTES: Routes = [
   {
     path: ':id',
     resolve: {
-      proposal: ProposalResolver
+      proposal: ProposalResolver,
+      schedule: ProposalScheduleResolver,
     },
     canActivate: [ ClientAccessAuthGuard ],
     children: [
@@ -28,6 +31,11 @@ export const BOOKING_ROUTES: Routes = [
         path: 'accepted',
         component: BookingWelcomeScreenComponent,
         data: {message: 'proposal_accepted'}
+      },
+      {
+        path: 'expired',
+        component: BookingWelcomeScreenComponent,
+        data: {message: 'proposal_expired'}
       },
       {path: '', component: BookingWizardComponent},
     ]

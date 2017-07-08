@@ -38,7 +38,7 @@ export class InnerComponent {
       // 'settings',
       'settings/products/items',
       'settings/products/packages',
-      'dashboard',
+      // 'dashboard',
       'contacts/profile',
       'jobs/info',
       'settings/templates/email',
@@ -48,9 +48,12 @@ export class InnerComponent {
       'settings/profile',
       'settings/payment-and-invoices',
       'settings/team',
+      'settings/job-roles',
+      'settings/job-types',
+      'settings/event-types'
     ];
     this.allowedEntitiesRegExp = {
-      'jobs': /^\/jobs\/[0-9]+/
+      'jobs': /^\/jobs\/([0-9]+)\??(?:.+)?/
     };
     /* Denied entities to display sidebar or top-navbar */
     this.deniedEntitiesTop = [
@@ -91,7 +94,9 @@ export class InnerComponent {
    */
   ngDoCheck() {
     /* Remove nopadding class on inner components */
-    document.getElementsByTagName('body')[0].classList.remove('body_nopadding');
+    if (document.getElementsByTagName('body')[0].classList.contains('body_nopadding')) {
+      document.getElementsByTagName('body')[0].classList.remove('body_nopadding');
+    }
     let oAuthInfo = sessionStorage.getItem('OAuthInfo');
     if (oAuthInfo !== undefined && oAuthInfo !== null) {
       this.isLoggedIn = true;
@@ -105,13 +110,15 @@ export class InnerComponent {
   public changeSidebarCollapsed() {
     this.isSidebarCollapsed = !this.isSidebarCollapsed;
   }
+
   /**
    * Function to handle to show or hide breadcrumb, also handle to
    * show / hide top and side navbars.
    */
   private handleBreadcrumbAndBars(objUrl: any) {
-    let entityAux = objUrl.url.match(/[^/].+[a-z]/g);
-    let entityName = ((entityAux !== null) ? entityAux[0] : objUrl.url);
+    let currentUrl = objUrl.url.split('?')[0];
+    let entityAux = currentUrl.match(/[^/].+[a-z]/g);
+    let entityName = ((entityAux !== null) ? entityAux[0] : currentUrl);
     this.breadcrumbClass = entityName.replace('/', '-');
     if (entityAux !== null && entityAux !== undefined) {
       /* Check for top-navbar and sidebar denied entities */
@@ -124,7 +131,7 @@ export class InnerComponent {
       let allowedEntityRegExp = this.allowedEntitiesRegExp[entityName];
       if (entityName !== undefined && entityName !== null
           && (this.allowedEntities.indexOf(entityName) !== -1
-              || allowedEntityRegExp && objUrl.url.match(allowedEntityRegExp))) {
+              || allowedEntityRegExp && currentUrl.match(allowedEntityRegExp))) {
         this.hideBreadcrumb = '';
       } else {
         this.hideBreadcrumb = 'hide';

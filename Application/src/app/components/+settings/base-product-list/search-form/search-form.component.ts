@@ -22,4 +22,8 @@ export class ProductsSearchFormComponent implements OnInit {
     });
   }
 
+  clearSearchInput() {
+    this.form.patchValue({search: ''});
+  }
+
 }

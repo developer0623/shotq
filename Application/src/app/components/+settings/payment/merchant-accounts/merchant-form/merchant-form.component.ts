@@ -144,7 +144,7 @@ export class MerchantFormComponent implements OnInit {
         callbacks: {
           cardNonceResponseReceived: (errors, nonce, cardData) => {
             if (errors) {
-              errors.forEach(function (error) {
+              errors.forEach((error) => {
                 this.flash.error(error.message);
               });
             } else {

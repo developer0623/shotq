@@ -21,7 +21,7 @@ import { ScheduleTemplateAddComponent } from '../schedule-template-add/schedule-
 export class ScheduleTemplatesComponent extends BaseTemplateListComponent<ProposalSchedulePaymentItemTemplate> {
   @ViewChild('modifyScheduleTemplate') public modalTemplate: ScheduleTemplateAddComponent;
 
-  modelName = 'Schedule';
+  modelName = 'Payment Schedule';
   inlineMode = true;
   prependAddButton = true;
   sliderContainerId = 'scheduleTemplateSlider';

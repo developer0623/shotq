@@ -43,4 +43,7 @@ export class MerchantAccount {
     private_key?: string
     public_key?: string
   };
+  extra?: {
+    SQUARE_APPLICATION_ID?: string
+  };
 }

@@ -15,7 +15,7 @@
                 <tr *ngIf="items.length == 0">
                     <td colspan="4">
                         <div class="empty">
-                            <h4>Your proposal package is empty!</h4>
+                            <h4>Your package is empty!</h4>
                             <p>Begin by dragging and dropping items from your shelf on the right.</p>
                         </div>
                     </td>
@@ -44,14 +44,14 @@
                             ></app-spinner>
                           </div>
                         </td>
-                        <td>{{ product.item.price| currency:'USD':true }}</td>
-                        <td><span>{{ (product.item.price * product.quantity)| currency:'USD':true }} <span (click)="removeProduct(i)" class="icon-close"></span></span></td>
+                        <td>{{ (product.item.price * 1 + product.addons_price * 1) | currency:'USD':true }}</td>
+                        <td><span>{{ (product.item.price * 1 + product.addons_price * 1) * product.quantity | currency:'USD':true }} <span (click)="removeProduct(i)" class="icon-close"></span></span></td>
                       </tr>
                       <tr class="additional-info">
                           <td colspan="4">
                             <item-options [groups]="product.item_template_data.item_template_option_groups"
                               [optionsFieldName]="'item_template_options'"
-                              (onChange)="onChangeItem()"
+                              (onChange)="onChangeItem(product)"
                               *ngIf="product.id === activeItemId"></item-options>
                           </td>
                       </tr>

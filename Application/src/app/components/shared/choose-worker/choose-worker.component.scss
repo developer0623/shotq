@@ -83,11 +83,12 @@ table {
     tbody {
         tr {
             td {
-                width: 270px;
+                max-width: 280px;
+                width: 50%;
                 height: 63px;
                 vertical-align: middle!important;
                 &:first-child {
-                    padding-left: 15px;
+                    padding-left: 20px;
                     width: 60px;
                 }
             }
@@ -174,4 +175,11 @@ div.newContact {
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
+}
+.td-line-through {
+  text-decoration: line-through;
+}
+
+.modal-header-in {
+    margin-left: -20px;
 }

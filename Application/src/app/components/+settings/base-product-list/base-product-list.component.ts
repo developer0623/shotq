@@ -1,5 +1,5 @@
 import * as _ from 'lodash';
-import { Component, OnInit, ViewEncapsulation, ViewChild } from '@angular/core';
+import { Component, OnInit, ViewEncapsulation, ViewChild, ViewContainerRef } from '@angular/core';
 import { Router, ActivatedRoute } from '@angular/router';
 
 import { Accordion } from 'ngx-accordion';
@@ -13,7 +13,7 @@ import { ProductsAction } from './product-action.model';
 import {
   FilteredCategory, addSpecialCategoriesAndFillFilters
 } from './special-categories';
-import { Modal, overlayConfigFactory } from 'single-angular-modal';
+import { Modal, overlayConfigFactory, Overlay } from 'single-angular-modal';
 import { ManageCategoriesWindowData } from './manage-categories/manage-categories.component';
 
 @Component({
@@ -25,7 +25,6 @@ import { ManageCategoriesWindowData } from './manage-categories/manage-categorie
 export class BaseProductList<ModelClass, CategoryClass extends FilteredCategory> implements OnInit {
   product: string;
   defaultSearchParams: ProductSearchQueryParams = {
-    search: '',
     page: 1,
     page_size: 10,
     ordering: 'name',
@@ -39,6 +38,7 @@ export class BaseProductList<ModelClass, CategoryClass extends FilteredCategory>
   realCategories: CategoryClass[] = [];
   openedCategoryIndex: number = 0;
   baseProductUrl: string;
+  isLoading: boolean = false;
 
   categoryItemsCountFieldName: string;
 
@@ -50,8 +50,12 @@ export class BaseProductList<ModelClass, CategoryClass extends FilteredCategory>
     private productService: ProductTemplateService<ModelClass>,
     private categoriesService: RestClientService<CategoryClass>,
     private flash: FlashMessageService,
-    public modal: Modal
-  ) { }
+    public modal: Modal,
+    overlay: Overlay,
+    vcRef: ViewContainerRef,
+  ) {
+    overlay.defaultViewContainer = vcRef;
+  }
 
   ngOnInit() {
     this.alertify.theme('bootstrap-shootq');
@@ -128,17 +132,29 @@ export class BaseProductList<ModelClass, CategoryClass extends FilteredCategory>
     if (_.isEmpty(params)) {
       return;
     }
+    let searchIsChanged = _.has(params, 'search') && this.searchParams.search !== params.search;
     this.searchParams = _.assignIn(this.searchParams, params);
+    if (searchIsChanged) {
+      this.loadCategories();
+    }
     this.loadProducts();
   }
 
   private loadProducts() {
+    this.products = [];
+    this.productsCount = 0;
+    this.isLoading = true;
     this.productService.getList(this.searchParams)
-      .subscribe(this.extractProducts.bind(this));
+      .subscribe(
+        this.extractProducts.bind(this),
+        () => {},
+        () => { this.isLoading = false; }
+      );
   }
 
   private loadCategories() {
-    this.categoriesService.getList({page_size: 1000})
+    let searchValue = this.searchParams.search;
+    this.categoriesService.getList({page_size: 1000, product_name: searchValue})
       .map((res: {results: CategoryClass[], count: number}) => {
         return addSpecialCategoriesAndFillFilters(res, this.categoryItemsCountFieldName);
       })

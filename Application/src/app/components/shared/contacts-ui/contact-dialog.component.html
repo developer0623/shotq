@@ -2,7 +2,7 @@
   <h4 class="modal-title" *ngIf="isNewObject" >Create Contact</h4>
   <h4 class="modal-title" *ngIf="!isNewObject" >Change Contact</h4>
 </div>
-<form class="modal-body" [formGroup]="form">
+<form class="modal-body" [formGroup]="form" (keydown.enter)="$event.preventDefault()">
   <fieldset>
     <legend>Contact Details</legend>
     <div class="row">
@@ -69,9 +69,11 @@
       <div class="col-md-12">
         <div class="field">
           <input id="id_postal_address" name="postal_address" type="text" class="sq-form-control"
-                 formControlName="postalAddress"
-                 [class.has-error]="form.controls.postalAddress.touched && form.controls.postalAddress.errors"
-                 [attr.data-empty]="!form.controls['postalAddress'].value"/>
+            placeholder=""
+            formControlName="postalAddress"
+            [class.has-error]="form.controls.postalAddress.touched && form.controls.postalAddress.errors"
+            [attr.data-empty]="!form.controls['postalAddress'].value"
+            googleplace (setAddress)="updateLocation($event)" />
           <label for="id_postal_address">Address, City State & Zip</label>
           <div *ngIf="form.controls.postalAddress.touched">
             <div class="error" *ngIf="form.controls.postalAddress.errors?.postalAddress.any">Cannot recognize the address</div>

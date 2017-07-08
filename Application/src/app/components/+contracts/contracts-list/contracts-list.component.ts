@@ -5,16 +5,18 @@ import { FlashMessageService } from '../../../services/flash-message/flash-messa
 import { ModalService } from '../../../services/modal/modal.service';
 import { Router } from '@angular/router';
 import { Contract } from '../../../models/contract';
-import { ContractService } from '../../../services/contract';
+import { ContractService } from '../../../services/contract/contract.service';
 import { FilterParam } from '../filter-panel/filter-panel.component';
 import { FormControl } from '@angular/forms';
 import { Subscription } from 'rxjs';
-import { ContractsAddModalService } from '../contracts-add';
-import { Modal, overlayConfigFactory } from 'single-angular-modal';
+import { Modal, Overlay, overlayConfigFactory } from 'single-angular-modal';
 import {
   ContractPreviewModalComponent,
   ContractPreviewModalContext
-} from '../contract-preview/contract-preview-modal/contract-preview-modal.component';
+} from '../contract-preview';
+import { StickyButtonsModal } from '../../sq-modal/base-modal-components/sticky-buttons/sticky-buttons-modal.service';
+import { Observable } from 'rxjs/Observable';
+import { ContractAddModalContext, ContractsAddModalComponent } from '../contracts-add/contracts-add.component';
 
 type viewType = 'list' | 'grid';
 
@@ -46,7 +48,7 @@ export const ContractActions = {
   selector: 'app-contracts',
   templateUrl: './contracts-list.component.html',
   styleUrls: ['./contracts-list.component.scss'],
-  providers: [GeneralFunctionsService, ContractService, ContractsAddModalService]
+  providers: [GeneralFunctionsService, ContractService]
 
 })
 export class ContractsListComponent implements OnInit {
@@ -137,13 +139,16 @@ export class ContractsListComponent implements OnInit {
   private modalSub$: Subscription;
 
   constructor(private breadcrumbService: BreadcrumbService,
-              private contractAddModalService: ContractsAddModalService,
               private contractService: ContractService,
               private flash: FlashMessageService,
               private modalService: ModalService,
               public modal: Modal,
+              public buttonsModal: StickyButtonsModal,
               private generalFunctions: GeneralFunctionsService,
-              private router: Router) {
+              private router: Router,
+              vcRef: ViewContainerRef,
+              overlay: Overlay) {
+    overlay.defaultViewContainer = vcRef;
 
   }
 
@@ -172,7 +177,21 @@ export class ContractsListComponent implements OnInit {
   }
 
   createContract() {
-    this.contractAddModalService.openModal(this, {});
+    this.modal
+      .open(ContractsAddModalComponent,
+        overlayConfigFactory({}, ContractAddModalContext))
+      .then(dialogRef => {
+        dialogRef.result
+          .then(result => {
+            this.getContracts();
+            // Catching close event with result data from modal
+            // console.log(result)
+          })
+          .catch(() => {
+            // Catching dismiss event with no results
+            // console.log('rejected')
+          });
+      });
   }
 
   openContract(contract) {
@@ -339,7 +358,7 @@ export class ContractsListComponent implements OnInit {
         break;
 
       case 'contract-preview':
-        this.modal
+        this.buttonsModal
           .open(ContractPreviewModalComponent,
             overlayConfigFactory({
               isBlocking: false,
@@ -350,8 +369,8 @@ export class ContractsListComponent implements OnInit {
         break;
 
       case 'contract-edit':
-        if (contract.status !== 'draft') {
-          this.flash.error('Cannot edit contract not in Draft status');
+        if (['draft', 'pending', 'sent'].indexOf(contract.status) === -1) {
+          this.flash.error(`Cannot edit contract in ${contract.status} status`);
         } else {
           this.router.navigate(['/contracts', contract.id]);
         }
@@ -383,4 +402,3 @@ export class ContractsListComponent implements OnInit {
       .subscribe();
   }
 }
-

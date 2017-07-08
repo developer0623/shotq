@@ -1,1 +1,1 @@
-export * from './contract-edit.component'
+export * from './contract-edit.component';

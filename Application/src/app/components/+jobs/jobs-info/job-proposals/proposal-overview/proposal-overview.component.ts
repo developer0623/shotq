@@ -22,6 +22,7 @@ export class JobProposalOverviewComponent implements OnInit {
 
   public proposal: Proposal;
   public package: Package;
+  public addons: any[];
   public workers: Worker[] = [];
   public isLoading: boolean = false;
 
@@ -48,6 +49,7 @@ export class JobProposalOverviewComponent implements OnInit {
         (proposal) => {
           this.proposal = proposal;
           this.package = proposal.approved_package_data;
+          this.addons = _.filter(this.package.addons, {approved: true});
         },
         () => {
           this.flash.error('Error loading proposal data.');

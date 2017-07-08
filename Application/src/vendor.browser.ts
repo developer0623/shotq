@@ -20,6 +20,7 @@ import 'rxjs/add/operator/map';
 import 'rxjs/add/operator/mergeMap';
 
 require('perfect-scrollbar/dist/css/perfect-scrollbar.css');
+require('libs/authnet/popup.js');
 import 'dom-autoscroller';
 
 if ('production' === ENV) {

@@ -24,6 +24,7 @@ export class DropdownSelectComponent implements ControlValueAccessor {
   @Input() valueKey = 'value';
   @Input() labelKey = 'label';
   @Input() descriptionKey = 'description';
+  @Input() archivedKey = 'archived';
   @Input() readOnly = false;
   @Input() enableSearch = false;
   @Input() disabled: boolean = false;
@@ -62,14 +63,15 @@ export class DropdownSelectComponent implements ControlValueAccessor {
   }
 
   ngOnInit() {
-    this.initOptions = this.options;
+    if (this.enableSearch)
+      this.initOptions = this.options;
     setTimeout(() => {
       if (this.readOnly && this.readOnlyOption) {
         this.currentOption = this.readOnlyOption;
       } else {
         this.selectOptionByValue(this.value);
       }
-    }, 100);
+    }, 150);
   }
 
   ngOnDestroy() {
@@ -77,45 +79,10 @@ export class DropdownSelectComponent implements ControlValueAccessor {
 
   toggleDropdown() {
     this.isOpen = !this.isOpen;
-  }
-
-  showDropdown() {
-    this.isOpen = true;
-    this.query = '';
-    this.options = this.initOptions;
-  }
-
-  enterKeyDown(event) {
-    if  (event.keyCode === 13) {
-      this.selectOption(_.first(this.options), true);
-      this.searchBox.nativeElement.blur();
-    }
-  }
-
-  hideDropdown() {
-    setTimeout(() => {
-      this.isOpen = false;
-      if (this.currentOption)
-        this.query = this.currentOption[this.labelKey];
-      this.currentLabel = this.query;
-    });
-  }
-
-  onQueryChange(query) {
-    let q = query.toLowerCase();
-    this.options = q ? _.filter(this.initOptions, option => {
-      let label = option[this.labelKey].toLowerCase();
-      return label.indexOf(q) > -1;
-    }) : this.initOptions;
-
-    let firstResult = this.currentOption ? this.currentOption : _.first(this.options);
-    let firstResultLabel = firstResult ? firstResult[this.labelKey] : '';
-
-    if (firstResultLabel.toLowerCase().startsWith(q)) {
-      this.currentLabel = firstResultLabel;
-      this.query = this.currentLabel.slice(0, query.length);
-    } else {
-      this.currentLabel = '';
+    if (this.isOpen && !this.enableSearch) {
+      setTimeout(() => {
+        this.dropdownMenu.nativeElement.focus();
+      });
     }
   }
 
@@ -128,14 +95,64 @@ export class DropdownSelectComponent implements ControlValueAccessor {
     );
   }
 
+  showDropdown() {
+    this.isOpen = true;
+    if (this.enableSearch)
+      this.query = '';
+      this.options = this.initOptions;
+  }
+
+  enterKeyDown(event) {
+    if (event.keyCode === 13) {
+      this.selectOption(_.first(this.options), true);
+      this.searchBox.nativeElement.blur();
+    }
+  }
+
+  hideDropdown() {
+    setTimeout(() => {
+      this.isOpen = false;
+      if (!this.enableSearch)
+        return;
+      if (this.currentOption) {
+        this.query = this.currentOption[this.labelKey];
+      } else {
+        this.selectOption(_.first(this.options), true);
+      }
+      this.currentLabel = this.query;
+    }, 150);
+  }
+
+  onQueryChange(query) {
+    if (!this.enableSearch)
+      return;
+
+    let q = query.toLowerCase();
+    this.options = q ? _.filter(this.initOptions, option => {
+      let label = option[this.labelKey].toLowerCase();
+      return label.indexOf(q) > -1;
+    }) : this.initOptions;
+
+    let firstResult = _.find([this.currentOption, _.first(this.options)], (o) => (o ? o[this.labelKey] : '').toLowerCase().startsWith(q));
+    let firstResultLabel = firstResult ? firstResult[this.labelKey] : '';
+
+    if (firstResultLabel.toLowerCase().startsWith(q)) {
+      this.currentLabel = firstResultLabel;
+      this.query = this.currentLabel.slice(0, query.length);
+    } else {
+      this.currentLabel = '';
+    }
+  }
+
 
   selectOption(option, markTouched: boolean = false) {
     this.isOpen = false;
     if (!isUndefined(option) && this.value !== option.value) {
       setTimeout(() => {
-        this.value = option[this.valueKey];
-        this.query = option[this.labelKey];
-        this.currentLabel = this.query;
+        this.value = option.value;
+        if (this.enableSearch)
+          this.query = option[this.labelKey];
+          this.currentLabel = this.query;
       });
       if (markTouched) {
         this.onTouched();
@@ -163,14 +180,16 @@ export class DropdownSelectComponent implements ControlValueAccessor {
   }
 
   ngOnChanges(changes) {
-    if (this.options) {
+    this.initOptions = this.options;
+    if (this.options && changes.options) {
       this.options = changes.options.currentValue.map(this.transformOption.bind(this));
       if (this.allowNull) {
         this.options.unshift({
           value: null,
-          label: 'Select option'
+          label: this.placeholder || 'Select option'
         });
       }
+      this.initOptions = this.options;
       this.selectOptionByValue(this.value);
     }
   }
@@ -180,6 +199,7 @@ export class DropdownSelectComponent implements ControlValueAccessor {
       value: option[this.valueKey],
       label: option[this.labelKey],
       description: option[this.descriptionKey],
+      archived: option[this.archivedKey],
       option: option,
     };
   }

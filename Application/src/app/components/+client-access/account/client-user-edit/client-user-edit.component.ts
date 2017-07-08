@@ -1,3 +1,4 @@
+import { } from '@types/googlemaps'; // tslint:disable-line
 import { Component } from '@angular/core';
 import { FormBuilder, FormGroup, Validators } from '@angular/forms';
 
@@ -7,6 +8,7 @@ import * as _ from 'lodash';
 import { DialogRef, ModalComponent } from 'single-angular-modal';
 import { ContactService } from '../../../../services/contact/contact.service';
 import { Contact } from '../../../../models/contact';
+import { BaseAddress } from '../../../../models/address';
 import { FlashMessageService } from '../../../../services/flash-message/flash-message.service';
 
 
@@ -51,14 +53,26 @@ export class ClientUserEditComponent implements ModalComponent<ClientUserWindowD
       last_name: ['', Validators.compose([
         Validators.required, Validators.maxLength(30)
       ])],
+      default_phone_details: this.fb.group({
+        number: ['',  Validators.compose([
+          Validators.maxLength(30), Validators.required
+        ])]
+      }),
       default_email_details: this.fb.group({
         address: ['', Validators.compose([
           Validators.required, Validators.email
         ])],
       }),
       default_address_details: this.fb.group({
-        address1: ['', Validators.required],
-      })
+        address1: ['', Validators.compose([
+          Validators.maxLength(200), Validators.required
+        ])],
+        city: '',
+        state: '',
+        zip: '',
+        country: ''
+      }),
+      default_address: {}
     });
   }
 
@@ -68,6 +82,9 @@ export class ClientUserEditComponent implements ModalComponent<ClientUserWindowD
       .subscribe(
         response => {
           this.contactInfo = response;
+          this.contactInfo.default_email_details = this.contactInfo.default_email_details || {};
+          this.contactInfo.default_phone_details = this.contactInfo.default_phone_details || {};
+          this.contactInfo.default_address_details = this.contactInfo.default_address_details || {};
           this.form.patchValue(this.contactInfo);
         },
         err => {
@@ -81,18 +98,36 @@ export class ClientUserEditComponent implements ModalComponent<ClientUserWindowD
   }
 
   prepareData() {
-    let data = this.form.value,
-      defaultEmail, defaultAddress;
+    let data = this.form.value;
 
     data['id'] = this.contactInfo.id;
     data['emails'] = this.contactInfo.emails;
     data['addresses'] = this.contactInfo.addresses;
+    data['phones'] = this.contactInfo.phones;
 
-    defaultEmail = _.find(data['emails'], {id: this.contactInfo.default_email_details['id']});
-    defaultEmail = Object.assign(defaultEmail, data['default_email_details']);
+    data = this.prepareChildSerializerData(data, 'phones', 'default_phone_details');
+    data = this.prepareChildSerializerData(data, 'emails', 'default_email_details');
+    data = this.prepareChildSerializerData(data, 'addresses', 'default_address_details');
 
-    defaultAddress = _.find(data['addresses'], {id: this.contactInfo.default_address_details['id']});
-    defaultAddress = Object.assign(defaultAddress, data['default_address_details']);
+    return data;
+  }
+
+  prepareChildSerializerData(data, key, default_key) {
+    let defaultValue;
+    if (_.every(_.values(data[default_key]), function(v) { return !v; })) {
+      // If child serializer have all empty values
+      _.remove(data[key], {id: this.contactInfo[default_key]['id']});
+      data[default_key] = null;
+      return data;
+    }
+
+    // Search for default value in all values and update it
+    defaultValue = _.find(data[key], {id: this.contactInfo[default_key]['id']}) || {'default': true};
+    defaultValue['default'] = true;
+    Object.assign(defaultValue, data[default_key]);
+    if (!defaultValue.id) {
+      data[key].push(defaultValue);
+    }
 
     return data;
   }
@@ -134,6 +169,14 @@ export class ClientUserEditComponent implements ModalComponent<ClientUserWindowD
     }
 
     this.dialog.dismiss();
+  }
+
+  updateLocation(place: google.maps.places.PlaceResult) {
+    let address = BaseAddress.extractFromGooglePlaceResult(place);
+    this.form.patchValue({
+      default_address_details: address
+    });
+    this.form.markAsDirty();
   }
 
 }

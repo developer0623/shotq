@@ -1,12 +1,16 @@
+import * as _ from 'lodash';
 import * as addressParser from 'parse-address';
+import { } from '@types/googlemaps'; // tslint:disable-line
 
 export class BaseAddress {
   address1: string;
-  address2: string;
+  address2?: string;
   city: string;
   state: string;
   zip: string;
   country: string;
+
+
 
   static parse(address: string): BaseAddress {
     let result = new BaseAddress();
@@ -30,6 +34,21 @@ export class BaseAddress {
     return;
   }
 
+  static addressComponentExtract(components: google.maps.GeocoderAddressComponent[], type: string) {
+    return (_.find(components, c => _.includes(c.types, type)) || {short_name: ''}).short_name;
+  }
+
+  static extractFromGooglePlaceResult(place: google.maps.places.PlaceResult): BaseAddress {
+    let components = place.address_components;
+    let result = new BaseAddress();
+    result.address1 = place.formatted_address;
+    result.city = BaseAddress.addressComponentExtract(components, 'locality');
+    result.state = BaseAddress.addressComponentExtract(components, 'administrative_area_level_1');
+    result.country = BaseAddress.addressComponentExtract(components, 'country');
+    result.zip = BaseAddress.addressComponentExtract(components, 'postal_code');
+    return result;
+  }
+
   toString(): string {
     return [
       this.address1,
@@ -45,8 +64,6 @@ export class Address extends BaseAddress {
   id: number;
   created: Date;
   visible: boolean;
-  address_type: number;
-  address_type_name: string;
   person: number;
   opened: boolean;
   name: string;
@@ -56,5 +73,20 @@ export class Address extends BaseAddress {
   constructor() {
     super();
     this.isLoading = false;
+  }
+}
+
+export class BaseLocation extends BaseAddress {
+  name: string;
+
+  static extractFromGooglePlaceResult(place: google.maps.places.PlaceResult): BaseLocation {
+    let components = place.address_components;
+    let result = new BaseLocation();
+    result.address1 = place.formatted_address;
+    result.city = BaseAddress.addressComponentExtract(components, 'locality');
+    result.state = BaseAddress.addressComponentExtract(components, 'administrative_area_level_1');
+    result.country = BaseAddress.addressComponentExtract(components, 'country');
+    result.zip = BaseAddress.addressComponentExtract(components, 'postal_code');
+    return result;
   }
 }

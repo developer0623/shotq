@@ -64,7 +64,7 @@
               <label></label>
             </div>
           </td>
-          <td class="text-middle">{{ item.name }}<span *ngIf="item.status === 'archived'"> (Archived)</span></td>
+          <td class="text-middle">{{ item.name }}<span *ngIf="item.status === 'archived' && category.filter_params.status !== 'archived'"> (Archived)</span></td>
           <ng-template [ngIf]="product === 'item-template'">
             <td class="text-middle text-capitalize">{{ item.item_type }}</td>
             <td class="text-middle text-green-600">{{ item.price | currency:'USD':true:'1.2-2' }}</td>

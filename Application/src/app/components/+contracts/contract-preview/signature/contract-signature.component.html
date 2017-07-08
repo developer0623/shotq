@@ -20,8 +20,11 @@
   </span>
   <span *ngIf="!signature.completed && selected">Click to Sign</span>
 
-  <div class="edit-block__content" *ngIf="editing">
+  <div class="edit-block__content" *ngIf="editing && !completed">
     <a (click)="edit($event)" class="btn edit">edit</a>
     <a (click)="clear($event)" class="btn delete">delete</a>
   </div>
+</div>
+<div *ngIf="completed">
+    {{ signature.ip_address }} - {{ signature.modified | date: 'mediumDate' }}
 </div>

@@ -1,1 +1,1 @@
-export * from './drag-and-drop-image.module'
+export * from './drag-and-drop-image.module';

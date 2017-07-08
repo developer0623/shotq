@@ -1,4 +1,4 @@
-import { Component } from '@angular/core';
+import { Component, ElementRef } from '@angular/core';
 import { ModalService } from '../../../services/modal/modal.service';
 import { FlashMessageService } from '../../../services/flash-message/flash-message.service';
 import { Router } from '@angular/router';
@@ -20,6 +20,8 @@ import { SignatureService } from '../../../services/signature/signature.service'
 import { TemplateVariable } from '../../../models/template-variable.model';
 
 import * as _ from 'lodash';
+import { BSModalContext } from 'single-angular-modal/plugins/bootstrap';
+import { DialogRef, ModalComponent } from 'single-angular-modal';
 
 type step = {
   name: string,
@@ -38,6 +40,15 @@ export type modalConfig = {
   showOnErrors?: boolean;
 };
 
+
+export class ContractAddModalContext extends BSModalContext {
+  contract?: Contract;
+  enabledSteps?: string[];
+  next?: (id: number) => (string | number)[];
+  errorsNext?: (id: number) => (string | number)[];
+  showOnErrors?: boolean;
+}
+
 @Component({
   selector: 'contracts-add',
   templateUrl: 'contracts-add.component.html',
@@ -49,7 +60,7 @@ export type modalConfig = {
     ContractTemplateService
   ]
 })
-export class ContractsAddComponent {
+export class ContractsAddModalComponent implements ModalComponent<ContractAddModalContext> {
 
   contacts: Contact[] = [];
   jobs: Job[] = [];
@@ -130,9 +141,11 @@ export class ContractsAddComponent {
   private showTemplateStep = true;
   private config: modalConfig;
   private showOnErrors: boolean = false;
+  private context: ContractAddModalContext;
 
 
-  constructor(private breadcrumbService: BreadcrumbService,
+  constructor(public dialog: DialogRef<ContractAddModalContext>,
+              private breadcrumbService: BreadcrumbService,
               private functions: GeneralFunctionsService,
               private flash: FlashMessageService,
               private modalService: ModalService,
@@ -142,11 +155,19 @@ export class ContractsAddComponent {
               private contractService: ContractService,
               private signatureService: SignatureService,
               private contractTemplateService: ContractTemplateService,
+              private elRef: ElementRef,
               private router: Router) {
     breadcrumbService.addFriendlyNameForRoute('/contacts/add', 'Add');
+    this.context = this.dialog.context;
   }
 
   ngOnInit() {
+    setTimeout(() => {
+      jQuery(this.elRef.nativeElement)
+        .parents('.modal-dialog')
+        .addClass('modal-dialog_wide');
+    });
+    this.initializeData(this.context);
     // this.activateTemplateStep();
   }
 
@@ -165,12 +186,12 @@ export class ContractsAddComponent {
 
   }
 
-  initializeData(config: modalConfig) {
+  initializeData(config) {
     this.resetToDefaults();
 
     this.config = config;
 
-    this.showOnErrors = !!config.showOnErrors;
+    this.showOnErrors = config.showOnErrors;
 
     if (config.contract)
       this.contract = config.contract;
@@ -353,12 +374,12 @@ export class ContractsAddComponent {
               if (errors.length > 0) {
                 this.activateErrorsStep();
               } else {
-                this.modalClose();
+                this.modalClose(this.contract);
                 this.goToContract(true);
               }
             });
         } else {
-          this.modalClose();
+          this.modalClose(this.contract);
 
         }
 
@@ -367,15 +388,21 @@ export class ContractsAddComponent {
 
   goToContract(skipErrors) {
 
-    this.modalClose();
+    this.modalClose(this.contract);
     if (skipErrors) {
-      this.router.navigate(!!this.config.next ? this.config.next(this.contract.id) : ['/contracts', this.contract.id, 'send']);
+      setTimeout(() => {
+        this.router.navigate(!!this.config.next ? this.config.next(this.contract.id) : ['/contracts', this.contract.id, 'send']);
+      }, 300);
     } else {
       if (!!this.config.errorsNext) {
         let next = this.router.createUrlTree(this.config.errorsNext(this.contract.id)).toString();
-        this.router.navigate(['/contracts', this.contract.id], {queryParams: {next: next}});
+        setTimeout(() => {
+          this.router.navigate(['/contracts', this.contract.id], {queryParams: {next: next}});
+        }, 300);
       } else {
-        this.router.navigate(['/contracts', this.contract.id]);
+        setTimeout(() => {
+          this.router.navigate(['/contracts', this.contract.id]);
+        }, 300);
       }
 
     }
@@ -404,8 +431,8 @@ export class ContractsAddComponent {
 
   activateErrorsStep() {
 
-    if (this.showOnErrors)
-      this.modalService.showModal();
+    // if (this.showOnErrors)
+    //   this.modalService.showModal();
     this.currentStep = this.steps.find(step => step.name === 'errors');
     this.currentStep.enabled = true;
     this.showStepIndicator = false;
@@ -513,15 +540,18 @@ export class ContractsAddComponent {
   /**
    * Function to close current choose contact modal.
    */
-  public modalClose() {
+  public modalClose(contract?) {
     if (this.templateUpdateSub$) {
       this.templateUpdateSub$.unsubscribe();
     }
-
-    this.modalService.hideModal();
+    if (contract) {
+      this.dialog.close(contract);
+    } else {
+      this.dialog.dismiss();
+    }
   }
 
-  public addNewContact(): Observable<null|Contact> {
+  public addNewContact(): Observable<null | Contact> {
     return Observable.create(observer => {
       let newContact = {
         'first_name': this.newContact.first_name,

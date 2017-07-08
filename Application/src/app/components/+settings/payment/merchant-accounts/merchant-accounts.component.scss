@@ -22,11 +22,13 @@
 // }
 .page {
     &-in {
-        margin: 20px 0;
+        //margin: 20px 0;
+        margin-bottom: 20px;
     }
     &-header {
         background: #FFF;
         padding: 20px 80px !important;
+        margin: 0;
         &_border {
             border-bottom: 1px solid #e4e8f0;
         }

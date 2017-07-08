@@ -9,6 +9,7 @@ export class BaseItem {
   price?: string;
   cost_of_goods_sold?: string; /*(required)*/
   shipping_cost?: string; /*(required)*/
+  addons_price?: string | number;
   max_add?: number; /*(required)*/
   account?: number; /*(required)*/
   $isTemplate?: boolean;

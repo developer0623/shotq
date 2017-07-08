@@ -1,3 +1,4 @@
+import { } from '@types/googlemaps'; // tslint:disable-line
 import { Component, forwardRef, Inject, OnInit } from '@angular/core';
 import { FormGroup, AbstractControl } from '@angular/forms';
 import { Observable } from 'rxjs/Rx';
@@ -5,6 +6,7 @@ import { IMyInputFieldChanged } from 'ngx-mydatepicker';
 import { DialogRef, ModalComponent } from 'single-angular-modal';
 import { BSModalContext } from 'single-angular-modal/plugins/bootstrap';
 
+import { BaseAddress } from '../../../models/address';
 import { Contact } from '../../../models/contact';
 import { ContactsUiService } from './contacts-ui.service';
 
@@ -40,9 +42,18 @@ export class ContactDialogComponent
     this.setViewValue(this.context.content);
   }
 
+  updateLocation(place: google.maps.places.PlaceResult) {
+    let address = BaseAddress.extractFromGooglePlaceResult(place);
+    this.form.patchValue({
+      postalAddress: address.address1,
+      default_address: address
+    });
+  }
+
   private setViewValue(contact: Contact) {
     if (!contact || contact === Contact.Empty)
       return;
+    console.log("setviewvalue", contact);
     this.isNewObject = !contact.id;
     this.presenter.createContactFormContext(Observable.of(contact))
       .subscribe(context => {
@@ -59,12 +70,15 @@ export class ContactDialogComponent
   //noinspection JSUnusedLocalSymbols
   private submit() {
     this.resetSubmitValue();
-    this.dialog.close(this.submitValue);
+    console.log("submitvalue", this.submitValue);
+    // this.dialog.close(this.submitValue);
   }
 
   //noinspection JSUnusedLocalSymbols
   private cancel() {
     this.dialog.dismiss();
+    // On safari modal-open(which hide scrollbar) class not removed from body tag
+    document.querySelector('body').classList.remove('modal-open');
   }
 
   //noinspection JSMethodCanBeStatic,JSUnusedLocalSymbols

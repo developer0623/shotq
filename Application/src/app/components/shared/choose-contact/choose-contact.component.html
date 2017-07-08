@@ -1,3 +1,4 @@
+<div class="contacts-modal">
 <div class="modal-header">
     <div class="modal-header-in">
         <div class="h3">Contacts</div>
@@ -12,7 +13,7 @@
             </li>
             <li class="filter-list__item" [class.current]="currentFilter === 'selected'"
                 (click)="setFilter('selected')">
-                SELECTED ({{ contactsToAdd.length }})
+                SELECTED ({{ selectedContacts.length }})
             </li>
             <li class="filter-list__item filter-list__item_right" [class.current]="currentFilter === 'new'"
                 (click)="this.addNewContactRow();">
@@ -32,11 +33,10 @@
                  infinite-scroll
                  [infiniteScrollDistance]="2"
                  (scrolled)="onScroll()"
-                 [scrollWindow]="false"
-            >
+                 [scrollWindow]="false">
                 <div class="loading-ripple" *ngIf="isLoading"></div>
-                <div class="text-center padding-top-20" *ngIf="!isLoading && totalItems === 0">There are no items to
-                    display
+                <div class="text-center padding-top-20" *ngIf="!isLoading && totalItems.length === 0">
+                    There are no items to display.
                 </div>
                 <div *ngIf="totalItems > 0" class="row position-relative">
                     <div class="col-md-12 contact-list pl-0 pr-0">
@@ -44,23 +44,27 @@
                             <table class="table table-hover" *ngIf="showNewContactRow && !isLoading">
                                 <tbody>
                                 <tr class="new-contact-data">
-                                    <td class="font-weight-600 new-conctact-name"><input type="text" name="contact-name"
-                                                                                         placeholder="First Name"
-                                                                                         [(ngModel)]="newName"
-                                                                                         required/>
+                                    <td class="font-weight-600 new-conctact-name">
+                                        <input type="text" name="contact-name"
+                                            placeholder="First Name"
+                                            [(ngModel)]="newName"
+                                            required/>
                                     </td>
-                                    <td class="font-weight-600 new-conctact-last-name"><input type="text"
-                                                                                              name="contact-name"
-                                                                                              placeholder="Last Name"
-                                                                                              [(ngModel)]="newLastName"
-                                                                                              required/></td>
-                                    <td class="font-weight-600 new-contact-email"><input type="email"
-                                                                                         name="contact-email"
-                                                                                         placeholder="Email"
-                                                                                         [(ngModel)]="newEmail"
-                                                                                         required/>
+                                    <td class="font-weight-600 new-conctact-last-name">
+                                        <input type="text"
+                                            name="contact-name"
+                                            placeholder="Last Name"
+                                            [(ngModel)]="newLastName"
+                                            required/>
                                     </td>
-                                    <td class="default-dropdown">
+                                    <td class="font-weight-600 new-contact-email">
+                                        <input type="email"
+                                            name="contact-email"
+                                            placeholder="Email"
+                                            [(ngModel)]="newEmail"
+                                            required/>
+                                    </td>
+                                    <td class="default-dropdown contacts-modal__dropdown">
                                         <form-field [onlySelect]="true" (ngSelectValueChange)="newRoleChange($event)"
                                                     [ngSelectValue]="newRole" [options]="jobRoles"></form-field>
                                     </td>
@@ -76,16 +80,21 @@
                                 <tr *ngFor="let contact of contacts">
                                     <td>
                                         <div class="checkbox-custom checkbox-default">
-                                            <input type="checkbox" (click)="setSelected(contact)"
-                                                   [checked]="contact.selected"
-                                                   [disabled]="contact.isJobContact"/><label></label>
+                                            <input type="checkbox"
+                                                   [disabled]="jobData.isPrimaryContactId(contact.id)"
+                                                   [(ngModel)]="contact.selected"
+                                                   (ngModelChange)="setSelected(contact)"/>
+                                            <label></label>
                                         </div>
                                     </td>
-                                    <td *ngIf="getFullName(contact).length < 20" class="font-weight-600">
-                                        {{ getFullName(contact) }}</td>
-                                    <td *ngIf="getFullName(contact).length >= 20" class="font-weight-600">
-                                    <span tooltip="{{ getFullName(contact) }}"
-                                          placement="bottom">{{ checkLength(getFullName(contact)) }}</span>
+                                    <td *ngIf="contact.full_name.length < 20"
+                                        class="font-weight-600">
+                                        {{ contact.full_name }}
+                                        <span *ngIf="jobData.isPrimaryContactId(contact.id)">(PRIMARY)</span>
+                                    </td>
+                                    <td *ngIf="contact.full_name.length >= 20" class="font-weight-600">
+                                        <span tooltip="{{ gcontact.full_name }}"
+                                              placement="bottom">{{ checkLength(contact.full_name) }}</span>
                                     </td>
                                     <td *ngIf="getEmail(contact).length < 17">
                                         {{ getEmail(contact) }}
@@ -94,7 +103,7 @@
                                     <span tooltip="{{ getEmail(contact)}}"
                                           placement="bottom">{{ checkLength(getEmail(contact)) }}</span>
                                     </td>
-                                    <td class="default-dropdown">
+                                    <td class="default-dropdown contacts-modal__dropdown">
                                         <form-field [onlySelect]="true" [ngSelectValue]="contact.role"
                                                     (ngSelectValueChange)="roleChange(contact, $event)"
                                                     [options]="jobRoles"
@@ -110,7 +119,8 @@
             <hr class="footer-line">
             <div class="padding-left-25 footer-buttons">
                 <button id="cancelButton" class="btn cancel-button" (click)="modalClose()">CANCEL</button>
-                <button [disabled]="submitDisabled" class="btn save-button" (click)="addJobContact($event)">ADD</button>
+                <button [disabled]="submitDisabled" class="btn save-button"
+                        (click)="save()">ADD</button>
             </div>
         </div>
         <div *ngIf="currentFilter === 'new'" class="newContact">
@@ -130,4 +140,5 @@
             </form>
         </div>
     </div>
+</div>
 </div>

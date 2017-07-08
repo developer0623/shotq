@@ -27,12 +27,12 @@ export class BaseTemplateService<ModelClass> extends RestClientService<any> {
   public unarchive(template) {
     template.status = this.statusDraft;
     return super.save(template);
-  };
+  }
 
   public archive(template) {
     template.status = this.statusArchived;
     return super.save(template);
-  };
+  }
 
   /**
    * Duplicate template
@@ -41,5 +41,5 @@ export class BaseTemplateService<ModelClass> extends RestClientService<any> {
    */
   public clone(id: number) {
     return super.itemPost(id, 'duplicate');
-  };
+  }
 }

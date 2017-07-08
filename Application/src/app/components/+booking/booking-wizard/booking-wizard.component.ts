@@ -7,6 +7,7 @@ import { Subject } from 'rxjs/Subject';
 import { BookingEventDetailsComponent } from './booking-event-details/booking-event-details.component';
 import { BookingOverview } from '../../../models/proposal-payment-overview.model';
 import { step } from '../../shared/step-indicator/step-indicator.component';
+import { ProposalSchedulePayment } from '../../../models/proposal-schedule-payment';
 
 
 @Component({
@@ -64,15 +65,15 @@ export class BookingWizardComponent {
       },
       valid: false,
     },
-    // {
-    //   name: 'payment',
-    //   title: 'Enter Payment Information',
-    //   enabled: true,
-    //   options: {
-    //     hasFooter: true,
-    //   },
-    //   valid: false,
-    // },
+    {
+      name: 'payment',
+      title: 'Enter Payment Information',
+      enabled: false,
+      options: {
+        hasFooter: false,
+      },
+      valid: false,
+    },
   ];
 
   currentStep = this.steps[0];
@@ -88,9 +89,22 @@ export class BookingWizardComponent {
 
   ngOnInit() {
     this.route.data
+      .do(data => {
+        if (data.schedule.length) {
+          let schedule = data.schedule[0];
+          // ref https://gearheartio.slack.com/archives/C32GBCSEM/p1498229114022878
+          if (schedule.payments.some(payment => payment.due_date_type === 'at_booking')
+            && !data.proposal.collect_manually) {
+            let paymentStep = this.steps.find(step => step.name === 'payment');
+            paymentStep.enabled = true;
+            this.steps = this.steps.slice();
+          }
+        }
+      })
       .map((data: { proposal: Proposal }) => data.proposal)
       .subscribe(this.handleProposalUpdate.bind(this));
-  };
+  }
+
 
   handleProposalUpdate(proposal: Proposal) {
     this.proposal = proposal;

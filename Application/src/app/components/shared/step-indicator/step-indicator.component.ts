@@ -31,6 +31,7 @@ export class StepIndicatorComponent {
   @Output() stepChanged = new EventEmitter<step>();
   @Output() onFinish = new EventEmitter<any>();
 
+  _steps: step[] = [];
   nextStepSub$: Subscription;
   currentStep: step;
 
@@ -70,17 +71,21 @@ export class StepIndicatorComponent {
       return false;
     }
 
-    return this.steps
+    return this._steps
       .slice(0, step._index)
       .every(step_ => step_.valid);
   }
 
   ngOnChanges(changes) {
     let i = 0;
-    this.steps.map(step => {
+
+    this._steps = this.steps.filter(step => isUndefined(step.enabled) ||  step.enabled);
+
+    this._steps.forEach(step => {
       step._index = i;
       i++;
     });
+
 
     if (this.nextStep && !this.nextStepSub$) {
       this.nextStepSub$ = this.nextStep
@@ -94,7 +99,7 @@ export class StepIndicatorComponent {
         });
     }
     if (!this.currentStep) {
-      this.stepTo(this.steps[this.initialStepIndex]);
+      this.stepTo(this._steps[this.initialStepIndex]);
     }
   }
 
@@ -105,9 +110,9 @@ export class StepIndicatorComponent {
   }
 
   stepNext() {
-    if (this.currentStep._index < this.steps.length - 1) {
+    if (this.currentStep._index < this._steps.length - 1) {
       let nextIndex = this.currentStep._index + 1;
-      this.stepTo(this.steps[nextIndex]);
+      this.stepTo(this._steps[nextIndex]);
     } else {
       this._finalizeStep(this.currentStep);
       this.onFinish.emit();

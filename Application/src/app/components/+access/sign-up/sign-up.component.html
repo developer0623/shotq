@@ -1,20 +1,27 @@
 <div class="page">
-  <div class="row panel panel_flex">
-    <div class="left-side" *ngIf="isLoading">
-      <div class="loading-ripple"></div>
-    </div>
-    <div class="left-side panel__item" *ngIf="!isLoading">
-      <div class="page-header">
-        <div class="logo-container">
+  <div class="board">
+    <!-- <div class="board__left">
+      
+    </div> -->
+    <div class="board__left" *ngIf="!isLoading">
+      <!-- begin preloader -->
+      <div class="loading-ripple" *ngIf="isLoading"></div>
+      <!-- end preloader -->
+
+      <!-- begin header -->
+      <div class="board__header">
+        <div class="logo-box">
           <div class="logo">
             <img alt="ShootQ logo" src="/assets/img/shootq-icon.svg" />
           </div>
         </div>
-        <h1 class="page-title">Get started for free</h1>
+        <h1 class="board__title">Get started for free</h1>
       </div>
-      <div class="log-in-container">
+      <!-- end header -->
+      <!-- begin body -->
+      <div class="board__body">
         <form [formGroup]="signUpForm">
-          <div class="field field_placeholder field_half" [ngClass]="{'is-validate': signUpForm.controls.first_name.invalid && showFormErrors}">
+          <div class="field field_placeholder field_half left" [ngClass]="{'is-validate': signUpForm.controls.first_name.invalid && showFormErrors}">
             <input name="first_name" type="text" value="" formControlName="first_name" [attr.data-empty]="!signUpForm.value.first_name">
             <label for="first_name">First name</label>
             <span *ngIf="signUpForm.controls.first_name.errors && showFormErrors" class="validate-message">
@@ -59,17 +66,19 @@
               <span *ngIf="signUpForm.controls.password.errors.maxlength">Password needs to be 128- characters.</span>
             </span>
           </div>
-          <div class="button-container">
+          <div class="control-button">
             <button type="button" (click)="doSignUp()" class="btn">SIGN UP</button>
           </div>
         </form>
         <div class="account-message">
-          <span>Already have an account?</span> <span class="link" [routerLink]="['/login']">Sign in.</span>
+          <span>Already have an account?</span>
+          <span class="link" [routerLink]="['/login']">Sign in.</span>
         </div>
       </div>
+      <!-- end body -->
     </div>
-    <div class="right-side panel__item">
-      <div class="right-img-workless"></div>
+    <div class="board__right">
+      <div class="bg-img" style="background-image: url('assets/img/computer_shoot_more_work_less.png')"></div>
     </div>
   </div>
 </div>

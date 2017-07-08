@@ -70,11 +70,8 @@ export class ItemEditComponent {
   private categoryErrors = null;
   private startUploadingCheck: boolean = false;
   private itemTypes = ITEM_TYPES;
-
   private newOptionsValues = {};
-
   private selectedType: number = 1;
-
   private nextUrl: string;
 
   private manageCategoriesModalConfig = {
@@ -748,5 +745,9 @@ export class ItemEditComponent {
       fileItem.withCredentials = false;
       fileItem.upload();
     }
+  }
+
+  private close() {
+    this.router.navigate(['pricing/items']);
   }
 }

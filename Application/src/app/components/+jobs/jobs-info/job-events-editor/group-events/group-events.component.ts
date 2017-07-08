@@ -1,18 +1,23 @@
 import * as _ from 'lodash';
 import moment from 'moment';
 import { SetOptions } from 'eonasdan-bootstrap-datetimepicker';
-import { Component, Input, Output, EventEmitter } from '@angular/core';
+import {
+  Component, Input, Output,
+  EventEmitter, OnChanges, SimpleChanges
+} from '@angular/core';
 import { FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { FlashMessageService } from '../../../../../services/flash-message/flash-message.service';
 import { EventGroup } from '../../../../../models/event-group';
 import { Event } from '../../../../../models/event';
+import { datesIntervalValidator } from '../../../../../validators';
+import { UpdateLocationEvent } from './event-location';
 
 @Component({
   selector: 'group-events',
   templateUrl: './group-events.component.html',
   styleUrls: ['./group-events.component.scss']
 })
-export class GroupEventsComponent {
+export class GroupEventsComponent implements OnChanges {
   currentEventItemIndex: number;
   eventItemForm: FormGroup;
   options: SetOptions;
@@ -20,16 +25,21 @@ export class GroupEventsComponent {
   @Output() saveEvent: EventEmitter<{index: number, event: Event}> = new EventEmitter<{index: number, event: Event}>();
   @Output() addNewEvent: EventEmitter<number> = new EventEmitter<number>();
   @Output() deleteEvent: EventEmitter<number> = new EventEmitter<number>();
-  private timeFormat: string = 'HH:mm';
+  private timeFormat: string = 'short';
 
   constructor(
     private fb: FormBuilder,
     public flash: FlashMessageService
   ) { }
 
+  ngOnChanges(changes: SimpleChanges) {
+    if (changes['eventGroup']) {
+      this.updateTimeFormats();
+    }
+  }
+
   selectEventItem(index: number) {
     if (index === this.currentEventItemIndex) {
-      this.closeEventItem();
       return;
     }
     this.currentEventItemIndex = index;
@@ -48,7 +58,7 @@ export class GroupEventsComponent {
       name: [eventItem.name, Validators.required],
       start: [eventItem.start, Validators.required],
       end: [eventItem.end, Validators.required]
-    });
+    }, {validator: datesIntervalValidator('start', 'end')});
     if (this.options.minDate && !eventItem.start) {
       this.eventItemForm.patchValue({start: this.options.minDate});
     }
@@ -72,6 +82,9 @@ export class GroupEventsComponent {
   }
 
   saveEventItem() {
+    if (this.eventItemForm.invalid) {
+      return;
+    }
     let oldEvent = this.eventGroup.events[this.currentEventItemIndex];
     let startDt = oldEvent.start;
     let endDt = oldEvent.end;
@@ -96,6 +109,19 @@ export class GroupEventsComponent {
     this.deleteEvent.emit(index);
   }
 
+  updateEventItemLocation(data: UpdateLocationEvent) {
+    let event = Object.assign({}, data.eventItem, {location: data.location});
+    let index = this.eventGroup.events.findIndex(e => e.id === data.eventItem.id);
+    this.saveEvent.emit({
+      index: index,
+      event: event
+    });
+  }
+
+  identify(index: number, item: Event): number {
+    return item.id;
+  }
+
   private getStartEnd(index: number): {start: moment.Moment, end: moment.Moment} {
     let start, end;
     if (this.eventGroup.events.length < 2) {
@@ -114,16 +140,39 @@ export class GroupEventsComponent {
       }
     }
     let startDt = moment(start);
+    if (!startDt.isValid()) {
+      startDt = moment().add(1, 'h').startOf('hour');
+    }
     let endDt = moment(end);
+    if (!endDt.isValid()) {
+      endDt = moment().add(3, 'months').startOf('month');
+    }
+    if (startDt.isAfter(endDt)) {
+      return {start: endDt, end: startDt};
+    }
     return {start: startDt, end: endDt};
+  }
+
+  private updateTimeFormats() {
+    if (this.eventGroup.start && this.eventGroup.end) {
+      let startDt = moment(this.eventGroup.start);
+      let endDt = moment(this.eventGroup.end);
+      let diffInHours = endDt.diff(startDt, 'hours', true);
+      if (diffInHours >= 24) {
+        this.timeFormat = 'short';
+      } else {
+        this.timeFormat = 'shortTime';
+      }
+    }
   }
 
   private updateDatetimepickerOptions() {
     let intervalDate = this.getStartEnd(this.currentEventItemIndex);
     let diffInHours = intervalDate.end.diff(intervalDate.start, 'hours');
-    this.timeFormat = diffInHours > 23 ? 'l LT' : 'LT';
+    let dtPickerFormat = diffInHours > 23 ? 'L LT' : 'LT';
     this.options = {
-      format: this.timeFormat,
+      useCurrent: false,
+      format: dtPickerFormat,
       minDate: intervalDate.start,
       maxDate: intervalDate.end
     };

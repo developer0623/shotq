@@ -13,10 +13,8 @@
 
 <div class="jobAssociated" *ngIf="currentStep.name == 'job' && currentStep.enabled">
   <div class="jobAssociated__head">
-    <div class="row">
       <div class="jobAssociated__title">Associate with a Job</div>
-    </div>
-    <div class="row">
+    <div class="">
       You may associate this contract with a Job. You can skip this step and save your contract.
     </div>
   </div>
@@ -47,12 +45,9 @@
 
 
     <div class="jobAssociated__list jobAssociated__list_mod ">
-      <div class="row contact-list position-relative">
+      <div class="contact-list position-relative">
         <div class="loading-ripple" *ngIf="isLoading"></div>
         <perfect-scrollbar class="ps-container">
-
-
-          <div class="col-md-12">
             <div class="radio-custom pointer"
                  (click)="contract.job = job.id"
                  *ngFor="let job of jobs">
@@ -61,7 +56,6 @@
                      (click)="contract.job = job.id">
               <label>{{ job.name }}</label>
             </div>
-          </div>
         </perfect-scrollbar>
 
       </div>
@@ -79,23 +73,19 @@
 <!-- Send To Modal -->
 <div class="jobAssociated" *ngIf="currentStep.name == 'contact' && currentStep.enabled">
   <div class="jobAssociated__head">
-    <div class="row">
       <div class="jobAssociated__title">Send To</div>
-    </div>
-    <div class="row">
       <div class="jobAssociated__text">
         Contracts must be associated with a person. Please select a recipient(s) to send the contract to. The
         contract
         will not be sent until you are done editing and sign the contract.
       </div>
-    </div>
   </div>
 
   <div class="contact-type-list">
-    <app-dropdown-select [(ngModel)]="contactFilter.contact_types"
+    <!-- <app-dropdown-select [(ngModel)]="contactFilter.contact_types"
                          (ngModelChange)="getContacts()"
                          [options]="contactTypes">
-    </app-dropdown-select>
+    </app-dropdown-select> -->
 
     <div class="row">
       <div class="col-md-8 col-sm-8">
@@ -117,19 +107,17 @@
   <div class="jobAssociated__content">
     <div class="jobAssociated__search">
       <i class="input-search-icon icon-search" aria-hidden="true"></i>
-      <input type="text"
-             [formControl]="searchTermControl"
-             class="form-control"
-             placeholder="Search">
+      <input type="text" class="form-control" placeholder="Search"
+        [(ngModel)]="contactFilter.search"
+        (ngModelChange)="getContacts()">
     </div>
 
     <div class="jobAssociated__list jobAssociated__list_mod">
       <perfect-scrollbar class="ps-container">
 
-        <div class="row contact-list position-relative">
+        <div class="contact-list position-relative">
           <div class="loading-ripple" *ngIf="isLoading"></div>
 
-          <div class="col-md-12">
             <div class="checkbox-custom is-trio checkbox-default" *ngIf="addingContact">
               <div class="checkbox-custom__checkbox">
                 <input type="checkbox" [(ngModel)]="addingContact">
@@ -156,13 +144,12 @@
                   <label>{{ contact.first_name }} {{ contact.last_name }}</label>
                 </div>
                 <div class="col-md-5">
-                  {{ contact.default_email }}
+                  <span class="contact-list__email">{{ contact.default_email }}</span>
                 </div>
               </div>
             </div>
 
 
-          </div>
 
         </div>
 
@@ -179,11 +166,11 @@
   </div>
 </div>
 
-
+<!-- begin select template modal -->
 <div class="select-template" *ngIf="currentStep.name == 'template' && showTemplateStep && currentStep.enabled">
   <div class="select-template__title">Select a Template</div>
   <div class="select-template__in">
-    <div class="row position-relative">
+    <div class="position-relative">
       <div class="loading-ripple" *ngIf="isLoading"></div>
       <div class="template-wrap position-relative">
         <!-- is-green , is-orange , is-yellow , is-red , is-black -->
@@ -234,7 +221,7 @@
     </button>
   </div>
 </div>
-
+<!-- end select template modal -->
 
 <div class="jobAssociated jobAssociated_sm" *ngIf="currentStep.name == 'errors' && currentStep.enabled">
   <div class="jobAssociated__title">

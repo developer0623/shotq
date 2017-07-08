@@ -1,14 +1,10 @@
 import { Injectable } from '@angular/core';
-import { ApiService } from '../api';
-import { Observable } from 'rxjs/Observable';
 import 'rxjs/Rx';
 import { Account } from '../../models/account';
+import { RestClientService } from '../rest-client/rest-client.service';
 
 @Injectable()
-export class AccountService {
-  // Account endpoint
-  accountEndpoint: string = '/person/account/';
+export class AccountService extends RestClientService<Account> {
+  baseUrl = 'account/account';
 
-  constructor(private apiService: ApiService) {
-  }
 }

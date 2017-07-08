@@ -1,6 +1,6 @@
 import { Component, Input, Output, EventEmitter } from '@angular/core';
 import { Tax } from '../../../../../models/tax.model';
-import { FormGroup, FormBuilder, Validators } from '@angular/forms';
+import { FormGroup, FormArray, FormBuilder, Validators } from '@angular/forms';
 import { FlashMessageService } from '../../../../../services/flash-message/flash-message.service';
 import { TaxService } from '../../../../../services/tax/tax.service';
 import { TaxTemplateRESTService } from '../../../../../services/tax-template/tax-template.service';
@@ -21,6 +21,7 @@ import { RestClientService } from '../../../../../services/rest-client/rest-clie
 export class ProposalTaxFormComponent {
   @Input() tax: Tax;
   @Input() forTemplate: boolean = false;
+  @Input() proposalHasTax: boolean = false;
   @Output() onCancel: EventEmitter<any> = new EventEmitter<any>();
   @Output() savedAsTemplate: EventEmitter<TaxTemplate> = new EventEmitter<TaxTemplate>();
   @Output() templateDeleted: EventEmitter<TaxTemplate> = new EventEmitter<TaxTemplate>();
@@ -68,7 +69,10 @@ export class ProposalTaxFormComponent {
         Services: false
       }),
       calculate_settings: [this.calculationAgainstChoices[0].value, Validators.compose([])],
-      schedule_settings: [this.paymentScheduleSettings[0].value, Validators.compose([])]
+      schedule_settings: [this.paymentScheduleSettings[0].value, Validators.compose([])],
+      additional_rates: this.formBuilder.array(
+        (this.tax.additional_rates || []).map(r => this.formBuilder.control(r))
+      )
     });
     this.taxForm.patchValue(Object.assign({}, this.tax, {
       calculate_against: this.buildCalculateAgainst(this.tax.calculate_against)
@@ -117,6 +121,10 @@ export class ProposalTaxFormComponent {
 
   save() {
     if (this.taxForm.valid) {
+      if (this.proposalHasTax) {
+        this.flash.error('Proposal can have only one tax, please remove existing taxes before create new.');
+        return;
+      }
       Object.assign(this.tax, this.cleanForm());
       let service = this.forTemplate ? this.taxTemplateService : this.taxService;
       (<RestClientService<any>>service).save(this.tax)
@@ -147,6 +155,15 @@ export class ProposalTaxFormComponent {
   cancel() {
     (<any>this.tax).editing = false;
     this.onCancel.emit();
+  }
 
+  addAdditionalRate() {
+    let control = <FormArray>this.taxForm.controls['additional_rates'];
+    control.push(this.formBuilder.control('0.00'));
+  }
+
+  removeAdditionalRate(i: number) {
+    const control = <FormArray>this.taxForm.controls['additional_rates'];
+    control.removeAt(i);
   }
 }

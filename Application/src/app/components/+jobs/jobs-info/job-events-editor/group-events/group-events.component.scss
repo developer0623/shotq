@@ -47,6 +47,7 @@
 
 	&__in {
 		position: relative;
+		width: 290px;
 	}
 }
 .events-editor {
@@ -100,6 +101,7 @@
 			appearance: none;
 			padding: 0 4px 0 4px;
 			position: relative;
+			z-index: 5;
 			left: 2px;
 		    width: 15px;
 		    height: 15px;
@@ -123,7 +125,7 @@
 		padding: 15px 0 20px 0;
 		padding-left: 80px;
 		display: block;
-		width: 330px;
+		width: 100%;
 		position: relative;
 		&:before {
 			content: '';
@@ -163,26 +165,6 @@
 			transform: translate(0, -50%);
 		}
 	}
-	&__location {
-		.form-control {
-			display: inline-block;
-			vertical-align: middle;
-			width: 240px;
-			height: 20px;
-			border: 0;
-			background-color: transparent;
-			font-size: 12px;
-			&::placeholder {
-				font-style: italic;
-			}
-		}
-		.fa-map-marker {
-			display: inline-block;
-			vertical-align: middle;
-			opacity: 0.5;
-			font-size: 12px;
-		}
-	}
 }
 .timeline-graph {
 	display: inline-block;
@@ -215,8 +197,8 @@
   z-index: 1001;
 	position: absolute;
 	top: -70px;
-	right: -200px;
-	width: 170px;
+	right: -270px;
+	width: 240px;
 	-webkit-box-shadow: 0 20px 40px 0 rgba(181, 193, 207, 0.3);
 	-moz-box-shadow: 0 20px 40px 0 rgba(181, 193, 207, 0.3);
 	box-shadow: 0 20px 40px 0 rgba(181, 193, 207, 0.3);

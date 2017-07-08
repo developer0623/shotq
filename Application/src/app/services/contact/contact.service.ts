@@ -1,18 +1,29 @@
-import * as _ from 'lodash';
+import { Injectable } from '@angular/core';
 import { URLSearchParams } from '@angular/http';
-import { Injectable }              from '@angular/core';
-import { ApiService }              from '../api';
+import * as _ from 'lodash';
+import { Observable } from 'rxjs/Observable';
+import { Subject } from 'rxjs/Subject';
+
+import { Contact } from '../../models/contact';
+import {
+  DATE_TYPE_ANNIVERSARY, DATE_TYPE_BIRTHDAY, DateType
+} from '../../models/contact-date';
+import { ApiService } from '../api';
 import { GeneralFunctionsService } from '../general-functions';
-import { Observable }              from 'rxjs/Observable';
+import { SocialNetwork } from '../../models/social-network';
+import { AccessService } from '../access/access.service';
+
 declare let require: (any);
 
-import 'rxjs/Rx';
-
-import { Contact }                 from '../../models/contact';
-import { DATE_TYPE_ANNIVERSARY, DATE_TYPE_BIRTHDAY, DateType } from '../../models/contact-date';
+type ChangedData = number|number[]|void;
 
 @Injectable()
 export class ContactService {
+  // This event is emitted when the changes has been successfully sent to the server.
+  // Any client interested in receiving notification when the local data
+  // should be updated, should subscribe to this event.
+  remoteDataHasChanged = new Subject<ChangedData>();
+
   /* Endpoints */
 
   // Contact endpoint
@@ -38,7 +49,6 @@ export class ContactService {
   private contactActivityList:   string = '/person/contact/:contact_id/activity/';
   /* Other vars */
   private contactTypes = [];
-  private functions;
   private emailTypeService;
   private phoneTypeService;
   private phoneType;
@@ -46,13 +56,15 @@ export class ContactService {
   private file: any;
 
   public static newObject(data?: object): Contact {
-    return Object.assign(new Contact(), data || {});
+    let result = Object.assign(new Contact(), data || {});
+    result.social_networks = (result['social_networks'] || [])
+      .map(value => Object.assign(new SocialNetwork(), value || {}));
+    return result;
   }
 
   // Initialize services
-  constructor(private apiService: ApiService) {
-      this.updateContactTypes();
-      this.functions = new GeneralFunctionsService();
+  constructor(private apiService: ApiService,
+              private functions: GeneralFunctionsService) {
   }
 
   /**
@@ -82,7 +94,7 @@ export class ContactService {
    */
   public getContactList(params: any = {}) {
     // parameter string
-    let p = '?archived=False&active=True&';
+    let p = '?active=True';
     let paginator = params.paginator;
     let order = params.order;
     let filters = params.filters;
@@ -90,7 +102,7 @@ export class ContactService {
     if (paginator !== undefined) {
       p += paginator;
     }
-    if (paginator !== undefined && order !== undefined) {
+    if (paginator !== undefined || order !== undefined) {
       p += '&';
     }
 
@@ -109,6 +121,9 @@ export class ContactService {
     if (params.page_size) {
       p += `&page_size=${params.page_size}`;
     }
+    if (params.hasOwnProperty('archived')) {
+      p += `&archived=${params.archived}`;
+    }
 
     // need to use QueryParams Object
     if (filters) {
@@ -123,9 +138,10 @@ export class ContactService {
       .map(data => {
         let contactList = [];
         for (let contact of data.results) {
-          if (!contact.archived) { // Do not show contact in the list if it is archived.
+          // SQNG-1029, SQNG-1030: Required to show archived contacts so remove the if condition
+          // if (!contact.archived) { // Do not show contact in the list if it is archived.
             contactList.push(this.formatContact(contact));
-          }
+          // }
         }
         return {
           page: contactList,
@@ -140,8 +156,10 @@ export class ContactService {
    */
   public getList(options: object = {}) {
     let searchParams = new URLSearchParams();
-    options = _.pickBy(options);
+    // options = _.pickBy(options);
     _.each(options, (value, key) => {
+      if (value === 0)
+        return;
       searchParams.set(key, value);
     });
     let query = _.isEmpty(options) ? '' : '?' + searchParams.toString();
@@ -182,9 +200,10 @@ export class ContactService {
       .map(data => {
         let contactList = [];
         for (let contact of data.results) {
-          if (!contact.archived) { // Do not show contact in the list if it is archived.
+          // SQNG-1029, SQNG-1030: Required to show archived contacts so remove the if condition
+          // if (!contact.archived) { // Do not show contact in the list if it is archived.
             contactList.push(this.formatContact(contact));
-          }
+          // }
         }
         return {
           page: contactList,
@@ -198,7 +217,7 @@ export class ContactService {
    * @param {any[]} contacts [description]
    */
   public bulkCreate(contacts: any[]) {
-    return this.apiService.post(this.bulkEndpoint, contacts);
+    return this.apiService.post(this.bulkEndpoint, contacts).do(() => this.remoteDataHasChanged.next());
   }
 
   /**
@@ -207,7 +226,7 @@ export class ContactService {
    */
   public deleteContact(id: number) {
     let path = `${this.personEndpoint}${id}/`;
-    return this.apiService.delete(path);
+    return this.apiService.delete(path).do(() => this.remoteDataHasChanged.next(id));
   }
 
   /**
@@ -216,7 +235,7 @@ export class ContactService {
    */
   public bulkDeleteContact(ids: Array<number>) {
     let path = `${this.personEndpoint}?id=${ids.join()}`;
-    return this.apiService.delete(path);
+    return this.apiService.delete(path).do(() => this.remoteDataHasChanged.next(ids));
   }
 
   /**
@@ -225,7 +244,8 @@ export class ContactService {
    */
   public archiveContact(id: number) {
     let path = `${this.personEndpoint}${id}/`;
-    return this.apiService.patch(path, { 'archived': true, 'active': false });
+    return this.apiService.patch(path, { 'archived': true, 'active': false })
+      .do(() => this.remoteDataHasChanged.next(id));
   }
 
   /**
@@ -235,7 +255,8 @@ export class ContactService {
    */
   public setDefaultPhone(id: number, phoneId: number) {
     let path = `${this.personEndpoint}${id}/`;
-    return this.apiService.patch(path, { 'default_phone': phoneId });
+    return this.apiService.patch(path, { 'default_phone': phoneId })
+      .do(() => this.remoteDataHasChanged.next(id));
   }
 
   /**
@@ -245,7 +266,8 @@ export class ContactService {
    */
   public setDefaultEmail(id: number, emailId: number) {
     let path = `${this.personEndpoint}${id}/`;
-    return this.apiService.patch(path, { 'default_email': emailId });
+    return this.apiService.patch(path, { 'default_email': emailId })
+      .do(() => this.remoteDataHasChanged.next(id));
   }
 
   /**
@@ -255,7 +277,8 @@ export class ContactService {
    */
   public setDefaultAddress(id: number, addressId: number) {
     let path = `${this.personEndpoint}${id}/`;
-    return this.apiService.patch(path, { 'default_address': addressId });
+    return this.apiService.patch(path, { 'default_address': addressId })
+      .do(() => this.remoteDataHasChanged.next(id));
   }
 
   /**
@@ -293,9 +316,6 @@ export class ContactService {
   /**
    * Function to update contact types.
    */
-  public updateContactTypes() {
-    this.getRequestContactTypes().subscribe(types => this.contactTypes = types);
-  }
   public getRequestContactTypes(): Observable<any> {
     return this.apiService.get(this.typesEndpoint)
       .map(response => response.results);
@@ -313,7 +333,8 @@ export class ContactService {
    * @param {Array} data the form data to make body and perform the post.
    */
   public quickCreate(data) {
-    return this.apiService.post(this.contactEndpoint, data);
+    return this.apiService.post(this.contactEndpoint, data)
+      .do(() => this.remoteDataHasChanged.next());
   }
 
   /**
@@ -323,7 +344,8 @@ export class ContactService {
    */
   public create(data: any) {
     data.account = this.apiService.getAccount();
-    return this.apiService.post(this.createContactEndpoint, data);
+    return this.apiService.post(this.createContactEndpoint, data)
+      .do(() => this.remoteDataHasChanged.next());
   }
 
   /**
@@ -332,16 +354,19 @@ export class ContactService {
    * @param {Array} data the form data to make body and perform the post.
    */
   public update(data) {
-    return this.apiService.put(`${this.contactEndpointUpdate}${data.id}/`, data, '');
+    return this.apiService.put(`${this.contactEndpointUpdate}${data.id}/`, data, '')
+      .do(() => this.remoteDataHasChanged.next(data.id));
   }
 
   public patch(data) {
-      return this.apiService.patch(`${this.contactEndpointUpdate}${data.id}/`, data);
+      return this.apiService.patch(`${this.contactEndpointUpdate}${data.id}/`, data)
+        .do(() => this.remoteDataHasChanged.next(data.id));
   }
 
   public doMerge(id1, id2, data) {
     let endpoint = this.mergeContactEndpoint.replace(':person_id', id1);
-    return this.apiService.post(endpoint, data);
+    return this.apiService.post(endpoint, data)
+      .do(() => this.remoteDataHasChanged.next([id1, id2]));
   }
 
   /**
@@ -446,7 +471,8 @@ export class ContactService {
    * @param {number} id [date id to delete]
    */
   public deleteContactDate(id: number) {
-    return this.apiService.delete(`${this.contactDateEndpoint}${id}/`);
+    return this.apiService.delete(`${this.contactDateEndpoint}${id}/`)
+      .do(() => this.remoteDataHasChanged.next(id));
   }
   /**
    * Function to get contact jobs from API.
@@ -482,6 +508,10 @@ export class ContactService {
   public contactAvailablePhoneTypes(id: number) {
     let path = `${this.personEndpoint}${id}/phone_types/`;
     return this.apiService.get(path);
+  }
+
+  bulkPatch(data: Array<{ id: Number }>) {
+    return this.apiService.patch(`${this.personEndpoint}`, data);
   }
   /**
    * Function to get full API URL.
@@ -542,7 +572,6 @@ export class ContactService {
   private getDefaultAddress(contact: Object): any {
     return this.getDefault('default_address', 'addresses', ['address1',
                                                             'address2',
-                                                            'address_type',
                                                             'city',
                                                             'country',
                                                             'state',

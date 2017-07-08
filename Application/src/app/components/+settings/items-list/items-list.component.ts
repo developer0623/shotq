@@ -1,4 +1,4 @@
-import { Component, ViewEncapsulation } from '@angular/core';
+import { Component, ViewEncapsulation, ViewContainerRef } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
 
 import { BreadcrumbService } from '../../shared/breadcrumb/components/breadcrumb.service';
@@ -8,7 +8,7 @@ import { ItemTemplate } from '../../../models/item-template';
 import { ItemCategory } from '../../../models/item-category';
 import { ItemTemplateService } from '../../../services/product/item-template';
 import { ItemCategoryService } from '../../../services/product/item-category';
-import { Modal } from 'single-angular-modal';
+import { Modal, Overlay } from 'single-angular-modal';
 
 
 @Component({
@@ -28,9 +28,11 @@ export class ProductItemsListComponent extends BaseProductList<ItemTemplate, Ite
     categoryService: ItemCategoryService,
     flash: FlashMessageService,
     breadcrumbService: BreadcrumbService,
-    modal: Modal
+    modal: Modal,
+    overlay: Overlay,
+    vcRef: ViewContainerRef,
   ) {
-    super(router, route, productService, categoryService, flash, modal);
+    super(router, route, productService, categoryService, flash, modal, overlay, vcRef);
     breadcrumbService.addFriendlyNameForRoute('/settings/products/items', 'Items');
   }
 }

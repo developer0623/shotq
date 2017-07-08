@@ -3,6 +3,7 @@ import { EventGroup } from './event-group';
 import { JobRole } from './job-role';
 import { JobType } from './job-type';
 import { Role } from './role';
+import { JobRoleService } from '../services/job-role/job-role.service';
 
 // see job_api_v1.ContactMinimalSerializer (person.models.Contact)
 export class JobApiBaseContact {
@@ -66,7 +67,7 @@ export class JobApiJobContact {
 
   get primaryRole(): JobRole {
     if (this.roles && this.roles.length > 0)
-      return this.roles[0];
+      return JobRoleService.newObject(this.roles[0]);
     return JobRole.Empty;
   }
 
@@ -91,7 +92,7 @@ export class Job {
   eventgroups: Array<EventGroup>;
   external_owner: JobApiExternalOwner;
   internal_owner: JobApiInternalOwner;
-  job_contacts: JobApiJobContact[];
+  job_contacts: JobApiJobContact[] = [];
   job_type: number;
   job_type_details?: JobType;
   job_workers: JobApiJobWorker[];
@@ -112,6 +113,7 @@ export class Job {
   over: boolean; // custom variable for job header
   referrers: Array<any>;
   status: string;
+  account_logo?: string;
 
   // these fields stays to do not break jobs add section
   contacts: Contact[];
@@ -134,8 +136,10 @@ export class Job {
     let result = this.job_contacts.find(this.isPrimaryJobContact.bind(this));
     if (result)
       return Object.assign(new JobApiJobContact(), result);
+    return JobApiJobContact.Empty;
   }
 }
 
 export const archivedJobStatus = 'archived';
 export const deletedJobStatus = 'deleted';
+export const activeJobStatus = 'opportunity';

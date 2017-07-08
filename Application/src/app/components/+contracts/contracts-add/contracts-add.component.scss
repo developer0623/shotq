@@ -1,3 +1,5 @@
+@import "../../../../assets/css/variables";
+@import "../../../../assets/css/mixins";
 
 .selectStyle {
     position: relative;
@@ -62,7 +64,8 @@
 }
 .jobAssociated {
     background-color:#fff;
-    padding: 20px;
+    //padding: 20px;
+    padding: 20px 0;
     max-width: 490px;
     width: 100%;
     margin: 0 auto;
@@ -77,6 +80,7 @@
     }
     &__head {
         margin-bottom: 20px;
+        padding: 0 20px;
     }
     // &__text {
     //     font-size: 18px;
@@ -134,7 +138,7 @@
     &__search {
         position: relative;
         padding: 20px;
-        margin: 0 -20px;
+        //margin: 0 -20px;
         // width: 100%;
 
         background-color: #f0f2f7;
@@ -171,6 +175,11 @@
         padding-bottom: 1px;
         min-height: 100px;
         max-height: 280px;
+        overflow: hidden;
+        //margin-right: -15px;
+        .ps-container {
+            max-height: 270px;
+        }
         //overflow-X: hidden;
         // margin-bottom: 20px;
         // &:after , &:before {
@@ -194,6 +203,9 @@
         .checkbox-custom {
             position: relative;
             padding: 12px 0 12px 7px;
+            .row {
+                margin: 0;
+            }
             &.is-trio {
                 .checkbox-custom__input {
                     width: 28.8%;
@@ -206,7 +218,7 @@
                 left: 35px;
                 bottom: -5px;
                 // right: -35px;
-                right: -15px;
+                right: 0;
                 height: 1px;
                 background: rgba(#3a405b , .2);
 
@@ -218,13 +230,13 @@
             }
             &:first-child {
                 // margin-right: -20px;
-                &:after {
-                    right: -15px;
-                }
+                // &:after {
+                //     right: -15px;
+                // }
             }
-            &.checkbox-default {
-                margin-right: -15px;
-            }
+            // &.checkbox-default {
+            //     margin-right: -15px;
+            // }
         }
     }
     &__list_mod {
@@ -448,7 +460,6 @@
             text-align: center;
             line-height:21px;
             border:none;
-            margin-right: 36px;
             &.is-disabled {
                 background-color: #e4e7ef;
                 cursor: not-allowed;
@@ -504,7 +515,15 @@
 }
 
 .contact-list {
-  width: 450px;
+  //width: 450px;
+  padding: 0 20px;
+  &__email {
+    white-space: nowrap;
+    text-overflow: ellipsis;
+    overflow: hidden;
+    width: 160px;
+    display: inline-block;
+  }
 }
 .radio-custom {
     position: relative;
@@ -568,6 +587,7 @@
 
 }
 div.contact-type-list {
+    margin: 0 20px;
     .row {
         margin-right: -15px !important;
         margin-left: -15px !important;
@@ -668,29 +688,26 @@ div.contact-type-list {
   cursor: pointer;
 }
 
-//tempalte
+// select template modal
 .select-template {
     position: relative;
-    padding: 30px 44px 60px 44px;
-    background: #FFF;
-    box-shadow: 0 10px 20px 0 rgba(0, 0, 0, 0.2);
-    border: solid 1px #e4e8f0;
-    width: 1060px;
-    max-width: 100%;
+    padding: 30px 50px 0;
+    height: 603px;
+    background: #fff;
+    @include box-shadow(0 10px 20px 0 rgba(0, 0, 0, 0.2));
+    border: 1px solid $gray-lighter;
     &__title {
         font-size: 24px;
         font-weight: 600;
         font-style: normal;
         font-stretch: normal;
         color: #3a405b;
-        margin-bottom: 30px;
+        margin-bottom: 41px;
     }
     &__in {
         font-size: 0;
-        margin: 0 -20px;
-        max-height: 560px;
-        overflow-y: auto;
-        // margin-bottom: 40px;
+        margin: 0;
+        height: 460px;
     }
     &__footer {
         position: absolute;
@@ -699,7 +716,7 @@ div.contact-type-list {
         right: 0;
         background-color: #ffffff;
         box-shadow: 0 -2px 4px 0 rgba(0, 0, 0, 0.2);
-        padding: 18px 0 20px 66px;
+        padding: 18px 66px 20px;
     }
     &__vcenter {
         padding: 135px 0;
@@ -736,7 +753,6 @@ div.contact-type-list {
 
 .template-wrap {
     font-size: 0;
-    margin: 0 0 20px 0;
 }
 .template-item {
     position: relative;
@@ -918,13 +934,20 @@ div.contact-type-list {
 
 }
 .btn {
+    &.save-button {
+        background-color: $bright-blue !important;
+    }
+    &.cancel-button {
+        background-color: transparent !important;
+    }
     &.is-disabled {
-        background-color: #e4e7ef;
+        background-color: #e4e7ef !important;
     }
 }
 
 .buttonsButtom {
     position: relative;
+    padding: 0 20px;
     &:before {
         content: "";
         position: absolute;
@@ -938,7 +961,7 @@ div.contact-type-list {
 
 .ps-container {
   position: relative;
-  max-height: 280px;
+  max-height: 426px;
 }
 
 

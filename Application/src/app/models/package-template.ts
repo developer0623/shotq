@@ -8,3 +8,5 @@ export class PackageTemplate extends BasePackage {
   package_count?: number;
   addons: number[];
 }
+
+export const statusArchived = 'archived';

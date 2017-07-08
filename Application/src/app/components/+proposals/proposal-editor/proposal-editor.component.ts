@@ -1,12 +1,15 @@
 import * as _ from 'lodash';
 import { Observable, Subject, Subscription } from 'rxjs';
 import { FormControl } from '@angular/forms';
-import { Component, ViewEncapsulation, OnInit, OnDestroy, AfterViewInit, ViewChild } from '@angular/core';
+import {
+  Component, ViewEncapsulation, OnInit, OnDestroy, AfterViewInit, ViewChild,
+  ViewContainerRef
+} from '@angular/core';
 import { Router, ActivatedRoute, Params } from '@angular/router';
 import { ModalDirective } from 'ngx-bootstrap';
 
 import { Proposal } from '../../../models/proposal';
-import { PackageTemplate } from '../../../models/package-template';
+import { PackageTemplate, statusArchived } from '../../../models/package-template';
 import { PackageCategory } from '../../../models/package-category';
 import { Package } from '../../../models/package';
 import { ProposalSettingTemplate } from '../../../models/proposal-setting-template';
@@ -21,12 +24,16 @@ import { Worker } from '../../../models/worker';
 import { PackagesFilter } from './packages-filter';
 import { ContractTemplateService } from '../../../services/contract-template/contract-template.service';
 import { ContractTemplate } from '../../../models/contract-template.model';
-import { ContractsAddModalService } from '../../+contracts/contracts-add/contracts-add-modal.service';
 import { Contract } from '../../../models/contract';
 import { ContractService } from '../../../services/contract/contract.service';
 import { AlertifyService } from '../../../services/alertify/alertify.service';
 import { FlashMessageService } from '../../../services/flash-message/flash-message.service';
 import { step } from '../../shared/step-indicator/step-indicator.component';
+import { Modal, Overlay, overlayConfigFactory } from 'single-angular-modal';
+import {
+  ContractAddModalContext,
+  ContractsAddModalComponent
+} from '../../+contracts/contracts-add/contracts-add.component';
 
 export const PROPOSAL_SETTINGS_FIELDS: string[] = [
   'merchant_account', 'pay_with_check', 'collect_manually',
@@ -150,19 +157,25 @@ export class ProposalEditorComponent implements OnInit, OnDestroy, AfterViewInit
               private workerService: WorkerService,
               private contractService: ContractService,
               private contractTemplateService: ContractTemplateService,
-              private contractsAddModalService: ContractsAddModalService,
               private packageCategoryService: PackageCategoryService,
               private proposalService: ProposalService,
-              private proposalSettingTemplatesService: ProposalSettingTemplatesService) {
+              private modal: Modal,
+              private proposalSettingTemplatesService: ProposalSettingTemplatesService,
+              private overlay: Overlay,
+              private vcRef: ViewContainerRef) {
+    overlay.defaultViewContainer = vcRef;
+
   }
 
   ngOnInit() {
     this.proposalService.settingsChanged.subscribe((changes) => {
       this.settingsIsChanged = true;
     });
-    this.packageTemplateService.getList().subscribe((result) => {
-      this.packageTemplates = result.results;
-    });
+    this.packageTemplateService
+      .getList({'status!': statusArchived})
+      .subscribe((result) => {
+        this.packageTemplates = result.results;
+      });
     this.packageService.getList().subscribe(result => {
       this.packages = result.results;
     });
@@ -296,7 +309,8 @@ export class ProposalEditorComponent implements OnInit, OnDestroy, AfterViewInit
     this.currentPackageFilter = _.cloneDeep(filterParams);
     let params = {
       category: filterParams.category,
-      search: filterParams.searchQuery
+      search: filterParams.searchQuery,
+      'status!': 'archived'
     };
     this.packageTemplateService.getList(params)
       .subscribe((result) => {
@@ -422,6 +436,7 @@ export class ProposalEditorComponent implements OnInit, OnDestroy, AfterViewInit
       .first()
       .subscribe(([workers, conflicts]: [Worker[], any[]]) => {
         this.workers = workers;
+        this.workers = this.workers.filter(w => w.job_role !== '');
         this.workers.map((worker: any) => {
           let conflict = conflicts.find(c => c.id === worker.id);
           worker.conflicts = !!conflict ? conflict.conflicts : [];
@@ -442,20 +457,24 @@ export class ProposalEditorComponent implements OnInit, OnDestroy, AfterViewInit
     this.contractTemplateService.getList(params)
       .first()
       .subscribe(res => {
-        this.contractTemplates = res.results;
+        this.contractTemplates = res.results
+          .filter(temp => temp.status !== 'archived');
       });
   }
 
   private selectContractTemplate(template: ContractTemplate) {
     if (this.proposal.contract_data) {
-      this.alertify.confirm(`This will mark current contract in proposal as archived and create new one.<br>
-        Do you want to continue?`, () => {
-        let contract = this.proposal.contract_data;
-        contract.status = 'archived';
-        this.contractService.save(contract)
-          .first()
-          .subscribe(() => this.createContract(template));
-      });
+      this.alertify.confirm(
+        `This will remove current contract from proposal.<br> Do you want to continue?`,
+        () => {
+          let contract = this.proposal.contract_data;
+          this.contractService
+            .delete(contract.id)
+            .first()
+            .subscribe(() => {
+              this.createContract(template);
+            });
+        });
     } else {
       this.createContract(template);
     }
@@ -463,9 +482,8 @@ export class ProposalEditorComponent implements OnInit, OnDestroy, AfterViewInit
 
   private createContract(template) {
     this._createContractInModal(template)
-      .first()
-      .map(data => data.instance)
-      .switchMap(compRef => compRef.onContractCreate)
+      // .map(data => data.instance)
+      // .switchMap(compRef => compRef.onContractCreate)
       .subscribe((contract: Contract) => {
         this.proposal.contract = contract.id;
         this.contractTemplate = contract.template;
@@ -478,17 +496,18 @@ export class ProposalEditorComponent implements OnInit, OnDestroy, AfterViewInit
     event.preventDefault();
     event.stopPropagation();
     if (this.proposal.contract_data) {
-      this.alertify.confirm(`This will mark current contract in proposal as archived and remove it from proposal<br>
-        Do you want to continue?`, () => {
-        let contract = this.proposal.contract_data;
-        contract.status = 'archived';
-        this.contractService.save(contract)
-          .first()
-          .subscribe(() => {
-            this.proposal.contract = null;
-            this.saveProposal();
-          });
-      });
+      this.alertify.confirm(
+        `This will remove current contract from proposal.<br> Do you want to continue?`,
+        () => {
+          let contract = this.proposal.contract_data;
+          this.contractService
+            .delete(contract.id)
+            .first()
+            .subscribe(() => {
+              this.proposal.contract = null;
+              this.saveProposal();
+            });
+        });
     }
   }
 
@@ -497,19 +516,38 @@ export class ProposalEditorComponent implements OnInit, OnDestroy, AfterViewInit
     if (this.proposal.job.external_owner) {
       contacts.push(this.proposal.job.external_owner.id);
     }
-    return this.contractsAddModalService.openModal(this, {
-      contract: {
-        contacts: contacts,
-        template: template.id,
-        contents: template.contents,
-        title: this.proposal.job.name,
-        job: this.proposal.job.id
-      },
-      next: () => ['/jobs', this.proposal.job.id, 'proposal'],
-      errorsNext: (contractId) => ['/jobs', this.proposal.job.id, 'proposal', 'send'],
-      enabledSteps: [],
-      showOnErrors: true
+    return Observable.create(observer => {
+      this.modal
+        .open(ContractsAddModalComponent,
+          overlayConfigFactory({
+            contract: ContractService.newObject({
+              contacts: contacts,
+              template: template.id,
+              contents: template.contents,
+              title: this.proposal.job.name,
+              job: this.proposal.job.id
+            }),
+            next: () => ['/jobs', this.proposal.job.id, 'proposal'],
+            errorsNext: (contractId) => ['/jobs', this.proposal.job.id, 'proposal', 'send'],
+            enabledSteps: [],
+            showOnErrors: true
+          }, ContractAddModalContext))
+        .then(dialogRef => {
+          dialogRef.result
+            .then(result => {
+              observer.next(result);
+              observer.complete();
+              // Catching close event with result data from modal
+              // console.log(result)
+            })
+            .catch(() => {
+              observer.error();
+              // Catching dismiss event with no results
+              // console.log('rejected')
+            });
+        });
     });
+
   }
 
   private openContract() {

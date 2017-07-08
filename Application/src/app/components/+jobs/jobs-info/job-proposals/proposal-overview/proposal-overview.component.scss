@@ -1,5 +1,6 @@
 .proposal-overview {
 	padding-top: 30px;
+	padding-bottom: 30px;
 	font-family: "Titillium Web", sans-serif;
 	color: #3a405b;
 }
@@ -54,7 +55,7 @@
 	&__pack {
 		padding: 0 20px;
 		padding-top: 30px;
-    border-bottom: 1px solid #e4e8f0;
+    	border-bottom: 1px solid #e4e8f0;
 		&-ttl {
 			opacity: 0.5;
 		 	font-size: 14px;
@@ -107,10 +108,27 @@
       max-width: 125px;
       object-fit: cover;
 		}
+    &-default-img {
+      border-radius: 50%;
+      border: 1px solid #00c4c9;
+      width: 4rem;
+      height: 4rem;
+      display: inline-block;
+      text-align: center;
+      margin: 0 10px;
+      vertical-align: middle;
+      img {
+        display: inline-block;
+        position: relative;
+        top: 50%;
+        transform: translateY(-50%);
+      }
+    }
 		&-txt {
 			display: inline-block;
 			vertical-align: middle;
 			padding-left: 41px;
+      		max-width: 70%;
 		}
 		&-name {
 			font-size: 14px;
@@ -163,12 +181,14 @@
 			display: inline-block;
 			vertical-align: top;
 			padding-left: 20px;
+			width: calc(100% - 66px);
 		}
 		&-name {
 			font-size: 14px;
   			font-weight: 600;
   			font-family: "Titillium Web", sans-serif;
   			margin-bottom: 0;
+  			word-wrap: break-word;
 		}
 		&-post {
 			color: #b5c1cf;
@@ -179,6 +199,11 @@
 			font-family: "Titillium Web", sans-serif;
 			font-size: 14px;
 			opacity: 0.5;
+		}
+		&-mail {
+			text-overflow: ellipsis;
+			white-space: nowrap;
+			overflow: hidden;
 		}
 	}
 }

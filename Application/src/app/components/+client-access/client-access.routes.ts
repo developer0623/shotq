@@ -1,24 +1,25 @@
 import { Routes } from '@angular/router';
 import { AccountComponent } from './account/';
 import { CommunicationComponent } from './communication/';
-import { InvoicesComponent } from './invoices/';
 import { OverviewComponent } from './overview/';
-import { ClientPageComponent, JobResolve } from './client-page';
+import { ClientPageComponent } from './client-page';
 import { ClientAccessAuthGuard } from '../../services/access';
+import { JobResolver } from '../+jobs/job.resolver';
+import { InvoicesComponent } from '../shared/invoices/invoices.component';
 
 export const CLIENT_ACCESS_ROUTES: Routes = [
   {
-    path: ':jobId',
+    path: ':id',
     component: ClientPageComponent,
     resolve: {
-      job: JobResolve
+      job: JobResolver
     },
-    canActivate: [ ClientAccessAuthGuard ],
+    canActivate: [ClientAccessAuthGuard],
     children: [
-      { path: 'account', component: AccountComponent },
-      { path: 'communication', component: CommunicationComponent },
-      { path: 'invoices', component: InvoicesComponent },
-      { path: 'overview', component: OverviewComponent }
+      {path: 'account', component: AccountComponent},
+      {path: 'communication', component: CommunicationComponent},
+      {path: 'invoices', component: InvoicesComponent},
+      {path: 'overview', component: OverviewComponent}
     ]
   }
 ];

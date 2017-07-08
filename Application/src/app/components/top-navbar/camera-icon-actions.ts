@@ -41,14 +41,14 @@ export const cameraIconActions = [
 export const accountActions = [
   {
     name: 'Profile',
-    icon: 'icon-shape',
+    icon: 'icon-user-list',
     href: '/settings/profile'
   },
-  {
-    name: 'Settings',
-    icon: 'icon-desk-support-help',
-    href: '#'
-  },
+  // {
+  //   name: 'Settings',
+  //   icon: 'icon-desk-support-help',
+  //   href: '#'
+  // },
   {
     name: 'Logout',
     icon: 'icon-log-out',

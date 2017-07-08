@@ -71,7 +71,7 @@
         <div class="row block-content__line" *ngIf="workerForm.controls.role.value == choices.CONTRACTOR || workerForm.controls.role.value == choices.EMPLOYEE">
           <div class="col-md-12">
             <div class="new-field">
-              <div class="checkbox">
+              <div class="sq-checkbox">
                 <input id="hide_billing_details" type="checkbox" formControlName="hide_billing_details" [checked]="worker.hide_billing_details"/>
                 <label for="hide_billing_details">Hide Billing/Financial Details</label>
               </div>
@@ -81,7 +81,7 @@
         <div class="row block-content__line" *ngIf="workerForm.controls.role.value == choices.CONTRACTOR || workerForm.controls.role.value == choices.EMPLOYEE">
           <div class="col-md-12">
             <div class="new-field">
-              <div class="checkbox">
+              <div class="sq-checkbox">
                 <input id="disable_client_correspondence" type="checkbox" formControlName="disable_client_correspondence" [checked]="worker.disable_client_correspondence"/>
                 <label for="disable_client_correspondence">Disable Client Correspondence</label>
               </div>
@@ -115,7 +115,7 @@
         <div class="row block-content__line" *ngIf="worker.role !== choices.OWNER">
           <div class="col-md-12">
             <div class="new-field">
-              <div class="checkbox">
+              <div class="sq-checkbox">
                 <input id="active" type="checkbox" formControlName="active" [checked]="worker.active"/>
                 <label for="active">Active</label>
               </div>

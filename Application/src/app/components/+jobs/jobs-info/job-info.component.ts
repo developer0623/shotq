@@ -1,34 +1,44 @@
+import { Component, OnDestroy, OnInit, ViewChild, ViewContainerRef } from '@angular/core';
+import { Router, NavigationEnd, ActivatedRoute } from '@angular/router';
+import { SentCorrespondence } from 'app/models/sentcorrespondence';
 import * as _ from 'lodash';
-import { Component, ViewChild, OnDestroy, OnInit, ViewContainerRef } from '@angular/core';
-import { Router } from '@angular/router';
 import { Observable, Subject } from 'rxjs';
-
-/* Components */
-import { JobContactListDialogComponent } from './contact-list-dialog/contact-list-dialog.component';
-import { JobHeaderComponent } from './job-header/job-header.component';
-/* Services */
-import { AccessService } from '../../../services/access';
-import { BreadcrumbService } from '../../shared/breadcrumb/components/breadcrumb.service';
+import { SubscribableOrPromise } from 'rxjs/Observable';
+import { Overlay, overlayConfigFactory } from 'single-angular-modal/esm';
+import { Modal } from 'single-angular-modal/plugins/bootstrap';
+import { BaseEvent } from '../../../models/event';
+import { Job, JobApiJobContact } from '../../../models/job';
+import { JobContact } from '../../../models/job-contact';
+import { JobNote } from '../../../models/job-note';
+import { BaseNote } from '../../../models/notes';
+import { Role } from '../../../models/role';
 import { ContactService } from '../../../services/contact';
 import { GeneralFunctionsService } from '../../../services/general-functions';
 import { JobContactService } from '../../../services/job-contact/job-contact.service';
 import { JobNoteService } from '../../../services/job-note';
-import { JobService } from '../../../services/job/';
-/* Models */
-import { ChangeNoteAction, DeleteNoteAction } from '../../shared/notes/note-actions';
-import { Job, JobApiJobContact } from '../../../models/job';
-import { JobContact } from '../../../models/job-contact';
-import { BaseNote } from '../../../models/notes';
-import { JobNote } from '../../../models/job-note';
 import { JobRoleService } from '../../../services/job-role/job-role.service';
-import { Role } from '../../../models/role';
-import { SubscribableOrPromise } from 'rxjs/Observable';
+import { JobService } from '../../../services/job/';
+import { MessagingService } from '../../../services/messaging/messaging.service';
 import { SentCorrespondenceService } from '../../../services/sent-correspondence/sent-correspondence.service';
-import { SentCorrespondence } from 'app/models/sentcorrespondence';
-import { ChooseContactComponent, ChooseContactWindowData } from '../../shared/choose-contact/choose-contact.component';
-import { Modal } from 'single-angular-modal/plugins/bootstrap';
-import { overlayConfigFactory, Overlay } from 'single-angular-modal/esm';
+import { BreadcrumbService } from '../../shared/breadcrumb/components/breadcrumb.service';
+import {
+  ChooseContactComponent, ChooseContactWindowData
+} from '../../shared/choose-contact/choose-contact.component';
 import { JobsUiService } from '../../shared/jobs-ui/jobs-ui.service';
+import { MessagingUiService } from '../../shared/messaging-ui/messaging-ui.service';
+import {
+  ChangeNoteAction, DeleteNoteAction
+} from '../../shared/notes/note-actions';
+
+import { JobContactListDialogComponent } from './contact-list-dialog/contact-list-dialog.component';
+import { JobHeaderComponent } from './job-header/job-header.component';
+import { EventService } from '../../../services/event/event.service';
+import { JobTypeService } from '../../../services/job-type/job-type.service';
+import { JobType } from '../../../models/job-type';
+import {
+  QuickJobComponent,
+  QuickJobWindowData
+} from '../../top-navbar/quick-job/quick-job.component';
 
 @Component({
   selector: 'job-info',
@@ -36,7 +46,7 @@ import { JobsUiService } from '../../shared/jobs-ui/jobs-ui.service';
   styleUrls: ['job-info.component.scss'],
   providers: [
     ContactService, GeneralFunctionsService, JobContactService, JobNoteService,
-    JobRoleService, JobService, SentCorrespondenceService
+    JobRoleService, JobTypeService, JobService, SentCorrespondenceService
   ]
 })
 export class JobInfoComponent implements OnInit, OnDestroy {
@@ -78,10 +88,12 @@ export class JobInfoComponent implements OnInit, OnDestroy {
   public jobId: any;
   public job: Job;
   public proposalToShowId: number;
+  public invoiceToShowId: number;
   private destroyed = new Subject<void>();
   private notesLoading: boolean;
   private correspondences: SentCorrespondence[] = [];
   private roles: Role[] = [];
+  private types: JobType[] = [];
   private notes: JobNote[];
   private responseOK: boolean = false;
   private tabSectionName: string = 'jobs';
@@ -95,26 +107,26 @@ export class JobInfoComponent implements OnInit, OnDestroy {
     currentPage: 1,
     perPage: 3,
   };
-  private router: Router;
 
-  constructor(private accessService: AccessService,
-              private breadcrumbService: BreadcrumbService,
+  constructor(private breadcrumbService: BreadcrumbService,
               private contactService: ContactService,
               private generalFunctions: GeneralFunctionsService,
               private jobContactService: JobContactService,
               private jobNoteService: JobNoteService,
               private jobRoleService: JobRoleService,
+              private jobTypeService: JobTypeService,
               private jobService: JobService,
+              private messagingService: MessagingService,
+              private messagingUiService: MessagingUiService,
               private presenter: JobsUiService,
-              private sentCorrespondenceService: SentCorrespondenceService,
               private modal: Modal,
-              overlay: Overlay,
-              vcRef: ViewContainerRef,
-              _router: Router) {
+              private router: Router,
+              private route: ActivatedRoute,
+              private vcRef: ViewContainerRef,
+              overlay: Overlay) {
     // This is a workaround for the issue where Modal doesn't work with lazy
     // modules. See http://bit.ly/2qqlpDX for details.
     overlay.defaultViewContainer = vcRef;
-    this.router = _router;
     breadcrumbService.addFriendlyNameForRouteRegex('^/jobs/[0-9]+', '');
   }
 
@@ -126,6 +138,9 @@ export class JobInfoComponent implements OnInit, OnDestroy {
     this.notes = [];
     this.notesLoading = false;
     this.responseOK = false;
+    this.jobNoteService.remoteDataHasChanged
+      .takeUntil(this.destroyed)
+      .subscribe(() => this.getJobNotes());
     /* Get job id from url params */
     this.generalFunctions.getUrlParams()
       .subscribe(
@@ -136,10 +151,13 @@ export class JobInfoComponent implements OnInit, OnDestroy {
               //noinspection JSIgnoredPromiseFromCall
               Observable.forkJoin(
                 this.getJobNotes(), this.fetchObject(),
-                this.jobRoleService.getList(), this.getJobCorrespondence())
+                this.jobRoleService.getList(),
+                this.jobTypeService.getList(),
+                this.getJobCorrespondence())
                 .takeUntil(this.destroyed)
-                .subscribe((responses) => {
-                  this.roles = responses[2].results || [];
+                .subscribe(([notes, job, roles, types, messages]) => {
+                  this.roles = _.map(roles.results || [], JobRoleService.newObject);
+                  this.types = _.map(types.results || [], JobTypeService.newObject);
                   if (this.job && this.job.name) {
                     this.breadcrumbService.addFriendlyNameForRouteRegex(
                       '^/jobs/[0-9]+',
@@ -152,6 +170,22 @@ export class JobInfoComponent implements OnInit, OnDestroy {
         },
         err => console.error.bind(console)
       );
+
+    this.router.events
+      .filter(event => event instanceof NavigationEnd)
+      .subscribe((event) => {
+        let invoiceId = this.route.snapshot.queryParams['invoice'];
+        if (this.route.snapshot.queryParams['invoice']) {
+          this.currentTab = _.find(this.tabs, {status: 'invoices'});
+          this.invoiceToShowId = invoiceId;
+          return;
+        }
+
+        if (this.route.snapshot.queryParams['proposal']) {
+          this.currentTab = _.find(this.tabs, {status: 'proposals_and_contracts'});
+          return;
+        }
+      });
   }
 
   ngOnDestroy() {
@@ -177,17 +211,19 @@ export class JobInfoComponent implements OnInit, OnDestroy {
   }
 
   private resetJob(jobData: any) {
-    this.job = Object.assign(new Job(), jobData);
     this.job = JobService.newObject(jobData);
+    // An event is required to render a message template on the server side,
+    // so we pass it to the service in case the user will try to create
+    // a message from a template.
+    this.messagingUiService.event = EventService.newObject(this.job.main_event_details);
     // upgrade the job contacts so we can use `JobApiJobContact` methods
     this.job.job_contacts = _.map(this.presenter.sortedJobContacts(this.job), item => {
       return Object.assign(new JobApiJobContact(), item);
     });
-    this.refreshJobHeader(null);
   }
 
   private getJobCorrespondence(): Observable<SentCorrespondence[]> {
-    let result = this.sentCorrespondenceService
+    let result = this.messagingService
       .getList({job: this.jobId})
       .map(response => {
         return _.map(response.results, item => Object.assign(new SentCorrespondence(), item));
@@ -211,7 +247,6 @@ export class JobInfoComponent implements OnInit, OnDestroy {
       .subscribe(
         response => {
           this.notes = response.jobNotes || [];
-          this.getNotesContacts(this.notes);
           this.paginator.totalItems = response.total;
           this.responseOK = true;
         },
@@ -277,27 +312,33 @@ export class JobInfoComponent implements OnInit, OnDestroy {
   }
 
   //noinspection JSUnusedLocalSymbols
+  private onChangeJob() {
+    this.modal
+      .open(QuickJobComponent, overlayConfigFactory({job: this.job}, QuickJobWindowData))
+      .then(dialogRef => {
+        dialogRef.result
+          .then(() => this.fetchObject())
+          .catch(() => {});
+      });
+  }
+
+  //noinspection JSUnusedLocalSymbols
   /**
    * Displays the modal dialog for changing the job contact.
    * @param jobContact The job contact to change.
    */
   private onChangeJobContact(jobContact: JobApiJobContact) {
     let isContactsDialogVisible = this.jobContactsDialog.isVisible;
+    if (isContactsDialogVisible)
+      this.jobContactsDialog.hide();
     //noinspection JSIgnoredPromiseFromCall
-    this.contactService.getContact(jobContact.contact)
-      .map(ContactService.newObject)
-      .subscribe(contact => {
+    this.presenter.displayAddOrUpdateJobContactDialog(jobContact)
+      .finally(() => {
         if (isContactsDialogVisible)
-          this.jobContactsDialog.hide();
-        //noinspection JSIgnoredPromiseFromCall
-        this.presenter.displayAddOrUpdateJobContactDialog(jobContact)
-          .finally(() => {
-            if (isContactsDialogVisible)
-              this.jobContactsDialog.show();
-          })
-          .subscribe(result => {
-            this.saveJobContact(result);
-          });
+          this.jobContactsDialog.show();
+      })
+      .subscribe(result => {
+        this.saveJobContact(result);
       });
   }
 
@@ -424,6 +465,7 @@ export class JobInfoComponent implements OnInit, OnDestroy {
       );
   }
 
+
   // <editor-fold desc="Job notes operations">
   /**
    * Removes the given notes from the current job.
@@ -454,7 +496,6 @@ export class JobInfoComponent implements OnInit, OnDestroy {
             this.presenter.displaySuccessMessage(requests.length > 1 ?
               'The notes were deleted from the job' :
               'The note was deleted from the job');
-            this.getJobNotes();
           },
           err => {
             this.isLoading = false;
@@ -487,43 +528,6 @@ export class JobInfoComponent implements OnInit, OnDestroy {
     }
   }
 
-  /**
-   * Function to get contact full name associated to a note (user profile)
-   * by replacing created_by / last_modified_by field on note object.
-   *
-   * @param {[type]} notes [description]
-   */
-  private getNotesContacts(notes: Array<JobNote>) {
-    if (notes) {
-      for (let note of notes) {
-        if (note.created_by !== undefined && note.created_by !== null) {
-          //noinspection JSIgnoredPromiseFromCall
-          this.accessService.getUserProfileInfo().takeUntil(this.destroyed)
-            .subscribe(
-              response => {
-                note.created_by = this.generalFunctions.getContactFullName(response);
-              },
-              err => {
-                console.error(err);
-              }
-            );
-        }
-        if (note.last_modified_by !== undefined && note.last_modified_by !== null) {
-          //noinspection JSIgnoredPromiseFromCall
-          this.accessService.getUserProfileInfo().takeUntil(this.destroyed)
-            .subscribe(
-              response => {
-                note.last_modified_by = this.generalFunctions.getContactFullName(response);
-              },
-              err => {
-                console.error(err);
-              }
-            );
-        }
-      }
-    }
-  }
-
   //noinspection JSUnusedLocalSymbols
   /**
    * Function to create or update a note thorough API.
@@ -542,9 +546,6 @@ export class JobInfoComponent implements OnInit, OnDestroy {
           this.presenter.displaySuccessMessage(
             isNewObject ? 'The note has been created.' : 'The note has been saved.');
           this.responseOK = true;
-          setTimeout(() => {
-            this.getJobNotes();
-          });
         },
         err => {
           console.error(err);
@@ -554,6 +555,31 @@ export class JobInfoComponent implements OnInit, OnDestroy {
       );
   }
   // </editor-fold>
+
+
+  //noinspection JSUnusedLocalSymbols
+  private onDisplayMessage(message: SentCorrespondence) {
+    this.messagingUiService.displayViewMessageDialog(message, this.vcRef).subscribe();
+  }
+
+  //noinspection JSUnusedLocalSymbols
+  private onCreateMessage() {
+    let message = SentCorrespondenceService.newObject();
+    this.messagingUiService.displayComposeMessageDialog(message, this.vcRef)
+      .subscribe(changedMessage => {
+        // make sure that the job ID is set to the current job
+        changedMessage.job = this.job.id;
+        this.messagingService.createMessage(changedMessage)
+          .subscribe(response => {
+            this.presenter.displaySuccessMessage('Message successfully created');
+          });
+      });
+  }
+
+  //noinspection JSUnusedLocalSymbols
+  private onMainEventChanged(event: BaseEvent) {
+    this.messagingUiService.event = event;
+  }
 
   //noinspection JSUnusedLocalSymbols
   /**
@@ -575,13 +601,5 @@ export class JobInfoComponent implements OnInit, OnDestroy {
     this.paginator.currentPage = event.currentPage;
     this.paginator.perPage = event.perPage;
     this.getJobNotes();
-  }
-
-  /**
-   * refresh Job Header
-   * @param {any} event [event]
-   */
-  private refreshJobHeader(e: any) {
-    this.headerRef.ngOnInit();
   }
 }

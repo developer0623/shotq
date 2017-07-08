@@ -10,8 +10,10 @@ declare let process: (any);
 export class ApiService {
   headers: Headers;
 
-  public apiUrl: string = process.env.APICONFIG.apiUrl;
-  public oAuthUrl: string = process.env.APICONFIG.oAuthUrl;
+  // public apiUrl: string = process.env.APICONFIG.apiUrl;
+  // public oAuthUrl: string = process.env.APICONFIG.oAuthUrl;
+  public apiUrl: string = 'http://shootq-base.test.gearheart.io/api/v1';
+  public oAuthUrl: string = 'http://shootq-base.test.gearheart.io';
 
   public auth = {
     id: process.env.APICONFIG.account_id,

@@ -1,142 +1,137 @@
 <div class="job-header">
-  <div class="page">
-    <div class="page-header">
-      <div class="loading-ripple divRipple" *ngIf="isLoading"></div>
-      <div class="name-section row" *ngIf="!isLoading">
-        <div class="col-md-8">
-          <div class="job-name">
-            <div>
-              <h1>{{ job.name || 'No Name' }}</h1>
+  <div class="loading-ripple divRipple" *ngIf="isLoading"></div>
+  <div class="name-block" *ngIf="!isLoading">
+    <div class="job-name">
+      <h1>{{ job.name || 'No Name' }}</h1>
+    </div>
+    <!-- begin buttons -->
+    <div class="buttons-block">
+      <div class="dropdown-wrapper">
+        <button class="sq-btn-default" (click)="onChangeJob()">Edit</button>
+        <button class="sq-caret sq-btn-secondary"
+                [class.open]="showDropdown"
+                (click)="showDropdown = !showDropdown"
+        >Add New</button>
+        <ul class="dropdown-menu" *ngIf="showDropdown">
+          <li>
+            <a (click)="onCreateMessage()">
+              <i class="icon md-plus"></i>
+              <span class="color-icon-md-plus">Send Email</span>
+            </a>
+          </li>
+          <li>
+            <a (click)="opentNewContractModal()">
+              <i class="icon md-plus"></i>
+              <span class="color-icon-md-plus">Create Contract</span>
+            </a>
+          </li>
+              <!--li>
+                <a href="#">
+                  <i class="icon md-plus"></i>
+                  <span class="color-icon-md-plus">Create Invoice</span>
+                </a>
+              </li-->
+              <!--li>
+                <a href="#">
+                  <i class="icon md-plus"></i>
+                  <span class="color-icon-md-plus">Create Note</span>
+                </a>
+              </li-->
+          </ul>
+        </div>
+      </div>
+      <!-- end buttons -->
+    </div>
+    <div class="info-block" *ngIf="!isLoading">
+        <div class="row">
+          <div class="col-lg-3 col-md-4">
+            <!-- Job Date -->
+            <div class="info-field">
+              <i class="info-field__icon icon-calendar-blank"></i>
+              <label class="info-field__label" *ngIf="!job.main_event_date">No date</label>
+              <label class="info-field__label" *ngIf="job.main_event_date">{{job.main_event_date | date: 'longDate' }}</label>
             </div>
-            <div class="top-job-status dropdown-wrapper dropdown-wrapper_sm">
-              <div class="dropdown-in">
-                <button class="header-status dropdown-toggle" (click)="showJobStatusDropdown = !showJobStatusDropdown">
-                  <i class="icon-confirm"></i>
-                  <label>{{ jobStatuses.NAMES[job.status] }}</label>
-                  <i class="icon icon-down-arrow"></i>
-                </button>
-                <ul class="dropdown-menu" *ngIf="showJobStatusDropdown">
-                  <li *ngFor="let choice of jobStatuses.CHOICES">
-                    <a (click)="setJobStatus(choice.value)" [ngStyle]="{color: choice.color}">
-                      <i [ngClass]="choice.icon"></i>
-                      <span class="color-icon-md-plus">{{ choice.name }}</span>
-                    </a>
-                  </li>
-                </ul>
+
+            <!-- Job place -->
+            <div class="info-field">
+              <i class="info-field__icon ml-placepin"></i>
+              <label class="info-field__label">{{ job.main_event_group?.address || "No address" }}</label>
+            </div>
+
+          </div>
+          <div class="col-lg-3 col-md-4">
+            <div *ngIf="job.primaryContact.id">
+              <div class="info-field padding-bottom-10" (click)="onChangePrimaryJobContact()">
+                <i class="info-field__icon icon-account"></i>
+                <label class="info-field__label" role="button" *ngIf="job.primaryContact.name">
+                    {{ job.primaryContact.name || 'No Name' }}</label>
+                <label class="info-field__label info-field__label_role" *ngIf="job.primaryContact.primaryRole">
+                    {{ job.primaryContact.primaryRole }}
+                </label>
+              </div>
+              <div class="info-field">
+                <i class="info-field__icon icon-email-template-settings"></i>
+                <a class="info-field__label" *ngIf="job.primaryContact.default_email_address"
+                   href="mailto:{{ job.primaryContact.default_email_address }}">
+                    {{ job.primaryContact.default_email_address }}</a>
+                <a class="info-field__label info-field__label_link" *ngIf="!job.primaryContact.default_email_address"
+                   (click)="onChangePrimaryJobContact()">Add email</a>
+              </div>
+              <div class="info-field">
+                <i class="info-field__icon icon-phone"></i>
+                <a class="info-field__label" *ngIf="job.primaryContact.default_phone_number"
+                   href="tel:{{ job.primaryContact.default_phone_number }}">
+                    {{ job.primaryContact.default_phone_number }}</a>
+                <a class="info-field__label info-field__label_link" *ngIf="!job.primaryContact.default_phone_number"
+                   (click)="onChangePrimaryJobContact()">Add phone</a>
+              </div>
+            </div>
+            <div *ngIf="!job.primaryContact.id">
+              <div class="info-field">
+                <i class="info-field__icon icon-account"></i>
+                <label class="info-field__label">No Name</label>
+              </div>
+              <div class="info-field">
+                <i class="info-field__icon icon-email-template-settings"></i>
+                <label class="info-field__label">No Email</label>
+              </div>
+              <div class="info-field padding-top-3">
+                <i class="info-field__icon icon-phone"></i>
+                <label class="info-field__label">No Phone</label>
               </div>
             </div>
           </div>
-        </div>
-        <!-- begin buttons -->
-        <div class="col-md-4">
-          <div class="add-new-options dropdown-wrapper">
-            <button class="btn btn-edit" (click)="openEditJobModal()">Edit</button>
-            <button class="dropdown-toggle btn btn-success green" (click)="showDropdown = !showDropdown">
-              Add New<i class="icon" [ngClass]="showDropdown ? 'icon-up-arrow' : 'icon-down-arrow'"></i>
-            </button>
-            <ul class="dropdown-menu" *ngIf="showDropdown">
-              <li>
-                <a href="#">
-                  <i class="icon md-plus"></i>
-                  <span class="color-icon-md-plus">Event 1</span>
-                </a>
-              </li>
-              <li>
-                <a href="#">
-                  <i class="icon md-plus"></i>
-                  <span class="color-icon-md-plus">Event 2</span>
-                </a>
-              </li>
-              <li>
-                <a href="#">
-                  <i class="icon md-plus"></i>
-                  <span class="color-icon-md-plus">Event 3</span>
-                </a>
-              </li>
-            </ul>
-          </div>
-        </div>
-        <!-- end buttons -->
-      </div>
-      <div class="row container-padding" *ngIf="!isLoading">
-        <div class="col-sm-4 col-md-3 padding-left-50 pr-0">
-          <!-- Job Date -->
-          <div class="field">
-            <i class="icon-calendar-blank custom-font-size"></i>
-            <label *ngIf="job.main_event_date && job.main_event_date !== 'None'">{{job.main_event_date | date: 'longDate'}}</label>
-            <label *ngIf="!isLoading && (!job.main_event_date || job.main_event_date === 'None')" class="editable-data no-data-label" (click)="modalAddEventOpen()">No Date Selected</label>
-          </div>
+          <div class="col-lg-3 col-md-4">
+            <!-- <div class="padding-bottom-10"> -->
+            <!--<a class="view-link">View Contract</a>-->
+            <!-- </div> -->
+            <div>
+              <a class="view-link hidden" [routerLink]="['/jobs', job.id, 'proposal']">View Proposal</a>
+            </div>
 
-          <!-- Job place -->
-          <div class="field">
-            <i class="map-pin"></i>
-            <label class="no-data-label">{{ job.main_event_group?.address || "No address" }}</label>
-          </div>
 
-        </div>
-        <div class="col-sm-4 col-md-3 pl pr-0">
-          <div *ngIf="job.external_owner">
-            <div class="field" (click)="onChangePrimaryJobContact()">
-              <i class="icon-account custom-font-size"></i>
-              <label role="button" *ngIf="job.external_owner.first_name">{{ job.external_owner.full_name || 'No Name' }}</label>
-              <label *ngIf="job.external_owner.$roles" class="role-label">{{ job.external_owner.$roles }}</label>
+            <!-- Job Type -->
+            <div class="info-field" *ngIf="job.job_type_details">
+              <i class="info-field__icon icon-photocamera"></i>
+              <label class="info-field__label">
+                  {{ job.job_type_details.display_name }}
+                  <span class="info-field__indicator"
+                        [ngStyle]="{'background-color': job.job_type_details.color}"></span>
+              </label>
             </div>
-            <div class="field padding-top-3">
-              <i class="icon-email-template-settings"></i>
-              <a class="owner-data" *ngIf="job.external_owner.default_email_address" href="mailto:{{ job.external_owner.default_email_address }}">{{ job.external_owner.default_email_address }}</a>
-              <a class="shooter-link" *ngIf="!job.external_owner.default_email_address" (click)="onChangePrimaryJobContact()">Add email</a>
-            </div>
-            <div class="field padding-top-3">
-              <i class="icon-phone"></i>
-              <a class="owner-data" *ngIf="job.external_owner.default_phone_number" href="tel:{{ job.external_owner.default_phone_number }}">{{ job.external_owner.default_phone_number }}</a>
-              <a class="shooter-link" *ngIf="!job.external_owner.default_phone_number" (click)="onChangePrimaryJobContact()">Add phone</a>
-            </div>
-          </div>
-          <div *ngIf="!job.external_owner">
-            <div class="field">
-              <i class="icon-account custom-font-size"></i>
-              <label class="no-data-label">No Name</label>
-            </div>
-            <div class="field">
-              <i class="icon-email-template-settings"></i>
-              <label class="no-data-label">No Email</label>
-            </div>
-            <div class="field padding-top-3">
-              <i class="icon-phone"></i>
-              <label class="no-data-label">No Phone</label>
+
+            <!-- Job shooter -->
+            <div class="info-field">
+              <i class="info-field__icon icon-team"></i>
+              <a class="info-field__label" [ngClass]="{'td-line-through': !worker.active}" *ngFor="let worker of job.job_workers">{{ worker.name || worker.email }}</a>
+              <a class="info-field__label info-field__label_link" (click)="addJobWorker()">Edit Personnel</a>
             </div>
           </div>
         </div>
-        <div class="col-sm-4 col-md-3 links-container">
-          <!-- <div class="padding-bottom-10"> -->
-          <!--<a class="view-link">View Contract</a>-->
-          <!-- </div> -->
-          <div>
-            <a class="view-link hidden" [routerLink]="['/jobs', job.id, 'proposal']">View Proposal</a>
-          </div>
-
-
-          <!-- Job Type -->
-          <div class="field" *ngIf="job.job_type_details">
-            <i class="icon-job-types-settings font-size-17"></i>
-            <label class="editable-data custom-pos">
-              {{ job.job_type_details.name }}<span class="custom-pos-indicator" [ngStyle]="{'background-color': job.job_type_details.color}"></span>
-            </label>
-          </div>
-
-          <!-- Job shooter -->
-          <div class="field">
-            <i class="icon-team-settings font-size-13"></i>
-            <a class="owner-data" *ngFor="let worker of job.job_workers">{{ worker.name || worker.email }}</a>
-            <a class="shooter-link" (click)="addJobWorker()">{{ job.job_workers?.length ? 'Add Another Shooter' : 'Add Shooter' }}</a>
-          </div>
-        </div>
-      </div>
-      <div class="tab-row">
-        <ul class="tab-list">
-          <li *ngFor="let tab of tabs; let i=index; " [class.current]="currentTab.title === tab.title" (click)="tabChange(i)">{{tab.title}}</li>
-        </ul>
-      </div>
     </div>
-  </div>
+    <div class="tab-row">
+      <ul class="tab-list">
+        <li *ngFor="let tab of tabs; let i=index; " [class.current]="currentTab.title === tab.title" (click)="tabChange(i)">{{tab.title}}</li>
+      </ul>
+    </div>
 </div>

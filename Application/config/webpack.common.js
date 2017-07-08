@@ -313,6 +313,8 @@ module.exports = function (options) {
         }
       ),
 
+      new ContextReplacementPlugin(/moment[\/\\]locale$/, /en/),
+
       /*
        * Plugin: CopyWebpackPlugin
        * Description: Copy files and directories in webpack.
@@ -325,7 +327,7 @@ module.exports = function (options) {
         { from: 'src/assets', to: 'assets' },
         // { from: 'src/app/assets', to: 'app/assets' },
         { from: 'src/meta'},
-
+        { from: 'src/libs/authnet'},
       ]),
 
 

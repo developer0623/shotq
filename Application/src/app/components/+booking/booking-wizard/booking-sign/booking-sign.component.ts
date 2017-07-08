@@ -8,6 +8,7 @@ import {
   ContractPreviewModalContext
 } from '../../../+contracts/contract-preview/contract-preview-modal/contract-preview-modal.component';
 import { Modal, Overlay, overlayConfigFactory } from 'single-angular-modal';
+import { StickyButtonsModal } from '../../../sq-modal/base-modal-components/sticky-buttons/sticky-buttons-modal.service';
 @Component({
   selector: 'app-booking-sign',
   templateUrl: './booking-sign.component.html',
@@ -20,7 +21,7 @@ export class BookingSignComponent {
   @Output() onSign = new EventEmitter<any>();
   private contract: Contract;
 
-  constructor(private modal: Modal,
+  constructor(public buttonsModal: StickyButtonsModal,
               private overlay: Overlay,
               private vcRef: ViewContainerRef,
               private contractService: ContractService) {
@@ -44,7 +45,7 @@ export class BookingSignComponent {
       $event.preventDefault();
     }
 
-    this.modal
+    this.buttonsModal
       .open(ContractPreviewModalComponent,
         overlayConfigFactory({
           isBlocking: false,
@@ -55,6 +56,7 @@ export class BookingSignComponent {
       ).then(dialogRef => {
       dialogRef.result.then(result => {
         this.onSign.emit();
+      }, () => {
       });
     });
   }

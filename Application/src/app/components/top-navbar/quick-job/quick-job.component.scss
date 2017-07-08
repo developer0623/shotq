@@ -14,17 +14,7 @@
   border-top: 1px solid #e4e8f0;
   border-bottom: 1px solid #e4e8f0;
 }
-.modal-footer {
-  //border-top: 1px solid #e4e8f0;
-  height: 50px;
-  padding: 7px 40px;
-  .btn {
-    margin-right: 10px;
-    &:last-child {
-      margin-right: 0;
-    }
-  }
-}
+
 .field {
   background: #FFF;
   border-radius: 2px;
@@ -117,6 +107,10 @@
     }
     /deep/.dropdown {
       padding-top: 15px;
+      padding-left: 12px;
+    }
+    /deep/.dropdown-parent {
+      height: 44px;
     }
   }
   &.has-error {
@@ -284,25 +278,43 @@
   &__right {
     float: right;
   }
+  &__field.single {
+    /deep/.error {
+      div span {
+        padding-left: 5px;
+      }
+    }
+    /deep/.icon-down-arrow,
+    /deep/.icon-up-arrow {
+      right: 9px;
+    }
+  }
   /deep/.error {
-		div span {
-			padding-left: 5px;
-		}
-	}
+    div span {
+      padding-left: 5px;
+    }
+  }
   &__datepicker.has-error {
-		/deep/sq-datetimepicker .sq-datetimepicker-input-group {
-			border: solid 1px #e94e4c !important;
-    		-webkit-box-shadow: 0 0 4px 1px rgba(233, 77, 75, 0.5);
-    		box-shadow: 0 0 4px 1px rgba(233, 77, 75, 0.5);
-    		margin-bottom: 0;
-    		border-radius: 2px;
-		}
-	}
-	&__datepicker {
-		/deep/.sq-datetimepicker-input-group {
-			margin-bottom: 5px;
-		}
-	}
+    /deep/sq-datetimepicker .sq-datetimepicker-input-group {
+      border: solid 1px #e94e4c !important;
+      -webkit-box-shadow: 0 0 4px 1px rgba(233, 77, 75, 0.5);
+      box-shadow: 0 0 4px 1px rgba(233, 77, 75, 0.5);
+      margin-bottom: 0;
+      border-radius: 2px;
+    }
+  }
+  &__datepicker {
+    /deep/.sq-datetimepicker-input-group {
+      margin-bottom: 5px;
+    }
+    /deep/.btn {
+      font-size: 14px;
+    }
+    /deep/.btn-primary {
+      background-color: #337ab7;
+      border-color: #337ab7;
+    }
+  }
   .dropdown-select_wrap {
     /deep/.dropdown {
       width: 100%;
@@ -318,31 +330,14 @@
   }
 }
 
-.modal-footer {
-  .btn {
-    &_transparent {
-      background-color: transparent;
-      color: rgba(55, 57, 76, 0.5);
-    }
-    &_blue {
-      background-color: #086aff;
-      color: #fff;
-    }
+.sq-checkbox {
+  display: inline-block;
+  vertical-align: middle;
+  &_mt3 {
+    margin-top: 3px;
   }
-}
-
-.checkbox-custom {
-  margin-bottom: 0;
-  &_top {
-    margin-top: 1px;
-  }
-  label:before, label:after {
-    top: 50%;
-    transform: translate(0, -50%);
-  }
-  input {
-    top: 50%;
-    transform: translate(0, -50%);
+  &_mt37 {
+    margin-top: 37px;
   }
 }
 .conjunct {
@@ -371,11 +366,31 @@
 }
 
 .alert-danger {
-	color: #e94e4c;
-	margin: 0;
-	padding: 0;
-	border: 0;
-	background-color: transparent;
-	font-size: 12px;
-	margin-left: -10px;
+  color: #e94e4c;
+  margin: 0;
+  padding: 0;
+  border: 0;
+  background-color: transparent;
+  font-size: 12px;
+  margin-left: -10px;
+}
+.checkbox-default.disabled {
+  pointer-events: none;
+  opacity: 0.6;
+}
+
+/deep/ .form-group__datepicker {
+  .sq-datetimepicker-input-group.input-group.date {
+    input {
+      padding-right: 3px;
+    }
+  }
+}
+.hidden {
+  display: none;
+}
+
+.modal-header{
+    padding: 20px 40px !important;
+    background-color: #fff;
 }

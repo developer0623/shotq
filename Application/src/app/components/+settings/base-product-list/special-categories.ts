@@ -5,7 +5,7 @@ export interface FilteredCategory {
   name?: string;
   is_fake?: boolean;
   filter_params?: Object;
-};
+}
 
 const allCategory: FilteredCategory = {
   id: 0,

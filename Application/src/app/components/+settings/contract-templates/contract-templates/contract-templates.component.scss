@@ -1,5 +1,8 @@
+@import "../../../../../assets/css/variables";
+@import "../../../../../assets/css/mixins";
+
 .page-header {
-	background: #FFF;
+	background: red;
 	padding: 14px 80px 18px 80px !important;
 	&_border {
 		border-bottom: 1px solid #e4e8f0;
@@ -25,7 +28,7 @@
 }
 .template-wrap {
 	font-size: 0;
-	margin: 0 -10px; 
+	margin: 0; 
 	
 }
 .template-item {
@@ -215,3 +218,9 @@
 	margin: 0;
 }
 
+.template-wrap {
+	/deep/.slick-track {
+		@include box-shadow(none);
+		border: none;
+	}
+}

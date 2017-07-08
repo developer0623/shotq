@@ -25,6 +25,7 @@ import {
 import { DropdownModule }                              from 'ngx-dropdown';
 import { ModalModule as ng2Modal } from 'single-angular-modal';
 import { BootstrapModalModule, Modal } from 'single-angular-modal/plugins/bootstrap';
+import { ColorPickerModule } from 'ngx-color-picker';
 /* Module with all components related to form-field-xxx */
 import { FormFieldModule }                             from './components/shared/form-field';
 import { ChooseContactModule }                         from './components/shared/choose-contact';
@@ -69,6 +70,7 @@ import * as services                                   from './services';
 import { AccessService, ClientAccessAuthGuard } from './services/access';
 import { SignalService }                               from './services/signal-service/signal.service';
 import { SettingsModule } from './components/+settings/settings.module';
+import { CalendarEntryModule } from './components/+calendar/calendar.module';
 const mapValuesToArray = (obj) => Object.keys(obj).map(key => obj[key]);
 
 
@@ -118,12 +120,14 @@ type StoreType = {
     ProposalsModule,
     BookingModule,
     SettingsModule,
+    CalendarEntryModule,
     ReactiveFormsModule,
     // ClientAccessModule,
     ModalModule.forRoot(),
     ng2Modal.forRoot(),
     BootstrapModalModule,
     RouterModule.forRoot(ROUTES, {useHash: true, preloadingStrategy: PreloadAllModules}),
+    ColorPickerModule
   ],
   providers: [ // expose our Services and Providers into Angular's dependency injection
     AccessService,

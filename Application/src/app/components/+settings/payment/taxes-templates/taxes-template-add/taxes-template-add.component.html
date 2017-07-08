@@ -28,6 +28,21 @@
                         </div>
 
                         <div *ngIf="form.value.amount_by === _AMOUNT_CHOICE_PERCENTAGE_RATE">
+                            <div formArrayName="additional_rates">
+                              <div *ngFor="let rate of form.controls.additional_rates.controls; let i=index">
+                                <div class="input-group">
+                                  <input type="number" class="form-control" placeholder="% rate" [formControlName]="i"/>
+                                  <div class="input-group-btn">
+                                    <button type="button" class="btn btn-default" (click)="removeAdditionalRate(i)">
+                                      <i class="fa fa-times" aria-hidden="true"></i>
+                                    </button>
+                                  </div>
+                                </div>
+                              </div>
+                            </div>
+                            <p class="text-center">
+                              <button type="button" class="btn btn-link" (click)="addAdditionalRate()">Add additional rate</button>
+                            </p>
                             <div class="m-b-s m-b-s_mod ">
                                 <app-dropdown-select formControlName="calculate_settings"
                                                      [options]="calculationAgainstChoices">
@@ -73,10 +88,10 @@
                 </form>
             </div>
             <div class="modal-footer bg">
-                <button type="button" class="btn btn_xs btn_transparent " data-dismiss="modal"
+                <button type="button" class="sq-btn-dismiss" data-dismiss="modal"
                         (click)="hide()">Cancel
                 </button>
-                <button type="button" class="btn btn_xs btn_blue"
+                <button type="button" class="sq-btn-submit"
                         [disabled]="form.invalid"
                         (click)="save()">Save
                 </button>

@@ -638,45 +638,7 @@
                                     }
                                 }
                             }
-                            .page-bottom-actions {
-                                background-color:rgb(250, 251, 251);
-                                padding-top: 10px;
-                                padding-right:15px;
-                                padding-bottom:10px;
-                                text-align:right;
-                                border-top:solid 1px rgb(228, 232, 240);
-                                #cancelButton {
-                                    width: 136px;
-                                    height: 30px;
-                                    border-radius: 2px;
-                                    background-color: rgb(255, 255, 255);
-                                    line-height: 30px;
-                                    color: rgb(181, 193, 207);
-                                    font-size: 14px;
-                                    font-weight: 600;
-                                    border:1px solid rgb(181, 193, 207);
-                                    display:inline-block;
-                                    text-align: center;
-                                    text-transform:uppercase;
-                                    padding: 0;
-                                }
-                                .btn-primary {
-                                    width: 136px;
-                                    height: 30px;
-                                    border-radius: 2px;
-                                    background-color: rgb(8, 106, 255);
-                                    text-transform:uppercase;
-                                    color: rgb(255, 255, 255);
-                                    font-size: 14px;
-                                    font-weight: 600;
-                                    line-height:30px;
-                                    margin-left:10px;
-                                    display:inline-block;
-                                    text-align: center;
-                                    padding: 0;
-                                    border: none;
-                                }
-                            }
+                            
                         }
                     }
                 }
@@ -796,6 +758,34 @@
                 color: red !important;
             }
      }
+    }
+}
+
+.contactMerge {
+    .page-bottom-actions {
+        background-color: #fafbfb;
+        padding-top: 10px;
+        padding-right: 15px;
+        padding-bottom: 8px;
+        text-align: right;
+        border-top: 1px solid #e4e8f0;
+        .btn {
+            padding: 10px 15px;
+            border-radius: 4px;
+            font-size: 14px;
+            display: inline-block;
+            text-align: center;
+            border: none; 
+        }
+        .btn-default {
+            background-color: transparent;
+            color: rgba(55, 57, 76, 0.5);;
+        }
+        .btn-primary {
+            background-color: #086aff;
+            color: #fff;
+            margin-left: 10px;
+        }
     }
 }
 

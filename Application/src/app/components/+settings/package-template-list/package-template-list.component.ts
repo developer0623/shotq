@@ -1,4 +1,4 @@
-import { Component, ViewEncapsulation } from '@angular/core';
+import { Component, ViewEncapsulation, ViewContainerRef } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
 
 import { FlashMessageService } from '../../../services/flash-message';
@@ -7,7 +7,7 @@ import { PackageTemplate } from '../../../models/package-template';
 import { PackageCategory } from '../../../models/package-category';
 import { PackageTemplateService } from '../../../services/product/package-template';
 import { PackageCategoryService } from '../../../services/product/package-category';
-import { Modal } from 'single-angular-modal';
+import { Modal, Overlay } from 'single-angular-modal';
 
 
 @Component({
@@ -26,8 +26,10 @@ export class PackageTemplateListComponent extends BaseProductList<PackageTemplat
     productService: PackageTemplateService,
     categoryService: PackageCategoryService,
     flash: FlashMessageService,
-    modal: Modal
+    modal: Modal,
+    overlay: Overlay,
+    vcRef: ViewContainerRef,
   ) {
-    super(router, route, productService, categoryService, flash, modal);
+    super(router, route, productService, categoryService, flash, modal, overlay, vcRef);
   }
 }

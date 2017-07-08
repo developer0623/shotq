@@ -2,7 +2,7 @@
   <section class="package-grid">
     <div class="no-packages" *ngIf="packages.length === 0">
       <div class="text-center">
-        <div class="title">Packages no found</div>
+        <div class="title">No Package Templates Available</div>
       </div>
     </div>
     <div class="package is-scooter"
@@ -45,12 +45,19 @@
       <div class="package--expand">
         <div class="package--expand-in">
           <div class="package-description">
-            <div class="package-description-title">
-              {{ package.name }}
-            </div>
-            <div class="package-description-text">
-              {{ package.description }}
-            </div>
+              <div class="package-description-title">
+                  {{ package.name }}
+              </div>
+              <div class="package-description-text">
+                  {{ package.description }}
+              </div>
+              <div class="package-description__addons package-description-text">
+                  <span>Add-On Options</span>
+                  <p *ngIf="!package.addons_data?.length">No add-ons selected.</p>
+                  <ul *ngIf="package.addons_data?.length">
+                      <li *ngFor="let addon of package.addons_data">{{ addon.name }}</li>
+                  </ul>
+              </div>
           </div>
           <div class="package-line"></div>
           <div class="package-items">
@@ -75,7 +82,7 @@
                   </div>
                   <div class="col-sm-4">
                     <div class="text-right">
-                      <div class="price">${{ item.item_template_data.price * item.quantity }}</div>
+                      <div class="price">${{ (item.item_template_data.price * 1 + item.addons_price * 1) * item.quantity }}</div>
                     </div>
                   </div>
                 </div>

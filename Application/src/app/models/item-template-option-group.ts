@@ -5,6 +5,8 @@ export interface ItemTemplateOptionGroup extends BaseItemOptionGroup {
   item_template: number;
   item_template_options: ItemTemplateOption[];
   option_type_label: string;
+  selected?: number;
+  selected_data?: ItemTemplateOption;
 }
 
 export class ItemTemplateOptionGroup {

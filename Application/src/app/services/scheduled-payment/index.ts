@@ -1,1 +1,1 @@
-export { ScheduledPaymentService } from './scheduled-payment.service'
+export { ScheduledPaymentService } from './scheduled-payment.service';

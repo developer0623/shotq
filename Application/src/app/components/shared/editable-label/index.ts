@@ -1,1 +1,1 @@
-export * from './editable-label.module'
+export * from './editable-label.module';

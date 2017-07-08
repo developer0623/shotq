@@ -1,4 +1,6 @@
+import * as _ from 'lodash';
 import { Injectable } from '@angular/core';
+
 @Injectable()
 export class AlertifyService {
   alertify = require('../../assets/theme/assets/vendor/alertify-js/alertify.js');
@@ -7,7 +9,9 @@ export class AlertifyService {
   prompt = this.alertify.prompt;
 
   constructor() {
-    this.alertify.theme('bootstrap-shootq');
-    this.alertify.okBtn('OK');
+    if (_.isFunction(this.alertify.theme)) {
+      this.alertify.theme('bootstrap-shootq');
+      this.alertify.okBtn('OK');
+    }
   }
 }

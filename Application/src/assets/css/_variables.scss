@@ -8,6 +8,8 @@ $gray-light: #818a91 !default;
 $gray-lighter: #e4e8f0 !default; // box-shadow
 $gray-lightest: #fafbfb !default; // modal footer
 
+$gray-border-dark: #37394c;
+$gray-border: #b6c1cf;
 $bright-blue: #086aff;
 $dark-mint: #57cd75;
 $green-blue: #02ad94;
@@ -29,6 +31,8 @@ $brand-inverse: $gray-dark !default;
 
 $enable-hover-media-query: false !default;
 
+// Gradients
+$linear-green: linear-gradient(to left, #38f9d7, #43e97b);
 
 // Spacing
 // Control the default styling of most app elements by modifying these
@@ -112,6 +116,9 @@ $border-radius: (2 / $font-size-root-px) + rem !default;
 $border-radius-lg: (4 / $font-size-root-px) + rem !default;
 $border-radius-sm: .2rem !default;
 
+$component-active-color: #fff !default;
+$component-active-bg: $brand-primary !default;
+
 $caret-width: .3em !default;
 $caret-width-lg: $caret-width !default;
 
@@ -143,6 +150,10 @@ $btn-success-border: $btn-success-bg !default;
 $btn-warning-color: #fff !default;
 $btn-warning-bg: $brand-warning !default;
 $btn-warning-border: $btn-warning-bg !default;
+
+$btn-default-color: $gray-dark !default;
+$btn-default-bg: $white !default;
+$btn-default-border: $gray-lighter !default;
 
 $btn-danger-color: #fff !default;
 $btn-danger-bg: $brand-danger !default;
@@ -205,6 +216,50 @@ $input-group-addon-bg: $gray-lighter !default;
 $input-group-addon-border-color: $input-border-color !default;
 
 $cursor-disabled: not-allowed !default;
+
+// Checkboxes
+$checkbox-width: 16px !default;
+$checkbox-height: 16px !default;
+$checkbox-border-radius: 2px !default;
+
+// Dropdowns
+// Dropdown menu container and contents.
+$dropdown-min-width: 160px !default;
+$dropdown-padding-y: 5px !default;
+$dropdown-margin-top: 2px !default;
+$dropdown-bg: #fff !default;
+$dropdown-border-color: rgba(0, 0, 0, .15) !default;
+$dropdown-border-width: $border-width !default;
+$dropdown-divider-bg: #e5e5e5 !default;
+$dropdown-box-shadow: 0 6px 12px rgba(0, 0, 0, .175) !default;
+
+$dropdown-link-color: $gray-dark !default;
+$dropdown-link-hover-color: darken($gray-dark, 5%) !default;
+$dropdown-link-hover-bg: #f5f5f5 !default;
+
+$dropdown-link-active-color: $component-active-color !default;
+$dropdown-link-active-bg: $component-active-bg !default;
+
+$dropdown-link-disabled-color: $gray-light !default;
+
+$dropdown-item-padding-x: 20px !default;
+
+$dropdown-header-color: $gray-light !default;
+
+
+// Z-index master list
+//
+// Warning: Avoid customizing these values. They're used for a bird's eye view
+// of components dependent on the z-axis and are designed to all work together.
+$zindex-dropdown-backdrop:  990 !default;
+$zindex-navbar:            1000 !default;
+$zindex-dropdown:          1000 !default;
+$zindex-popover:           1060 !default;
+$zindex-tooltip:           1070 !default;
+$zindex-navbar-fixed:      1030 !default;
+$zindex-navbar-sticky:     1030 !default;
+$zindex-modal-bg:          1600 !default;  // BS default is 1040
+$zindex-modal:             1700 !default;  // BS default is 1050
 
 
 // Close

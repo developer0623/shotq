@@ -32,6 +32,10 @@ export class ProposalService extends RestClientService<Proposal> {
 
   public settingsChanged = new Subject<any>();
 
+  public static newObject(data?: object): Proposal {
+    return Object.assign(new Proposal(), data || {});
+  }
+
   constructor(apiService: ApiService) {
     super(apiService);
   }
@@ -107,11 +111,15 @@ export class ProposalService extends RestClientService<Proposal> {
       taxes
         .filter(tax => tax.amount_by === AMOUNT_CHOICE_PERCENTAGE_RATE && tax.calculate_settings === FINAL_SUBTOTAL)
         .forEach(tax => {
-          let taxRate = parseFloat(<string>tax.rate) / 100;
-          let taxAmount = initialManualPrice * taxRate;
-          taxAmount = Math.round(taxAmount * 100) / 100;
-          finalTaxAmount += taxAmount;
-          manual_price += taxAmount;
+          let taxRates = [parseFloat(<string>tax.rate) / 100].concat(
+            tax.additional_rates.map(r => parseFloat(String(r)) / 100)
+          );
+          taxRates.forEach(taxRate => {
+            let taxAmount = initialManualPrice * taxRate;
+            taxAmount = Math.round(taxAmount * 100) / 100;
+            finalTaxAmount += taxAmount;
+            manual_price += taxAmount;
+          });
         });
     }
 
@@ -234,21 +242,24 @@ export class ProposalService extends RestClientService<Proposal> {
           || tax.calculate_settings === RETAIL_PRICE
           && tax.calculate_against.toLowerCase().includes(item.item_type.toLowerCase())
         );
-        let taxRate = parseFloat(<string>tax.rate) / 100;
+        let taxRates = [parseFloat(<string>tax.rate) / 100].concat(
+          tax.additional_rates.map(r => parseFloat(String(r)) / 100)
+        );
 
-        if (applyTaxToPrice) {
-          let taxAmount = initialItemPrice * taxRate;
-          taxAmount = Math.round(taxAmount * 100) / 100;
-          item.final_price = parseFloat(<string>item.final_price) + taxAmount;
+        taxRates.forEach(taxRate => {
+          if (applyTaxToPrice) {
+            let taxAmount = initialItemPrice * taxRate;
+            taxAmount = Math.round(taxAmount * 100) / 100;
+            item.final_price = parseFloat(<string>item.final_price) + taxAmount;
+            tax.final_tax = <number>tax.final_tax + taxAmount * item.quantity;
+          }
 
-          tax.final_tax = <number>tax.final_tax + taxAmount * item.quantity;
-        }
-
-        if (tax.apply_to_shipping_cost) {
-          let shippingTax = parseFloat(item.shipping_cost) * taxRate;
-          shippingTax = Math.round(shippingTax * 100) / 100;
-          tax.final_tax = <number>tax.final_tax + shippingTax * item.quantity;
-        }
+          if (tax.apply_to_shipping_cost) {
+            let shippingTax = parseFloat(item.shipping_cost) * taxRate;
+            shippingTax = Math.round(shippingTax * 100) / 100;
+            tax.final_tax = <number>tax.final_tax + shippingTax * item.quantity;
+          }
+        });
       });
   }
 }

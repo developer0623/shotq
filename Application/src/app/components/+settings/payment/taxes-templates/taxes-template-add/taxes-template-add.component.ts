@@ -1,5 +1,5 @@
 import { Component, ViewChild } from '@angular/core';
-import { FormBuilder, FormGroup, Validators } from '@angular/forms';
+import { FormBuilder, FormGroup, FormArray, Validators } from '@angular/forms';
 
 import { Observable } from 'rxjs';
 import { ModalDirective } from 'ngx-bootstrap';
@@ -77,7 +77,8 @@ export class TaxesTemplateAddComponent {
         Services: false
       }),
       calculate_settings: [this.calculationAgainstChoices[0].value, Validators.compose([])],
-      schedule_settings: [this.paymentScheduleSettings[0].value, Validators.compose([])]
+      schedule_settings: [this.paymentScheduleSettings[0].value, Validators.compose([])],
+      additional_rates: this.fb.array([])
     });
   }
 
@@ -96,7 +97,8 @@ export class TaxesTemplateAddComponent {
         amount_by: this.amountChoices[0].value,
         calculate_against: '',
         calculate_settings: this.calculationAgainstChoices[0].value,
-        schedule_settings: this.paymentScheduleSettings[0].value
+        schedule_settings: this.paymentScheduleSettings[0].value,
+        additional_rates: []
       });
       this.isLoading = false;
       observer.complete();
@@ -169,8 +171,11 @@ export class TaxesTemplateAddComponent {
       .subscribe((instance: TaxTemplate) => {
           this.isLoading = false;
           this.template = instance;
+          this.form.controls['additional_rates'] = this.fb.array(
+            this.template.additional_rates.map(r => this.fb.control(r))
+          );
           this.form.reset(Object.assign({}, this.template, {
-            calculate_against: this.buildCalculateAgainst(this.template.calculate_against)
+            calculate_against: this.buildCalculateAgainst(this.template.calculate_against),
           }));
         },
         error => {
@@ -184,6 +189,16 @@ export class TaxesTemplateAddComponent {
 
   hide() {
     this.modal.hide();
+  }
+
+  addAdditionalRate() {
+    let control = <FormArray>this.form.controls['additional_rates'];
+    control.push(this.fb.control('0.00'));
+  }
+
+  removeAdditionalRate(i: number) {
+    const control = <FormArray>this.form.controls['additional_rates'];
+    control.removeAt(i);
   }
 
 }

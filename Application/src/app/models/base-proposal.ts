@@ -1,4 +1,4 @@
-export interface BaseProposal {
+export class BaseProposal {
   id?: number;
   created?: Date;
   updated?: Date;

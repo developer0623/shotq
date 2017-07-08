@@ -1,6 +1,7 @@
 .page-header {
 	background: #FFF;
 	padding: 14px 80px 18px 80px !important;
+	margin: 0;
 	&_border {
 		border-bottom: 1px solid #e4e8f0;
 	}
@@ -87,9 +88,15 @@
 		font-weight: 300;
 		line-height: 1.56;
 		color: #3a405b;
-    word-wrap: break-word;
-    word-break: break-all;
-    white-space: initial;
+    	word-wrap: break-word;
+    	// word-break: break-all;
+    	white-space: initial;
+    	overflow: hidden;
+    	text-overflow: ellipsis;
+    	display: -webkit-box;
+    	height: 85px; // fallback
+    	-webkit-line-clamp: 3;
+    	-webkit-box-orient: vertical;
 	}
 	&__about {
 		font-size: 12px;
@@ -311,3 +318,105 @@ button {
 	}
 }
 
+#contractTemplateSlider,
+#proposalTemplateSlider,
+#emailTemplateSlider {
+	margin-left: 100px;
+	.page {
+		margin-left: 0!important;
+	}
+	/deep/.slider__arr {
+	    position: absolute;
+	    top: 50%;
+	    font-size: 21px;
+	    color: #3a405b;
+	    background: transparent;
+	    border: none;
+	    z-index: 2;
+	    &:hover {
+	      cursor: pointer;
+	      opacity: .8;
+	    }
+	    &:focus {
+	      outline: none;
+	    }
+	    &.is-left {
+	      left: 20px;
+	      transform: rotate(-180deg);
+	    }
+	    &.is-right {
+	      right: 20px;
+	    }
+	 }
+	/deep/.slick-list {
+	    position: static;
+	}
+	/deep/.slick-track {
+	    box-shadow: none;
+	    border: none;
+	    padding-left: 0;
+	    &:hover {
+	      box-shadow: none;
+	    }
+	}
+	// /deep/ .wrap-template {
+	//   margin-bottom: 20px;
+	//   background-color: #fff;
+	//   padding-bottom: 0;
+
+	//   .slick-dots {
+	//     bottom: 20px;
+	//   }
+
+	//   .page {
+	//     margin-left: 0 !important;
+	//   }
+	//   .page-header {
+	//     padding: 20px 80px !important;
+	//   }
+	//   .h2 {
+	//     font-size: 26px!important;
+	//     margin: 5px 0!important;
+	//   }
+
+	//   .ttemplate-item_add {
+	//     margin-top: 15px;
+	//   }
+
+	//   .template-wrap,
+	//   .template-slider {
+	//     width: 100%;
+	//     overflow: hidden;
+	//     white-space: nowrap;
+	//     padding-top: 10px;
+	//   }
+	//   .page-content {
+	//     padding-top: 20px;
+	//     padding-left: 80px;
+	//     padding-right: 80px;
+	//     padding-bottom: 0;
+	//   }
+	//   .slick-list {
+	//     position: static;
+	//   }
+	//   .slick-track {
+	//     box-shadow: none;
+	//     border: none;
+	//     padding-left: 0;
+	//     &:hover {
+	//       box-shadow: none;
+	//     }
+	//   }
+	//   .ttemplate-item {
+	//     &:focus {
+	//       outline: none;
+	//     }
+	//   }
+
+	// }
+
+	// /deep/ .slider {
+	//   position: relative;
+
+	// }
+}

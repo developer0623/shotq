@@ -17,14 +17,23 @@ export class ProposalTaxesComponent extends BaseTaxDiscountsComponent<Tax, TaxTe
   modelName = 'Tax';
   header = '3. Configure Taxes';
 
-  constructor(flash: FlashMessageService,
+  constructor(private flashService: FlashMessageService,
               taxService: TaxService,
               proposalService: ProposalService,
               templateService: TaxTemplateRESTService) {
-    super(flash, proposalService);
+    super(flashService, proposalService);
 
     this.objectService = taxService;
     this.templateService = templateService;
+  }
+
+  createObject(e, objTemplate?: TaxTemplate) {
+    if (this.objects.length) {
+      e.preventDefault();
+      this.flashService.error('Proposal can have only one tax, please remove existing taxes before create new.');
+      return;
+    }
+    super.createObject(e, objTemplate);
   }
 
 }

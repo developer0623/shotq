@@ -3,20 +3,22 @@
  */
 import { Component } from '@angular/core';
 import { Subject } from 'rxjs/Subject';
-import { Router, ActivatedRoute } from '@angular/router';
+import { Router } from '@angular/router';
 
 import * as _ from 'lodash';
 import { DialogRef, ModalComponent } from 'single-angular-modal';
 import { BSModalContext } from 'single-angular-modal/plugins/bootstrap';
 
-import { ModalService }             from '../../../services/modal/';
 import { ContactService }           from '../../../services/contact';
 import { JobService }               from '../../../services/job';
 import { JobContactService }        from '../../../services/job-contact';
 import { JobRoleService }           from '../../../services/job-role';
 import { GeneralFunctionsService }  from '../../../services/general-functions';
 import { FlashMessageService }      from '../../../services/flash-message';
-import { Job } from '../../../models/job';
+import { Job, JobApiJobContact } from '../../../models/job';
+import { Observable } from 'rxjs';
+import { Contact } from '../../../models/contact';
+import { ArrayFilterPipe } from '../../../pipes/array-filter/array-filter.pipe';
 
 
 export class ChooseContactWindowData extends BSModalContext {
@@ -28,7 +30,8 @@ export class ChooseContactWindowData extends BSModalContext {
   selector: 'choose-contact',
   templateUrl: 'choose-contact.component.html',
   styleUrls: ['choose-contact.component.scss'],
-  providers: [ContactService, JobContactService, GeneralFunctionsService, FlashMessageService, JobRoleService, JobService]
+  providers: [ContactService, JobContactService, GeneralFunctionsService,
+    FlashMessageService, JobRoleService, JobService, ArrayFilterPipe]
 })
 export class ChooseContactComponent implements ModalComponent<ChooseContactWindowData> {
   searchTextChanged: Subject<string> = new Subject<string>();
@@ -48,13 +51,11 @@ export class ChooseContactComponent implements ModalComponent<ChooseContactWindo
   private currentPage: number = 1;
   private perPage: number = 10;
   private isLoading: boolean = false;
-  private contactsToAdd: Array<any> = [];
   private contacts: Array<any> = [];
+  private selectedContacts: Array<any> = [];
   private jobRoles: Array<any> = [];
-  private initialContacts: Array<any> = [];
-  private initialContactsIds: Array<number> = [];
   private contactsToAddIds: Array<number> = [];
-  private initialContactsAdded: number = 0;
+  private contactsToRemoveIds: Array<number> = [];
   private newName: string = null;
   private newLastName: string = null;
   private newEmail: string = null;
@@ -62,19 +63,16 @@ export class ChooseContactComponent implements ModalComponent<ChooseContactWindo
   private newChecked: boolean = false;
   private currentUrl: string = null;
   private showNewContactRow: boolean = false;
-  private sub;
   private addContactFlag = false;
 
   constructor(
-    private route: ActivatedRoute,
     private contactService: ContactService,
     private jobContactService: JobContactService,
     private jobRoleService: JobRoleService,
     private jobService: JobService,
-    private generalFunctions: GeneralFunctionsService,
-    private modalService: ModalService,
     private flash: FlashMessageService,
     public router: Router,
+    public filterPipe: ArrayFilterPipe,
     public dialog: DialogRef<ChooseContactWindowData>
     ) {
     this.currentUrl = this.router.url;
@@ -113,11 +111,10 @@ export class ChooseContactComponent implements ModalComponent<ChooseContactWindo
     this.jobId = id;
     this.isLoading = true;
     this.jobService.get(this.jobId)
-      .subscribe(data => {
-        this.jobData = data;
-        this.getInitialContacts();
+      .subscribe((data: Job) => {
+        this.jobData = JobService.newObject(data);
         this.getRoles();
-        this.search();
+        this.search(true, true);
       }, err => console.error(err), () => {});
   }
   /**
@@ -135,42 +132,12 @@ export class ChooseContactComponent implements ModalComponent<ChooseContactWindo
       });
   }
   /**
-   * Function to get already associated contacts when modal opens
-   */
-  public getInitialContacts() {
-    this.contactsToAdd = [];
-    this.initialContactsAdded = 0;
-    this.initialContacts = [];
-    this.initialContactsIds = [];
-    for (let contact of this.jobData.job_contacts) {
-
-      let aux = this._.cloneDeep(contact);
-      // set job contacts as selected
-      aux.isJobContact = true;
-      aux.selected = true;
-      aux.role = 0;
-      // Set role
-      if (aux.roles && aux.roles.length > 0) {
-        aux.role = aux.roles[0].id;
-        aux.roleName = aux.roles[0].name;
-      }
-      this.contactsToAdd.push(aux);
-      this.initialContacts.push(aux);
-      // the contact property on job contact is the contact id,
-      // add it to the array to avoid duplicated on the list
-      // this array will be checked looking for contact ids
-      // in order to show or don't show a contact if it is already
-      // a job contact
-      this.initialContactsIds.push(contact.contact);
-      this.contactsToAddIds.push(contact.contact);
-    }
-  }
-  /**
    * Function to close current choose contact modal.
    */
   public modalClose() {
     this.dialog.close();
-    this.contactsToAdd = [];
+    this.contactsToAddIds = [];
+    this.contactsToRemoveIds = [];
     this.search_box = '';
     this.currentFilter = 'all';
   }
@@ -180,64 +147,47 @@ export class ChooseContactComponent implements ModalComponent<ChooseContactWindo
    *
    * @param {event} e [description]
    */
-  public search(newSearch?: boolean) {
-    if (newSearch && newSearch !== undefined) {
+  public search(newSearch?: boolean, firstSearch?: boolean) {
+    if (newSearch) {
       // Each time the user types a letter the search must be restarted
       this.contacts = [];
       this.totalItems = 0;
       this.currentPage = 1;
-
     }
 
-    if (typeof this.search_box !== undefined) {
-      this.isLoading = true;
-      this.contactService.searchContact(this.search_box, { archived: 'False', active: 'True', page: this.currentPage, page_size: this.perPage })
-        .subscribe(response => {
-          // Add selected contacts
-          if (this.contacts.length === 0) {
-            for (let existingContact of this.initialContacts) {
-              if (this.filterContact(existingContact, this.search_box)) {
-                this.contacts.push(existingContact);
-              }
-            }
-          }
+    if (this.search_box === undefined)
+      return;
+
+    this.isLoading = true;
+    this.contactService
+      .searchContact(this.search_box, {
+        archived: 'False',
+        active: 'True',
+        page: this.currentPage,
+        page_size: this.perPage
+      })
+      .subscribe(
+        response => {
           // add search result contacts to contact list
-          for (let contact of response.contacts) {
-            contact.role = 0;
-            // if the contact is already a job contact don't display it
-            if (this.initialContactsIds.indexOf(contact.id) !== -1) {
-              contact.notAdd = true;
-            } else if (this.contactsToAddIds.indexOf(contact.id) !== -1) {
-              let toAdd = _.find(this.contactsToAdd, {id: contact.id});
+          this.contacts = response.contacts;
+          for (let contact of this.contacts) {
+            let assocJobContact = _.find(this.jobData.job_contacts, {contact: contact.id});
+            if (assocJobContact ||
+              this.contactsToAddIds.indexOf(contact.id) !== -1)
               contact.selected = true;
-              if (toAdd)
-                contact.role = toAdd.role;
-            }
+
             // Set roles
-            if (contact.roles && contact.roles.length > 0) {
-              contact.role = contact.roles[0].id;
-            }
-            // Add contacts to list
-            if (!contact.notAdd) {
-              this.contacts.push(contact);
-            }
+            contact.role = 0;
+            if (assocJobContact && assocJobContact.roles.length > 0)
+                contact.role = assocJobContact.roles[0].id;
           }
           this.totalItems = this.contacts.length;
+          if (firstSearch)
+            this.selectedContacts = _.filter(this.contacts, {selected: true});
         },
-        err => {
-          console.error(`ERROR: ${err}`);
-          this.isLoading = false;
-        },
+        err => { console.error(err); },
         () => { this.isLoading = false; }
-        );
-    }
-  }
-  /**
-   * Clear the ContactsToAdd array
-   *
-   */
-  public clearContactsToAdd() {
-    this.contactsToAdd = [];
+      );
   }
   /**
    * Function triggered when role is changed
@@ -267,7 +217,7 @@ export class ChooseContactComponent implements ModalComponent<ChooseContactWindo
    * @param {string} section [section paginator to increase]
    */
   public onScroll() {
-    if (this.currentFilter === 'all' && this.currentPage <= Math.floor(this.totalItems / this.perPage)) {
+    if (this.currentFilter === 'all' && this.currentPage < Math.floor(this.totalItems / this.perPage)) {
       this.currentPage += 1;
       this.search();
     }
@@ -278,124 +228,124 @@ export class ChooseContactComponent implements ModalComponent<ChooseContactWindo
    * @param {Object} contact Contact object.
    */
   public setSelected(contact: any) {
-    // iterate contacts.
+    let inJobContacts = _.findIndex(this.jobData.job_contacts, {contact: contact.id}) !== -1;
+
+    this.submitDisabled = false;
     if (contact.selected) {
-      contact.selected = false;
-      let index = -1;
-      for (let i = 0; i < this.contactsToAdd.length; i++) {
-        if (this.contactsToAdd[i].id === contact.id) {
-          index = i;
-          break;
-        }
-      }
-      if (index > -1) { // Remove contact from array.
-        this.contactsToAdd.splice(index, 1);
-      }
-      index = -1;
-      index = this.contactsToAddIds.indexOf(contact.id);
-      if (index > -1) {
-        this.contactsToAddIds.splice(index, 1);
-      }
-      if (this.contactsToAdd.length === this.initialContacts.length) { // Disable button if there're no contacts to add for relation.
-        this.submitDisabled = true;
-      }
-    } else {
-      this.submitDisabled = false; // Enable button for contact relation.
-      contact.selected = true;
-      this.contactsToAdd.push(contact);
+      // If it's already added - do nothing
+      if (inJobContacts)
+        return;
+      // Add id to array - to save then
       this.contactsToAddIds.push(contact.id);
+      this.selectedContacts.push(contact);
+      return;
     }
+
+    if (_.includes(this.contactsToAddIds, contact.id))
+      _.pull(this.contactsToAddIds, contact.id);
+    if (inJobContacts)
+      this.contactsToRemoveIds.push(contact.id);
+    _.remove(this.selectedContacts, {id: contact.id});
   }
+
   /**
    * Function to add job contact relation.
    */
-  public addJobContact(e: any) {
-    let i = 0;
-    let contactsAdded = 0;
-    let newJobContacts = (this.contactsToAdd.length - this.initialContacts.length);
-    let primary = ((this.jobData.external_owner === null || this.jobData.external_owner === undefined) && newJobContacts === 1);
-    for (let contact of this.contactsToAdd) {
-      this.isLoading = true;
-      if (!contact.isJobContact) {
-        let roles = [];
-        if (contact.role !== 0) {
-          roles.push(contact.role);
-        } else {
-          this.flash.error('Couldn\'t add ' + this.getFullName(contact) + ' to the job. Job role is required');
-          i++;
+  public save() {
+    let primary = this.jobData.primaryContact,
+      validated = this.validate(),
+      $subAddContacts = [], $subRemoveContacts = [];
+
+    if (!validated)
+      return;
+
+    this.isLoading = true;
+
+    for (let contactId of this.contactsToAddIds) {
+      let contact = _.find(this.contacts, {id: contactId});
+      $subAddContacts.push(this.addContact(contact));
+    }
+
+    for (let contactId of this.contactsToRemoveIds) {
+      $subRemoveContacts.push(this.removeContact(contactId));
+    }
+
+    Observable
+      .zip(...$subAddContacts, ...$subRemoveContacts)
+      .subscribe(
+        (jobContacts: JobApiJobContact[]) => {
+          this.jobData.job_contacts.concat(jobContacts);
+          this.setPrimary(jobContacts[0].contact);
+          this.modalClose();
+        },
+        err => {
+          console.error(err);
           this.isLoading = false;
-          break;
+        },
+        () => { this.isLoading = false; }
+      );
+  }
+
+  public setPrimary(contact) {
+    if (this.jobData.primaryContact)
+      return;
+
+    this.jobService
+      .partialUpdate(this.jobData.id, {
+        external_owner: contact
+      })
+      .subscribe(
+        () => {},
+        err => console.error(err),
+        () => {
+          this.isLoading = false;
+          this.modalClose();
         }
-        let data = {
-          job: this.jobData.id,
-          contact: contact.id,
-          roles: roles
-        };
-        this.jobContactService.create(data)
-          .subscribe(jobContact => {
-            // if this is the first contact, then set as primary.
-            // only if one is selected
-            if (primary) {
-              // set this as primary
-              let aux =  {
-                external_owner: jobContact.contact
-              };
-              this.jobService
-                .partialUpdate(this.jobData.id, aux)
-                .subscribe(
-                  () => {},
-                  err => console.error(err),
-                  () => {
-                    if (primary) {
-                      this.isLoading = false;
-                      this.modalService.data = {
-                        'primary': true
-                      };
-                      this.modalClose();
-                      this.contactsToAdd = [];
-                      this.currentFilter = 'all';
-                      this.search_box = '';
-                    }
-                  }
-                );
-            }
-          },
-          err => {
-            console.error(`ERROR: ${err}`);
-          },
-          () => {
-            i++;
-            contactsAdded++;
-            // finish to add all contacts;
-            if (i === newJobContacts && !primary) {
-              this.isLoading = false;
-              this.modalClose();
-              this.contactsToAdd = [];
-              this.currentFilter = 'all';
-              this.search_box = '';
-            }
-          }
-        );
+      );
+  }
+
+  public validate() {
+    let primaryContact = this.jobData.primaryContact,
+      validated = true;
+
+    if (primaryContact && _.includes(this.contactsToRemoveIds, primaryContact.id)) {
+      this.flash.error('Can\'t delete primary job contact.');
+      validated = false;
+    }
+
+    for (let contactId of this.contactsToAddIds) {
+      let contact = _.find(this.contacts, {id: contactId});
+      if (!contact.role) {
+        this.flash.error(`Can\'t add ${contact.full_name} to the job. Job role is required.`);
+        validated = false;
       }
     }
+
+    return validated;
   }
-  /**
-   * Function to get the contact full name.
-   *
-   * @param  {Contact} contact [description]
-   * @return {string}          [description]
-   */
-  public getFullName(contact: any): string {
-    let value = '';
-    if (contact.isJobContact) {
-      value = contact.name;
-    } else {
-      value = this.generalFunctions.getContactFullName(contact);
+
+  public addContact(contact) {
+    return this.jobContactService
+      .create({
+        job: this.jobData.id,
+        contact: contact.id,
+        roles: [contact.role]
+      });
+  }
+
+  public removeContact(contactId) {
+    let jobContact = _.find(this.jobData.job_contacts, {contact: contactId}),
+      contact = _.find(this.contacts, {id: contactId});
+
+    contact.selected = false;
+    if (!jobContact) {
+      _.pull(this.contactsToRemoveIds, contact.id);
+      return;
     }
-    value = value.replace(/_/g, ' ');
-    value = value.replace(/\b\w/g, l => l.toUpperCase());
-    return value;
+
+    return this.jobContactService.delete(jobContact.id);
   }
+
   /**
    * Function to get the contact email.
    *
@@ -428,7 +378,6 @@ export class ChooseContactComponent implements ModalComponent<ChooseContactWindo
    * @param  {string} filter [filter to apply]
    */
   public setFilter(filter: string) {
-
     if (this.showNewContactRow && !this.addContactFlag) {
       let $this = this;
       let message = 'The contact is not saved yet. Do you want to continue?';
@@ -438,7 +387,6 @@ export class ChooseContactComponent implements ModalComponent<ChooseContactWindo
       });
     } else {
       this.search_box = '';
-      this.contacts = [];
       if (filter === 'all') {
         this.currentFilter = 'all';
         this.totalItems = 0;
@@ -446,7 +394,6 @@ export class ChooseContactComponent implements ModalComponent<ChooseContactWindo
         this.search();
       } else if (filter === 'selected') {
         this.currentFilter = 'selected';
-        this.contacts = this.contactsToAdd;
         this.searchSelected();
       }
     }
@@ -461,19 +408,15 @@ export class ChooseContactComponent implements ModalComponent<ChooseContactWindo
    *
    */
   public searchSelected() {
-    this.contacts = [];
-    if (this.search_box.trim() !== '') {
-      for (let contact of this.contactsToAdd) {
-        let index = this.getFullName(contact).toLowerCase().indexOf(this.search_box.toLowerCase());
-        if (index > -1) {
-          this.contacts.push(contact);
-        }
-      }
-    } else {
-      this.contacts = this.contactsToAdd;
-    }
+    let searchTerm = this.search_box.trim();
+    this.contacts = _.filter(this.contacts, {selected: true});
+    if (searchTerm)
+      this.contacts = this.filterPipe.transform(this.contacts, {full_name: searchTerm});
+    else
+      this.contacts = this.selectedContacts;
     this.totalItems = this.contacts.length;
   }
+
   /**
    * Function to set the new contact as selected when is created
    *
@@ -488,7 +431,6 @@ export class ChooseContactComponent implements ModalComponent<ChooseContactWindo
   public addNewContact() {
     this.addContactFlag = true;
     let hasErrors = false;
-    let primary = ((this.jobData.external_owner === null || this.jobData.external_owner === undefined) && this.initialContacts.length === 0);
     if (this.newRole === undefined || this.newRole === 0) {
       this.flash.error('You must select a role.');
       hasErrors = true;
@@ -518,9 +460,24 @@ export class ChooseContactComponent implements ModalComponent<ChooseContactWindo
     this.contactService.create(newContact)
       .subscribe(contactData => {
           contactData.role = this.newRole;
-          this.setSelected(contactData);
+          // Add contact to Job
+          this.addContact(contactData)
+            .subscribe(
+              (data) => {
+                this.setPrimary(contactData);
+                this.jobData.job_contacts.push(
+                  Object.assign(new JobApiJobContact(), data)
+                );
+              },
+              (error) => {
+                console.error(error);
+                this.flash.error('An error has occurred adding the contact' +
+                  ' to Job, please try again later.');
+                this.contactsToAddIds.push(contactData.id);
+              },
+              () => { this.setFilter('all'); }
+            );
           this.flash.success('The contact has been created.');
-          this.setFilter('all');
         },
         err => {
           this.flash.error('An error has occurred creating the contact, please try again later.');
@@ -592,21 +549,4 @@ export class ChooseContactComponent implements ModalComponent<ChooseContactWindo
     }
   }
 
-  /**
-   * Filter contacts searching the filter string
-   * on his name or email
-   * @param {any}    contact [description]
-   * @param {string} filter  [description]
-   */
-  private filterContact(contact: any, filter?: string) {
-    if (filter === undefined || filter === '') {
-      return true;
-    }
-    filter = filter.toLowerCase();
-    let name = this.getFullName(contact).toLowerCase();
-    let email = this.getEmail(contact).toLowerCase();
-    let findName = name.indexOf(filter);
-    let findEmail = email.indexOf(filter);
-    return (findName !== -1 || findEmail !== -1);
-  }
 }

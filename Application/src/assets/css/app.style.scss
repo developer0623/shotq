@@ -5,10 +5,26 @@
 @import 'datepicker-overrides.scss';
 @import 'ngx-datepicker-overrides.scss';
 @import 'buttons.scss';
+@import 'dropdown.scss';
 @import 'accordion.scss';
 @import 'ng-select.scss';
 @import 'material-inputs.scss';
+@import 'body-padding-with-modal';
 
+// This class adds a dropdown/dropup caret to an element.
+// By default it is a dropdown caret. To make it drop-up add `.open` class
+// to the same element.
+.sq-caret {
+  @include sq-caret;
+}
+
+[class^="sq-btn-"],
+[class*="sq-btn-"] {
+  &.sq-caret::after {
+    float: right;
+    line-height: 1.25rem;
+  }
+}
 
 #wrapper {
   height: 100%;
@@ -111,6 +127,9 @@ modal-overlay .modal.in {
 modal-overlay .modal-dialog {
   width: 600px;
   margin: auto!important;
+  &_wide {
+    width: 1040px!important;
+  }
 
   /deep/ {
     .modal-header {
@@ -137,7 +156,7 @@ modal-overlay .modal-dialog {
     .modal-footer {
       position: initial;
       height: 50px;
-      padding: 7px $modal-padding-x;
+      padding: 9px $modal-padding-x;
       background: $modal-footer-bg;
     }
 
@@ -332,4 +351,136 @@ textarea,
 
 .slick-slide {
   float: none;
+}
+
+html {
+  background: transparent;
+}
+.fc-event-popover {
+  min-width: 320px;
+  max-width: 320px;
+  min-height: 170px;
+  background-color: #fff;
+  border: 1px solid #e4e8f0;
+  padding: 15px 15px 60px;
+  color: #3a405b;
+  &:before {
+    content: '';
+    position: absolute;
+    top: 25px;
+    right: 2px;
+    transform: rotate(-45deg);
+    background-color: #fff;
+    width: 15px;
+    height: 15px;
+    border-right: 1px solid #e4e8f0;
+    border-bottom: 1px solid #e4e8f0;
+  }
+  a:hover {
+    color: #3a405b;
+  }
+  &__wrapper {
+    position: absolute;
+    top: 0;
+    left: 0;
+    z-index: 5000;
+    padding: 10px;
+  }
+  &__header {
+    //border-bottom: 1px solid #e4e8f0;
+    padding-bottom: 15px;
+  }
+  &__title {
+    font-family: "Titillium Web", sans-serif;
+    font-size: 16px;
+    font-weight: 600;
+    margin: 0;
+  }
+  &__location {
+    opacity: .5;
+    font-size: 12px;
+    font-family: "Titillium Web", sans-serif;
+  }
+  &__desc {
+    padding: 15px 0;
+    border-bottom: 1px solid #e4e8f0;
+    font-size: 12px;
+    opacity: .87;
+    max-height: 150px;
+    overflow-y: auto;
+  }
+  &__sub-events {
+    opacity: .87;
+    font-size: 12px;
+    margin: 0;
+    padding: 15px 0 15px 0px;
+    border-bottom: 1px solid #e4e8f0;
+  }
+  &__sub-event {
+    list-style: none;
+    padding-top: 10px;
+  }
+  &__event-item {
+    text-decoration: none;
+    color: #3a405b;
+    font-size: 12px;
+    &:hover {
+      text-decoration: none;
+    }
+    &:after {
+      content: '';
+      display: table;
+      clear: both;
+    }
+  }
+  &__event-name {
+    float: left;
+    padding-right: 5px;
+    width: 50%;
+    display: inline-block;
+    -webkit-box-sizing: border-box;
+    -moz-box-sizing: border-box;
+    -ms-box-sizing: border-box;
+    box-sizing: border-box;
+  }
+  &__event-time {
+    float: right;
+    font-weight: 600;
+    text-align: right;
+    width: 50%;
+  }
+  &__footer {
+    padding-top: 15px;
+    position: absolute;
+    bottom: 25px;
+    //min-height: 50px;
+    width: calc(100% - 50px);
+    &:after {
+      content: '';
+      display: table;
+      clear: both;
+    }
+  }
+  &__participant {
+    float: left;
+  }
+  &__participant {
+    display: inline-block;
+    vertical-align: middle;
+    width: 35px;
+    height: 35px;
+    margin-right: 10px;
+    border-radius: 50%;
+    overflow: hidden;
+  }
+  &__btn {
+    float: right;
+  }
+  .fa-circle {
+    margin-right: 12px;
+  }
+}
+
+.disable-all-events {
+  pointer-events: none;
 }

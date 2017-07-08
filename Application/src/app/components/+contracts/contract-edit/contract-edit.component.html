@@ -58,9 +58,9 @@
 
     <!-- variables -->
     <div class="col-lg-4 col-md-5 col-sm-7 col-xs-7">
-      <app-template-variables [errors]="templateVarErrors"
-                              (variablesChange)="onTemplateVariablesChange($event)">
-
+      <app-template-variables [variables]="templateVariables"
+        [errors]="templateVarErrors"
+        (variablesChange)="onTemplateVariablesChange($event)">
       </app-template-variables>
       <!--<app-template-errors [errors]="templateVarErrors"></app-template-errors>-->
 
@@ -92,4 +92,3 @@
 
   </div>
 </div>
-

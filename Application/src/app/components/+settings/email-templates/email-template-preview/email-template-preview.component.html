@@ -13,31 +13,28 @@
 
             <div class="email-template">
                 <div class="email-template__header border-bottom">
-                    <div class="row m-0">
-                        <div class="col-sm-6">
-                            <div class="email-template__dropdown">
-                                <app-dropdown-select
-                                        [placeholder]="'Choose Template'"
-                                        [(ngModel)]="selectedTemplate"
-                                        (optionSelected)="loadTemplate($event?.id)"
-                                        [labelKey]="'name'"
-                                        [valueKey]="'id'"
-                                        [options]="variants">
-                                </app-dropdown-select>
-                            </div>
+                    <div class="email-template__col">
+                        <div class="email-template__dropdown">
+                            <app-dropdown-select
+                                    [placeholder]="'Choose Template'"
+                                    [allowNull]="true"
+                                    [(ngModel)]="selectedTemplate"
+                                    (optionSelected)="loadTemplate($event?.id)"
+                                    [labelKey]="'name'"
+                                    [valueKey]="'id'"
+                                    [options]="variants">
+                            </app-dropdown-select>
                         </div>
-                        <div class="col-sm-6 p-r-0">
-                            <div class="text-right">
-                                <div class="checkbox">
-                                    <input type="checkbox" [(ngModel)]="template.send_me_copy"
-                                           [disabled]="true" name="copy" id="copy">
-                                    <label for="copy">Send Me a Copy</label>
-                                </div>
-                            </div>
+                    </div>
+                    <div *ngIf="template" class="email-template__col text-right">
+                        <div class="sq-checkbox">
+                            <input type="checkbox" [(ngModel)]="template.send_me_copy"
+                                [disabled]="true" name="copy" id="copy">
+                            <label for="copy">Send Me a Copy</label>
                         </div>
                     </div>
                 </div>
-                <div class="email-template__header-line border-bottom">
+                <div *ngIf="template" class="email-template__header-line border-bottom">
                     <div class="edit-block">
                         <div class="edit-block__item edit-block__item_width">
                             <button class="edit-block__btn extand-btn" (click)="toggleContacts()">
@@ -73,7 +70,7 @@
                     </div>
                 </div>
                 <div class="email-template__body border-bottom">
-                    <tinymce [elementId]="'email-template-preview'"
+                    <tinymce *ngIf="template" [elementId]="'email-template-preview'"
                             [noteBody]="tempContents"
                             [editableMode]="'inactive'"
                             [class]="'wrap-editor template-contents-body'"
@@ -85,6 +82,7 @@
                             [theme]="'modern'"
                             [blurEvent]="true">
                     </tinymce>
+                    <p *ngIf="!template">No template selected.</p>
                 </div>
             </div>
         </div>

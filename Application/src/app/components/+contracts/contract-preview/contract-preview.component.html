@@ -38,8 +38,10 @@
       </div>
 
       <div class="row" *ngIf="canSign">
-        <div class="ckeckBox">
-          <input type="checkbox" id="check" [(ngModel)]="agreement" (click)="updateValidity()">
+        <div class="sq-checkbox">
+          <input type="checkbox" id="check"
+                 [disabled]="currentSignatureCompleted"
+                 [(ngModel)]="agreement" (click)="updateValidity()">
           <label for="check"> I have read and fully understand the contract presented above and by entering my
             full name and pressing, "Sign and Continue," I represent and warrant that I am the individual
             identified and I understand and agree to be bound by the legal contract set forth above.</label>

@@ -52,7 +52,7 @@
             (click)="delete()" *ngIf="canDelete && !schedule.proposal">Delete</button>
     <button type="button" class="saveNew btn" *ngIf="canSavePreset"
             (click)="saveAsPreset()" [ngClass]="{'disabled': schedule.payments.length < 1}">Save as preset</button>
-    <button type="button" class="save btn"
+    <button type="button" class="saveNew btn"
             [disabled]="schedule.payments.length < 1 || form.invalid"
             (click)="save()" [ngClass]="{'disabled': schedule.payments.length < 1 || form.invalid}">Save</button>
   </div>

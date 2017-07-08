@@ -3,6 +3,7 @@
 <!-- Bootstrap and site stylesheets -->
 <link rel="stylesheet" href="app/assets/theme/assets/css/bootstrap.min.css">
 <link rel="stylesheet" href="app/assets/theme/assets/css/bootstrap-extend.min.css">
+<link rel="stylesheet" href="app/assets/theme/assets/vendor/fullcalendar/fullcalendar.min.css">
 <link rel="stylesheet" href="app/assets/theme/assets/css/site.min.css">
 <link rel="stylesheet" href="index-styles.css">
 <!-- ng2 select -->
@@ -26,6 +27,9 @@
 <link rel="stylesheet" href="app/assets/theme/assets/fonts/font-awesome/font-awesome.css">
 <link rel="stylesheet" href="app/assets/theme/assets/fonts/simple-line-icons/css/simple-line-icons.css">
 <link rel="stylesheet" href="app/assets/theme/assets/fonts/icomoon/style.css">
+<link rel="stylesheet" href="app/assets/theme/assets/fonts/weather-icons/weather-icons.css">
+<link rel="stylesheet" href="app/assets/theme/assets/fonts/octicons/octicons.css">
+<link rel="stylesheet" href="app/assets/theme/assets/fonts/mfglabs/mfglabs.css">
 <link rel="stylesheet" href="app/assets/theme/assets/fonts/brush-script/brush-script.css">
 <link rel="stylesheet" href="app/assets/theme/assets/fonts/snellRoundhand/SnellRoundhandScript.css">
 <link rel="stylesheet" href="app/assets/theme/assets/fonts/savoye-let-plain/SavoyeLETPlain1.0.css">
@@ -38,6 +42,16 @@
 <![endif]-->
 <link rel="stylesheet" href="assets/css/uikit.min.css">
 <script type="text/javascript" src="https://js.squareup.com/v2/paymentform"></script>
+<script src="https://checkout.stripe.com/checkout.js"></script>
+<script src="https://js.braintreegateway.com/web/3.18.0/js/client.js"></script>
+<script src="https://js.braintreegateway.com/web/3.18.0/js/hosted-fields.js"></script>
+<script type="text/javascript" src="popup.js"></script>
+<script src="https://sandbox-assets.secure.checkout.visa.com/checkout-widget/resources/js/integration/v1/sdk.js"></script>
+	<script src="https://includestest.ccdc02.com/cardinalcruise/v1/songbird.js"></script>
+	<script src="https://jstest.authorize.net/v1/Accept.js"></script>
+
+<!--<script type="text/javascript" src="https://js.authorize.net/v1/Accept.js" charset="utf-8"></script>-->
+
 <script src="https://code.jquery.com/jquery-2.2.4.min.js"></script>
 <script src="app/assets/theme/assets/js/components/uikit.min.js"></script>
 <script src="app/assets/theme/assets/js/components/autocomplete.js"></script>
@@ -59,7 +73,39 @@
   <!-- base url -->
   <base href="<%= htmlWebpackPlugin.options.metadata.baseUrl %>">
 
-
+  <% if (process.env.ENV === 'production') { %>
+  <script>
+    window['_fs_debug'] = false;
+    window['_fs_host'] = 'fullstory.com';
+    window['_fs_org'] = '5CAR3';
+    window['_fs_namespace'] = 'FS';
+    (function(m,n,e,t,l,o,g,y){
+      if (e in m && m.console && m.console.log) { m.console.log('FullStory namespace conflict. Please set window["_fs_namespace"].'); return;}
+      g=m[e]=function(a,b){g.q?g.q.push([a,b]):g._api(a,b);};g.q=[];
+      o=n.createElement(t);o.async=1;o.src='https://'+_fs_host+'/s/fs.js';
+      y=n.getElementsByTagName(t)[0];y.parentNode.insertBefore(o,y);
+      g.identify=function(i,v){g(l,{uid:i});if(v)g(l,v)};g.setUserVars=function(v){g(l,v)};
+      g.identifyAccount=function(i,v){o='account';v=v||{};v.acctId=i;g(o,v)};
+      g.clearUserCookie=function(c,d,i){if(!c || document.cookie.match('fs_uid=[`;`]*`[`;`]*`[`;`]*`')){
+        d=n.domain;while(1){n.cookie='fs_uid=;domain='+d+
+          ';path=/;expires='+new Date(0).toUTCString();i=d.indexOf('.');if(i<0)break;d=d.slice(i+1)}}};
+    })(window,document,window['_fs_namespace'],'script','user');
+  </script>
+  <script type="text/javascript">
+    setTimeout(function(){
+      let currentUser = sessionStorage.getItem('currentUser');
+      if (currentUser) {
+        currentUser = JSON.parse(currentUser);
+        FS.identify(currentUser.email, {
+            displayName: currentUser.first_name + ' ' + currentUser.last_name,
+            email: currentUser.email
+        });
+      } else {
+        FS.clearUserCookie();
+      }
+    }, 3000);
+  </script>
+  <% } %>
 </head>
 
 <body>
@@ -69,8 +115,7 @@
       <img class="spinSvg" src="/assets/img/shootq-loader.gif">
     </div>
   </app>
-
-
+  <% if (process.env.ENV === 'production') { %>
   <!-- Google Analytics: change UA-71073175-1 to be your site's ID -->
   <script>
     (function(A,n,g,u,l,a,r){A.GoogleAnalyticsObject=r;A[l]=A[l]||function(){
@@ -81,6 +126,7 @@
     ga('create', 'UA-71073175-1', 'auto');
     ga('send', 'pageview');
   </script>
+  <% } %>
   <script type="text/javascript">
   if(navigator.userAgent.indexOf('MSIE')!==-1
   || navigator.appVersion.indexOf('Trident/7.0') > 0){ /*IE 11*/
@@ -93,5 +139,7 @@
   <% } %>
   <!-- Google Map Api -->
   <script src="https://maps.googleapis.com/maps/api/js?libraries=places&key=<%= htmlWebpackPlugin.options.metadata.googleMapsKey %>"></script>
+<div id="divAuthorizeNetPopupScreen" style="display:none;"></div>
+
 </body>
 </html>

@@ -34,7 +34,7 @@
                     <tr *ngFor="let proposal of proposals">
                         <td class="bold cursor-pointer"
                             (click)="openProposal(proposal)">{{ proposal.name }}</td>
-                        <td>{{ proposal.job.job_type_details.name }}</td>
+                        <td>{{ proposal.job.job_type_details?.name }}</td>
                         <td>{{ proposal.sent_at | date: 'mediumDate' }}</td>
                         <td>{{ proposal.status | humanize }}</td>
                         <td>
@@ -42,7 +42,7 @@
                                       [dropUp]="true"
                                       [button]="false"
                                       [dropdownClass]="'dropdown-menu-right'"
-                                      listClass="blue-circle-btn"
+                                      listClass="blue-circle vertical"
                                       iconClass="icon-more-icon-o font-size-10"
                                       [actions]="proposal.actions"
                                       (optionSelected)="singleAction($event, proposal)">

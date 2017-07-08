@@ -15,6 +15,9 @@ import { FlashMessageService } from '../../../../services/flash-message/flash-me
 })
 export class ProposalTemplatesComponent extends BaseTemplateListComponent<ProposalTemplate> {
   modelName = 'Proposal';
+  inlineMode = true;
+  prependAddButton = true;
+  sliderContainerId = 'proposalTemplateSlider';
 
   constructor(
     router: Router,

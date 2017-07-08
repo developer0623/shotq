@@ -16,6 +16,9 @@ import { BreadcrumbService } from '../../../shared/breadcrumb/components/breadcr
 })
 export class ContractTemplatesComponent extends BaseTemplateListComponent<ContractTemplate> {
   modelName = 'Contract';
+  inlineMode = true;
+  prependAddButton = true;
+  sliderContainerId = 'contractTemplateSlider';
 
   constructor(contractTemplateService: ContractTemplateService,
               flash: FlashMessageService,

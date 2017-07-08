@@ -13,6 +13,7 @@ interface ContentItem {
   item_template_data: ItemTemplate;
   quantity: number;
   position: number;
+  addons_price: number | string;
 }
 
 @Component({
@@ -27,18 +28,25 @@ export class PackageTemplateContentsComponent implements OnChanges {
   items: ContentItem[] = [];
   dragulaOptions = {
     modelItemModifier: (item) => {
-      return {item: item, quantity: 1};
+      return {
+        id: this.generateRandomId(),
+        item: item,
+        item_template: item.id,
+        item_template_data: item,
+        addons_price: 0,
+        quantity: 1
+      };
     }
   };
   activeItemId: number = null;
 
   constructor(dragulaService: DragulaService) {
     dragulaService.dropModel.subscribe((args) => {
-      if (this.contents.length !== this.items.length) {
-        this.contentsChanged.emit(this.getContents());
-      } else {
-        this.contentsChanged.emit(this.getContents());
+      let newItems = _.differenceBy(this.items, this.contents, 'id');
+      if (newItems.length) {
+        this.toggleItemOptions(newItems[0]);
       }
+      this.contentsChanged.emit(this.getContents());
     });
   }
 
@@ -51,7 +59,8 @@ export class PackageTemplateContentsComponent implements OnChanges {
           item: itemTemplate,
           item_template_data: _.cloneDeep(item.item_template_data || itemTemplate),
           quantity: item.quantity,
-          position: index
+          position: index,
+          addons_price: item.addons_price
         };
       });
     }
@@ -64,7 +73,8 @@ export class PackageTemplateContentsComponent implements OnChanges {
         item_template: item.item.id,
         item_template_data: item.item_template_data,
         quantity: item.quantity,
-        position: index
+        position: index,
+        addons_price: item.addons_price
       };
     });
   }
@@ -85,7 +95,12 @@ export class PackageTemplateContentsComponent implements OnChanges {
     this.changeUnit(product, e, -1);
   }
 
-  onChangeItem() {
+  onChangeItem(item: ContentItem) {
+    item.addons_price = _.sum(
+      item.item_template_data.item_template_option_groups
+        .filter(g => !!g.selected)
+        .map(g => parseFloat(<string>g.selected_data.extra_price))
+    );
     this.contentsChanged.emit(this.getContents());
   }
 
@@ -101,18 +116,18 @@ export class PackageTemplateContentsComponent implements OnChanges {
     }
   }
 
-  private changeUnit(product: ContentItem, e: MouseEvent, size: number) {
-    e.preventDefault();
-    e.stopPropagation();
-    product.quantity += size;
-    this.contentsChanged.emit(this.getContents());
-  }
-
-  private generateRandomId(): number {
+  generateRandomId(): number {
     let r = _.random(-1, -1000);
     while (_.find(this.items, {id: r})) {
       r = _.random(-1, -1000);
     }
     return r;
+  }
+
+  private changeUnit(product: ContentItem, e: MouseEvent, size: number) {
+    e.preventDefault();
+    e.stopPropagation();
+    product.quantity += size;
+    this.contentsChanged.emit(this.getContents());
   }
 }

@@ -19,6 +19,10 @@ export class ContractService extends RestClientService<Contract> {
   // Fields endpoint
   private _ = require('../../../../node_modules/lodash');
 
+  public static newObject(data?: object): Contract {
+    return Object.assign(new Contract(), data || {});
+  }
+
   // Initialize services
   constructor(apiService: ApiService,
               private functions: GeneralFunctionsService,

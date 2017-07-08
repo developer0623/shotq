@@ -12,7 +12,7 @@ import { ItemTemplateService } from '../../../../../services/product/item-templa
 
 interface ContentItem {
   id?: number;
-  item: Item | ItemTemplate;
+  item: Item;
   quantity: number;
   position?: number;
   option_groups?: ItemOptionGroup[];
@@ -105,6 +105,7 @@ export class PackageContentsComponent implements OnChanges {
         if (index !== -1) {
           this.items[index].item = item;
           delete this.items[index].$isTemplate;
+          this.toggleItemOptions(item);
         }
       });
   }
@@ -125,6 +126,15 @@ export class PackageContentsComponent implements OnChanges {
     e.preventDefault();
     e.stopPropagation();
     product.quantity += size;
+    this.contentsChanged.emit(this.getContents());
+  }
+
+  private updateAddonsPrice(item: ContentItem) {
+    item.item.addons_price = _.sum(
+      item.item.option_groups
+        .filter(g => !!g.selected)
+        .map(g => parseFloat(g.selected_data.extra_price))
+    );
     this.contentsChanged.emit(this.getContents());
   }
 }

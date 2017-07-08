@@ -15,6 +15,8 @@ import { CustomDatePipe }         from './custom-date/custom-date.pipe';
 import { SafeUrlPipe } from './safe-url/safe-url.pipe';
 import { GroupByPipe } from './group-by/group-by.pipe';
 import { UTCDatePipe } from './utc-date';
+import { SortPipe } from './sort/sort.pipe';
+import { PhonePipe } from './phone/phone.pipe';
 
 const PIPES = [
   HumanizePipe,
@@ -29,7 +31,9 @@ const PIPES = [
   CustomDatePipe,
   SafeUrlPipe,
   GroupByPipe,
-  UTCDatePipe
+  UTCDatePipe,
+  SortPipe,
+  PhonePipe
 ];
 
 @NgModule({

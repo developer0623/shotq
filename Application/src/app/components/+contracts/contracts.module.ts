@@ -19,8 +19,7 @@ import { ContractEditComponent } from './contract-edit';
 import { ContractTemplate } from '../../models/contract-template.model';
 import { GeneralFunctionsService } from '../../services/general-functions/general-functions.service';
 import { ContractSendComponent } from './contract-send/contract-send.component';
-import { ContractService, SignatureService, TemplateEmailService } from '../../services';
-import { ContractsAddModalService } from './contracts-add/contracts-add-modal.service';
+import { ContractService, SignatureService } from '../../services';
 import { PerfectScrollbarConfigInterface, PerfectScrollbarModule } from 'angular2-perfect-scrollbar';
 import { PipesModule } from '../../pipes/pipes.module';
 import { CustomDropdownModule } from '../shared/dropdown';
@@ -29,6 +28,8 @@ import { CONTRACTS_ROUTES } from './contracts.routes';
 import { SettingsModule } from '../+settings/settings.module';
 import { ContractPreviewModalComponent } from './contract-preview/contract-preview-modal/contract-preview-modal.component';
 import { ContractPreviewModule } from './contract-preview/contract-preview.module';
+import { SQModalModule } from '../sq-modal/sq-modal.module';
+import { MessagingUiService } from '../shared/messaging-ui/messaging-ui.service';
 
 const PERFECT_SCROLLBAR_CONFIG: PerfectScrollbarConfigInterface = {
   // suppressScrollX: true
@@ -55,7 +56,8 @@ const PERFECT_SCROLLBAR_CONFIG: PerfectScrollbarConfigInterface = {
     ModalModule,
     CustomDropdownModule,
     SettingsModule,
-    ContractPreviewModule
+    ContractPreviewModule,
+    SQModalModule
   ],
   declarations: [
     ContractsListComponent,
@@ -65,11 +67,10 @@ const PERFECT_SCROLLBAR_CONFIG: PerfectScrollbarConfigInterface = {
   ],
   exports: [],
   providers: [
-    ContractsAddModalService,
     GeneralFunctionsService,
     ContractService,
     ContractTemplate,
-    TemplateEmailService,
+    MessagingUiService,
     SignatureService
   ],
   entryComponents: [

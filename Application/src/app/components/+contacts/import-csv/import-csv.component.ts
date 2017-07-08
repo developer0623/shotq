@@ -12,7 +12,6 @@ import { ContactService }           from '../../../services/contact';
 import { ApiService }               from '../../../services/api';
 import { GeneralFunctionsService }  from '../../../services/general-functions';
 import { ModalService }             from '../../../services/modal/';
-import { AddressTypeService }           from '../../../services/address-type/';
 import { PhoneTypeService }         from '../../../services/phone-type/';
 import { EmailTypeService }         from '../../../services/email-type/';
 import { DateService }              from '../../../services/date/';
@@ -26,7 +25,7 @@ import {
     selector: 'import-csv',
     templateUrl: 'import-csv.component.html',
     styleUrls: ['import-csv.component.scss'],
-    providers: [GeneralFunctionsService, AddressTypeService, PhoneTypeService, EmailTypeService, DateService]
+    providers: [GeneralFunctionsService, PhoneTypeService, EmailTypeService, DateService]
 })
 export class ImportCSVComponent {
   public step: number = 1;
@@ -83,7 +82,6 @@ export class ImportCSVComponent {
     last: 10,
     maxSize: 5
   };
-  private contactTypeItems: Array<any> = [];
   private items: Array<any> = [];
 
   private blurSelectId;
@@ -117,7 +115,6 @@ export class ImportCSVComponent {
               private flash: FlashMessageService,
               private apiService: ApiService,
               private contactService: ContactService,
-              private addressTypeService: AddressTypeService,
               private phoneTypeService: PhoneTypeService,
               private emailTypeService: EmailTypeService,
               private dateService: DateService,
@@ -139,7 +136,6 @@ export class ImportCSVComponent {
     let observableArray = [];
 
     observableArray.push(this.contactService.getContactFields());
-    observableArray.push(this.addressTypeService.getList());
     observableArray.push(this.phoneTypeService.getList());
     observableArray.push(this.emailTypeService.getList());
     observableArray.push(this.dateService.getTypes());
@@ -148,41 +144,22 @@ export class ImportCSVComponent {
     Observable.forkJoin(observableArray)
       .subscribe(
         data => {
-          if (data.length === 6) {
+          if (data.length === 5) {
             // shootQ fields list
             if (data[0] && data[0]['fields'] !== undefined) {
               this.listFields(data[0]['fields']);
             }
-            // Address types
-            if (data[1] && data[1]['results'] !== undefined) {
-              this.setAddressTypeIds(data[1]['results']);
-            }
             //  Phone types
-            if (data[2] && data[2]['results'] !== undefined) {
-              this.setPhonesTypeIds(data[2]['results']);
+            if (data[1] && data[1]['results'] !== undefined) {
+              this.setPhonesTypeIds(data[1]['results']);
             }
             // Emails types
-            if (data[3] && data[3]['results'] !== undefined) {
-              this.setEmailsTypeIds(data[3]['results']);
+            if (data[2] && data[2]['results'] !== undefined) {
+              this.setEmailsTypeIds(data[2]['results']);
             }
             // Date types
-            if (data[4] && data[4]['results'] !== undefined) {
-              this.setDatesTypeIds(data[4]['results']);
-            }
-            // contact types
-            if (data[5] !== undefined) {
-                let contactTypes: any = data[5];
-                this.items = [];
-                for (let type of contactTypes) {
-                let aux = {
-                  id: type.id,
-                  name: type.name,
-                  slug: this.functions.getSlug(type.name)
-                };
-                this.items.push(aux);
-              }
-              this.items.unshift({'id': 0, 'name': 'CONTACT TYPE', slug: 'none'});
-              this.contactTypeItems = this.items;
+            if (data[3] && data[3]['results'] !== undefined) {
+              this.setDatesTypeIds(data[3]['results']);
             }
           }
         },
@@ -353,7 +330,9 @@ export class ImportCSVComponent {
               this.restart();
               return;
             }
-            this.functions.navigateTo('contacts');
+            setTimeout(() => {
+              this.functions.navigateTo('contacts');
+            }, 300);
           })
           .catch(() => {
           });
@@ -490,21 +469,10 @@ export class ImportCSVComponent {
     this.isLoading = true;
     // generate contact list
     let contactList = [];
-    let isContactTypeSet = true;
     for (let contact of this.generatedContacts) {
       if (this.isChecked(contact.id)) {
-        if (contact.typeId === 0) {
-          isContactTypeSet = false;
-        } else {
-          contactList.push(contact.data);
-        }
+        contactList.push(contact.data);
       }
-    }
-    // check if all the checked contacts have set the contact type
-    if (!isContactTypeSet) {
-      this.flash.error('You must select a contact type');
-      this.isLoading = false;
-      return;
     }
     let messageErrors = [];
     this.createSubscriber = this.contactService.bulkCreate(contactList)
@@ -663,22 +631,6 @@ export class ImportCSVComponent {
   }
 
   /**
-   * Set the home and work address ids
-   * @param {[type]} types [description]
-   */
-  private setAddressTypeIds(types) {
-    if (types !== undefined && types.length > 0) {
-      for (let a of types) {
-        if (a.slug === 'home') {
-          this.homeAddressId = a.id;
-        } else if (a.slug === 'work') {
-          this.workAddressId = a.id;
-        }
-      }
-    }
-  }
-
-  /**
    * Set the home and work emails ids
    * @param {[type]} types [description]
    */
@@ -765,15 +717,9 @@ export class ImportCSVComponent {
         data.dates = dates;
       }
 
-      let typeId = this.getContactTypeId(contact);
-      if (typeId !== 0) {
-        data.contact_types = [typeId];
-      }
-
       // TODO: change for person account
       data.account = this.apiService.getAccount();
       aux.data = data;
-      aux.typeId = typeId;
       // add the generated contact to the list
       this.generatedContacts.push(aux);
       this.generatedContactsBkp = this.generatedContacts;
@@ -857,8 +803,7 @@ export class ImportCSVComponent {
         address1: contact[this.mappedShootQFields['home_address_1']],
         address2: (this.isFieldComplete(contact, 'home_address_2')) ? contact[this.mappedShootQFields['home_address_2']] : undefined,
         state: contact[this.mappedShootQFields['home_state']],
-        country: contact[this.mappedShootQFields['home_country']],
-        address_type: this.homeAddressId
+        country: contact[this.mappedShootQFields['home_country']]
       };
       addresses.push(home_address);
     }
@@ -875,8 +820,7 @@ export class ImportCSVComponent {
         address1: contact[this.mappedShootQFields['work_address_1']],
         address2: (this.isFieldComplete(contact, 'work_address_2')) ? contact[this.mappedShootQFields['work_address_2']] : undefined,
         state: contact[this.mappedShootQFields['work_state']],
-        country: contact[this.mappedShootQFields['work_country']],
-        address_type: this.workAddressId
+        country: contact[this.mappedShootQFields['work_country']]
       };
       addresses.push(work_address);
     }
@@ -930,16 +874,6 @@ export class ImportCSVComponent {
     return dates;
   }
 
-  private getContactTypeId(contact: any) {
-    for (let t of this.contactTypeItems) {
-      if (t.slug === contact.contact_types) {
-        return t.id;
-      }
-    }
-    // default id
-    return 0;
-  }
-
   /**
    * check if the mapped fields are valid
    * @return {boolean} [description]
@@ -952,13 +886,6 @@ export class ImportCSVComponent {
     }
     return false;
   }
-  /**
-   * Change the contact type of the contact with id = id
-   * @param {number} id: the contact id
-   */
-  private singleChangeContactType(id: number) {
-    // console.info('single contact type change for ', id);
-  }
 
   /**
    * unsubscribe the subscribed observables
@@ -969,56 +896,6 @@ export class ImportCSVComponent {
     }
     if (this.isCreateSubscribed && this.createSubscriber !== undefined) {
       this.createSubscriber.unsubscribe();
-    }
-  }
-
-  /**
-   * Set the contactType options selected in the bulk select to all
-   * of the contacts
-   */
-  private applyBulkContactType() {
-    for (let c of this.generatedContacts) {
-      if (this.isChecked(c.id)) {
-        c.typeId = this.bulkContactTypeId;
-        if (this.bulkContactTypeId === 0 ) {
-          c.data.contact_types = undefined;
-        } else {
-          c.data.contact_types = [this.bulkContactTypeId];
-        }
-      }
-    }
-  }
-
-  /**
-   * Function to get contact types. (brand-roles).
-   */
-  private getContactTypes() {
-    let types = this.contactService.getContactTypes();
-    if (types.length !== 0) {
-      for (let type of types) {
-        let aux = {
-          id: type.id,
-          name: type.name,
-          slug: this.functions.getSlug(type.name)
-        };
-        this.items.push(aux);
-      }
-      this.items.unshift({'id': 0, 'name': 'CONTACT TYPE', slug: 'none'});
-      this.contactTypeItems = this.items;
-    } else {
-      this.contactService.getRequestContactTypes()
-        .subscribe(iTypes => {
-          for (let type of iTypes) {
-            let aux = {
-              id: type.id,
-              name: type.name,
-              slug: this.functions.getSlug(type.name)
-            };
-            this.items.push(aux);
-          }
-          this.items.unshift({'id': '', 'name': 'CONTACT TYPE', slug: 'none'});
-          this.contactTypeItems = this.items;
-        });
     }
   }
 

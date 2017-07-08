@@ -14,6 +14,9 @@ import { CompanySettingsComponent } from './account/company/company.component';
 import { PaymentAndInvoicesComponent } from './payment/payment.component';
 import { TeamComponent } from './team/team.component';
 import { WorkerProfileSettingsComponent } from './team/worker-profile/worker-profile.component';
+import { JobRolesComponent } from './jobs/job-roles/job-roles.component';
+import { JobTypesComponent } from './jobs/job-types/job-types.component';
+import { EventTypesComponent } from './jobs/event-types';
 
 
 
@@ -109,6 +112,24 @@ const ACCOUNT_ROUTES: Routes = [
   },
 ];
 
+const JOBS_ROUTES: Routes = [
+   {
+     path: 'job-roles',
+     component: JobRolesComponent,
+     canDeactivate: [CanDeactivateChangesGuard]
+   },
+   {
+     path: 'job-types',
+     component: JobTypesComponent,
+     canDeactivate: [CanDeactivateChangesGuard]
+   },
+   {
+     path: 'event-types',
+     component: EventTypesComponent,
+     canDeactivate: [CanDeactivateChangesGuard]
+   }
+];
+
 
 export const SETTINGS_ROUTES = [
   {path: '', component: SettingsComponent},
@@ -116,5 +137,6 @@ export const SETTINGS_ROUTES = [
   {path: 'payment-and-invoices', component: PaymentAndInvoicesComponent},
   ...ACCOUNT_ROUTES,
   ...TEAM_ROUTES,
-  ...PRODUCTS_ROUTES
+  ...PRODUCTS_ROUTES,
+  ...JOBS_ROUTES
 ];

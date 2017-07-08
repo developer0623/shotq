@@ -3,12 +3,14 @@ import {
   OnInit,
   Inject,
   ViewChild,
-  OnDestroy }							           from '@angular/core';
+  OnDestroy, ViewContainerRef
+}                         from '@angular/core';
 import { DOCUMENT }                  from '@angular/platform-browser';
 import { SettingsAndActions }        from './settings-and-actions';
 /* Services */
 import { GeneralFunctionsService }   from '../../services/general-functions';
 import { BreadcrumbService } from '../shared/breadcrumb/components/breadcrumb.service';
+import { Overlay } from 'single-angular-modal';
 
 @Component({
     selector: 'settings',
@@ -22,8 +24,11 @@ export class SettingsComponent {
   constructor(
     @Inject(DOCUMENT) private document: Document,
     private generalFunctions: GeneralFunctionsService,
-    private breadcrumbService: BreadcrumbService
+    private breadcrumbService: BreadcrumbService,
+    private overlay: Overlay,
+    private vcRef: ViewContainerRef
   ) {
+    overlay.defaultViewContainer = vcRef;
     breadcrumbService.addFriendlyNameForRoute('/settings', 'Settings');
   }
 

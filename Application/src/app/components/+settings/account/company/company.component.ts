@@ -89,7 +89,7 @@ export class CompanySettingsComponent {
         Validators.email,
         Validators.maxLength(254),
       ])],
-      website: ['', CustomValidators.url],
+      website: [''],
       address1: ['', Validators.maxLength(255)],
       address2: ['', Validators.maxLength(255)],
       city: ['', Validators.maxLength(255)],
@@ -101,7 +101,9 @@ export class CompanySettingsComponent {
 
   save() {
     let data = Object.assign(this.account, this.form.value);
-
+    if (data.website && data.website.search('http') < 0) {
+      data.website = `http://${data.website}`;
+    }
     this.isLoading = true;
     this.accessService
       .updateLoggedAccountInfo(this.account.id, data)

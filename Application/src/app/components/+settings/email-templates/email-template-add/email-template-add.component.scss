@@ -1,3 +1,6 @@
+@import "../../../../../assets/css/variables";
+@import "../../../../../assets/css/mixins";
+
 .modal-dialog {
   width: 90%!important;
   margin: 100px auto 50px!important;
@@ -64,6 +67,17 @@
         font-size: 24px;
         font-weight: 600;
         color: #3a405b;
+      }
+    }
+    /deep/ button.dropdown {
+      border: 0;
+      line-height: 1.1;
+      height: auto;
+      width: auto;
+      /deep/ span {
+        top: 50%!important;
+        right: 0!important;
+        transform: translate(0, -50%);
       }
     }
 
@@ -172,7 +186,7 @@ h3,
       vertical-align: middle;
       font-size: 12px;
       color: #3a405b;
-      padding: 15px 0 13px 23px;
+      padding: 3px 0 0 23px;
       cursor: pointer;
       user-select: none;
       white-space: nowrap;
@@ -446,21 +460,21 @@ h3,
 
 // }
 
-.email-template__dropdown {
-  margin-top: 10px;
+// .email-template__dropdown {
+//   margin-top: 10px;
 
-  /deep/ {
-    .dropdown {
-      border: none;
+//   /deep/ {
+//     .dropdown {
+//       border: none;
 
-      span {
-        position: static !important;
-        vertical-align: middle;
-        margin-left: 20px;
-      }
-    }
-  }
-}
+//       span {
+//         position: static !important;
+//         vertical-align: middle;
+//         margin-left: 20px;
+//       }
+//     }
+//   }
+// }
 
 #externalEditorToolbar /deep/ {
   .mce-tinymce {

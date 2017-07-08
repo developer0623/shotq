@@ -6,5 +6,5 @@ export class Tax extends TaxTemplate {
   proposal: number;
   template: number;
   apply_to_shipping_cost?: boolean;
-  calculate_settings?; string;
+  calculate_settings?: string;
 }

@@ -15,8 +15,9 @@ export class LegalDocumentService {
    * Get contact info by job id.
    * @param {number} id The job id to search information.
    */
-  public getContractsInfoByJob(id: number) {
-    let path = `${this.contractsInfoEndpoint}?job=${id}`;
+  public getContractsInfoByJob(id: number, statuses = ['sent', 'viewed', 'pending', 'signed']) {
+    let status_filter = statuses.join('&status=');
+    let path = `${this.contractsInfoEndpoint}?job=${id}&status=${status_filter}`;
     return this.apiService.get(path);
   }
 }

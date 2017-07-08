@@ -109,45 +109,37 @@
               <div class="col-sm-5">
                 <div class="text-right">
                   <div class="select ">
-                    <select [(ngModel)]="emailTemplate" disabled>
-                      <!--<option [ngValue]="template" *ngFor="let template of emailTemplates">{{ template.name }}</option>-->
+                    <select [ngModel]="emailTemplate" (ngModelChange)="onTemplateSelected($event)"
+                            [disabled]="isDisabled">
+                      <option value="undefined" >No template</option>
+                      <option [ngValue]="template" *ngFor="let template of emailTemplates"
+                      >{{ template.name }}</option>
                     </select>
                   </div>
 
                 </div>
               </div>
             </div>
+
             <div class="row">
               <div class="col-md-12">
                 <div class="iinput input_text">
                   <div class="iinput__title">Subject:</div>
-                  <input type="text" [(ngModel)]="proposal.email_subject" [disabled]="isDisabled">
+                  <input type="text" [(ngModel)]="emailSubject" [disabled]="isDisabled">
                 </div>
               </div>
             </div>
 
             <div class="row">
-              <div class="col-md-12">
-                <div class="block-content">
-                  <!-- <label>Subject: <input type="text" [(ngModel)]="emailSubject"></label> -->
-
-                  <tinymce
-                    [noteBody]="proposal.email_contents"
-                    [elementId]="'template-contents'"
-                    [editableMode]="'active'"
-                    [class]="'template-contents-body is-active'"
-                    [name]="'template-contents'"
-                    [readonly]="isDisabled"
-                    [toolbar]="'bold italic | bullist numlist | fontsizeselect | link image'"
-                    [theme]="'inlite'"
-                    (onEditorBlur)="proposal.email_contents = $event"
-                    [placeholder]="'Begin typing here'">
-                  </tinymce>
-                </div>
-
-
+              <div class="col-md-12" *ngIf="!isDisabled">
+                <sq-text-editor
+                  class="proposal-send__email-editor-form-control"
+                  name="body" [(ngModel)]="emailBody"
+                ></sq-text-editor>
               </div>
-
+              <div class="col-md-12" *ngIf="!!isDisabled">
+                <div class="proposal-send__email-text" [innerHTML]="emailBody"></div>
+              </div>
             </div>
           </div>
 

@@ -6,9 +6,11 @@ import { Account } from '../../models/account';
 
 @Injectable()
 export class JobService {
-  jobEndpoint:      string = '/job/job/';
+  jobEndpoint: string = '/job/job/';
 
-  constructor(private apiService: ApiService) {}
+  constructor(private apiService: ApiService) {
+  }
+
   /**
    * Get jobs by id
    * @param {number} id The job id to search information.
@@ -16,6 +18,7 @@ export class JobService {
   public get(id: number) {
     return this.apiService.get(`${this.jobEndpoint}${id}/`);
   }
+
   /**
    * Get contact info by job id.
    * @param {number} id The job id to search information.

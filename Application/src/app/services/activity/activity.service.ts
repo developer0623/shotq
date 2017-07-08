@@ -1,33 +1,22 @@
 import { Injectable } from '@angular/core';
+
 import { ApiService } from '../api';
-import { GeneralFunctionsService } from '../general-functions';
-import { Observable } from 'rxjs/Observable';
-import { Headers } from '@angular/http';
-declare let require: (any);
 
-import 'rxjs/Rx';
-
-/* Models */
-import { Activity } from '../../models/activity';
 
 @Injectable()
 export class ActivityService {
-  /* Endpoints */
+  private baseUrl: string = '/activity/feed';
 
-  /* Contact activity list */
-  private activityType: string = '/activity/activitytype/';
-  /* Other vars */
-  private functions;
-  private _ = require('../../../../node_modules/lodash');
+  constructor(private apiService: ApiService) {}
 
-  // Initialize services
-  constructor(private apiService: ApiService) {
-    this.functions = new GeneralFunctionsService();
+  public account() {
+    return this.apiService.get(`${this.baseUrl}/account/json`);
   }
-  /**
-   * Function to get the activity types.
-   */
-  public getActivityType() {
-    return this.apiService.get(this.activityType);
+
+  /***
+    Stream of most recent actions where obj is the actor OR target OR action_object.
+  ***/
+  public objectAny(contentType, target) {
+    return this.apiService.get(`${this.baseUrl}/${contentType}/${target}/json`);
   }
 }

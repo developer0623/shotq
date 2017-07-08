@@ -2,7 +2,7 @@
   <div class="job-name">
     <editable-label
         *ngIf="!isLoadingHeader"
-        [value]="jobData.name" 
+        [value]="jobData.name"
         [editOnClick] = "true"
         [truncateWords]="'4'"
         [required]="false"
@@ -26,8 +26,8 @@
           <accordion-toggle>
           <i class="icon-hamburger"></i>
           </accordion-toggle>
-          <editable-label 
-              [value]="eventGroup.name" 
+          <editable-label
+              [value]="eventGroup.name"
               [editOnClick] = "true"
               [truncateWords]="'4'"
               [required]="false"
@@ -38,7 +38,7 @@
           </editable-label>
           <span class="trash">
             <i class="icon-trash" (click)="onDeleteEventGroup(eventGroup, i)"></i>
-          </span>          
+          </span>
           <accordion-toggle>
           <i class="arrow icon-down-arrow" *ngIf="!eventGroup.isOpenEvGroup"></i>
           <i class="arrow icon-up-arrow" *ngIf="eventGroup.isOpenEvGroup"></i>
@@ -127,7 +127,7 @@
               </div>
               <div class="field event-address">
                 <label>Location Address</label>
-                <form-field-address [hideAddressType]="true" [(ngValue)]="event.location" [required]="true"></form-field-address>
+                <form-field-address [(ngValue)]="event.location" [required]="true"></form-field-address>
               </div>
             </div>
           </accordion-group>

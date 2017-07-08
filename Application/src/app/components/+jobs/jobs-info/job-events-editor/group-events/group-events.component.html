@@ -7,16 +7,19 @@
       </div>
       <div class="group-event-body">
         <div class="group-event-title">
-          <span class="event-time">{{ eventGroup.start | date:'shortTime' }}</span>
+          <span class="event-time">{{ eventGroup.start | date:'mediumDate' }} {{ eventGroup.start | date:'shortTime' }}</span>
           <span class="is-bold"> {{ eventGroup.name }}</span>
            begins
+        </div>
+        <div class="group-event-location" *ngIf="eventGroup.location_name">
+          <i class="fa fa-map-marker" aria-hidden="true"></i> {{ eventGroup.location_name }}
         </div>
         <div class="group-event-location" *ngIf="eventGroup.address">
           <i class="fa fa-map-marker" aria-hidden="true"></i> {{ eventGroup.address }}
         </div>
       </div>
     </li>
-    <template ngFor let-eventItem [ngForOf]="eventGroup.events" let-i="index">
+    <template ngFor let-eventItem [ngForOf]="eventGroup.events" let-i="index" [ngForTrackBy]="identify">
       <!-- begin add button -->
       <li class="events-editor__btn">
         <button type="button" class="btn" (click)="addEventItem(i)">
@@ -26,10 +29,10 @@
       <!-- end add button -->
       <li class="event-item events-editor__timeslot">
         <div class="event-cycle" (click)="addEventItem(i)"></div>
-        <div class="event-wrapper" (click)="selectEventItem(i)">
+        <div class="event-wrapper">
           <div class="event-wrapper__in">
-            <div class="event-info events-editor__timeblock">
-              <div class="event-time" *ngIf="eventItem.start && eventItem.end">{{ eventItem.start | date:'shortTime' }}-{{ eventItem.end | date:'shortTime' }}</div>
+            <div class="event-info events-editor__timeblock" (click)="selectEventItem(i)">
+              <div class="event-time" *ngIf="eventItem.start && eventItem.end">{{ eventItem.start | date:timeFormat }} - {{ eventItem.end | date:timeFormat }}</div>
               <div class="event-title">{{ eventItem.name }}</div>
             </div>
 
@@ -52,6 +55,9 @@
                   <sq-datetimepicker [options]="options" formControlName="end"></sq-datetimepicker>
                 </div>
                 <!-- end end time -->
+                <div class="field" *ngIf="eventItemForm.errors?.invalidInterval">
+                  <p class="text-danger">Sorry, end time cannot be earlier than start time.</p>
+                </div>
               </div>
               <div class="new-timeslot__footer">
                 <div class="new-timeslot__btns">
@@ -65,10 +71,7 @@
             </div>
             <!-- end modal window -->
           </div>
-          <!--div class="event-location events-editor__location">
-            <i class="fa fa-map-marker" aria-hidden="true"></i>
-            <input type="text" class="form-control" placeholder="Enter a new address or leave blank" />
-          </div-->
+          <event-location [eventItem]="eventItem" (onUpdateLocation)="updateEventItemLocation($event)"></event-location>
         </div>
 
       </li>
@@ -87,7 +90,8 @@
       </div>
       <div class="group-event-body">
         <div class="group-event-title">
-          <span class="event-time">{{ eventGroup.end | date:'shortTime' }}</span><span class="is-bold"> {{ eventGroup.name }}</span> ends
+          <span class="event-time">{{ eventGroup.end | date:'mediumDate' }} {{ eventGroup.end | date:'shortTime' }}</span>
+          <span class="is-bold"> {{ eventGroup.name }}</span> ends
         </div>
         <div class="group-event-location" *ngIf="eventGroup.address">
           <i class="fa fa-map-marker" aria-hidden="true"></i> {{ eventGroup.address }}

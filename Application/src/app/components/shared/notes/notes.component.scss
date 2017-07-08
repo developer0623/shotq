@@ -1,6 +1,9 @@
 @import "../../../../assets/css/variables";
 @import "../../../../assets/css/mixins";
 
+$content-padding-x: 32px;
+$content-padding-y: 24px;
+
 @media (max-width: breakpoint-max(md)) {
   .loading-ripple {
     top: 150px !important;
@@ -9,18 +12,12 @@
   }
 }
 
-/deep/ .add-note-body {
-  padding: 8px 24px;
-}
-
 .notes {
   display: block;
   margin: 0 !important;
   font-family: $font-family-base;
   background-color: #fff;
-  -webkit-box-shadow: 0 1px 1px 1px rgba(0, 0, 0, 0.1);
-  -moz-box-shadow: 0 1px 1px 1px rgba(0, 0, 0, 0.1);
-  box-shadow: 0 1px 1px 1px rgba(0, 0, 0, 0.1);
+  @include box-shadow(0 1px 1px 1px rgba(0, 0, 0, 0.1))
 }
 
 .notes-header {
@@ -28,26 +25,21 @@
   background-color: #fff;
   min-height: 80px;
   position: relative;
-  padding: 24px 35px 24px 30px;
+  padding: $content-padding-y $content-padding-x;
   font-size: 0;
-  &__title-text {
+  &__title {
     display: inline-block;
     vertical-align: middle;
     width: 50%;
-    h1 {
-      font-family: $font-family-base;
-      font-size: $font-size-h2;
-      font-style: normal;
-      font-weight: 700;
-      font-stretch: normal;
-      color: $gray-dark;
-      line-height: 1;
-      margin: 0;
-    }
+    margin: 0;
+    font-family: $font-family-base;
+    font-size: $font-size-h3;
+    font-weight: 700;
+    line-height: 1;
+    color: $gray-dark;
   }
-  &__add-button {
+  &__actions {
     display: inline-block;
-    vertical-align: middle;
     text-align: right;
     width: 50%;
   }
@@ -61,27 +53,6 @@
     padding-top: 10px;
     text-align: right;
     margin-bottom: 0;
-  }
-  /deep/ &__name {
-    width: 100%;
-    height: 40px;
-    padding: 0 23px;
-    margin-top: 4px;
-    margin-bottom: 6px;
-    background-color: #fff;
-    border: solid 1px $pale-grey;
-    border-radius: $border-radius;
-    outline: 0;
-  }
-  /deep/ &__body {
-    width: 100%;
-    height: 80px;
-    padding: 8px 23px;
-    overflow-y: scroll;
-    outline: none;
-    border: solid 1px $pale-grey;
-    border-radius: 2px;
-    background-color: #fff;
   }
 }
 
@@ -110,8 +81,9 @@
 </div>
 */
 
-.note-card, .note-card--longtext {
+.note-card {
   margin: 0;
+  padding: 20px $content-padding-x;
   font-family: $font-family-base;
   transition: box-shadow .3s;
   box-shadow: 0 1px 2px 0 rgba(181, 193, 207, 0.5);
@@ -128,13 +100,6 @@
   }
 }
 
-.note-card {
-  padding: 20px 20px 20px 40px;
-  ::-webkit-scrollbar {
-    width: 0;
-  }
-}
-
 // container for the card header and text
 .note-card__block {
   position: relative;
@@ -143,19 +108,16 @@
   padding: 0 0 0 16px;
 }
 
-.note-card__header {
-  display: none;
-}
-
 .note-card__title-text {
   overflow: hidden;
   margin-right: $input-height;
+
+  // override editable label rules
   /deep/ label {
     font-size: $font-size-lg;
     font-style: normal;
     font-weight: 600 !important;
     font-stretch: normal;
-    text-transform: capitalize;
     color: $gray-dark;
   }
 }
@@ -164,6 +126,7 @@
   float: right;
   line-height: $input-height;
   width: $input-height;
+  vertical-align: text-top;
 
   /deep/ .dropdown-menu {
     // display the popup menu to the left of the menu button
@@ -182,80 +145,29 @@
 
 .note-card__edited-tag {
   color: $red-pink;
-  margin: 0 0 0 6px;
+  margin: 0 0 0 $spacer-x;
 }
 
 .note-card__text {
   overflow-y: hidden;
-  //height: 50px;
-  padding: 0 8px 0 0;
+  padding: 0;
 }
 
 .note-card__title-input {
   @include sq-base-form-control;
-  width: 60%;
   display: inline-block;
   vertical-align: middle;
+
+  @media (min-width: breakpoint-min(xl)) {
+    width: 60%;
+  }
 }
 
 // tinymce editor
-/deep/ .note-card__editor {
-  display: block;
-  height: 180px !important;
-  max-height: 200px !important;
-  outline: none;
-  padding: 8px 24px;
-  overflow-y: auto !important;
-}
-
-.note-card--longtext {
-  padding: 0;
-  .note-card__block {
-    height: 100%;
-    padding: 0 0 12px 0;
-  }
-
-  .note-card__title {
-    background-color: #fff;
-    padding: 16px 16px 16px 40px;
-    width: 100%;
-    margin-left: -1px;
-    border-left: 1px solid #e4e8f0;
-    box-shadow: 0 0 16px 0 rgba(181, 193, 207, 0.5);
-  }
-
-  .note-card__text {
-    height: auto;
-    margin-right: 16px;
-    padding: 16px 16px 16px 40px;
-
-    .note-card__expanded {
-      height: auto;
-      overflow-y: visible;
-    }
-
-    &::-webkit-scrollbar {
-      -webkit-appearance: none;
-      width: 6px;
-      background-color: transparent;
-    }
-    &::-webkit-scrollbar-track {
-      -webkit-appearance: none;
-      width: 6px;
-      height: 170px;
-      background-color: transparent;
-    }
-    &::-webkit-scrollbar-thumb {
-      border-radius: 6px;
-      border: 1px solid transparent;
-      background-color: rgba(127, 127, 127, 0.6);
-      -webkit-box-shadow: 0 0 1px rgba(255, 255, 255, .5);
-    }
-  }
-
-  /deep/ .note-card__editor {
-    margin: 0 0 0 16px;
-  }
+.note-card__editor {
+  // 10 lines of the default font text
+  min-height: (10 * ($font-size-base * $line-height-base) + ($input-padding-y * 2));
+  margin-top: 15px;
 }
 
 .note-card--changing {
@@ -268,10 +180,10 @@
 }
 
 .note-card.note-card--changing {
-  padding: 20px 20px 20px 40px;
+  padding: 20px $content-padding-x;
 
-  /deep/ .note-card__editor {
-    padding: 8px 0;
+  .note-card__block {
+    padding: 0;
   }
 }
 
@@ -281,28 +193,8 @@
   width: 100%;
 }
 
-.add-note-form__name {
-  width: 100%;
-  height: 40px;
-  padding-right: 24px;
-  padding-left: 24px;
-  margin-top: 4px;
-  margin-bottom: 6px;
-  background-color: #fff;
-  border: solid 1px $pale-grey;
-  border-radius: $border-radius;
-  outline: 0;
-}
-
-/deep/ .add-note-form__body {
-  width: 100%;
-  height: 80px;
-  padding: 8px 24px;
-  overflow-y: scroll;
-  outline: none;
-  border: solid 1px $pale-grey;
-  border-radius: 2px;
-  background-color: #fff;
+.add-note-form__title-input {
+  @include sq-base-form-control;
 }
 
 .add-note-form__action-buttons {
@@ -312,16 +204,14 @@
 }
 
 .note-card__edit-note-buttons {
-  float: right;
-}
+  text-align: right;
+  width: 100%;
+  margin-top: 10px;
+  white-space: nowrap;
 
-.notes-container .note-card .date {
-  font-size: $font-size-h5;
-  color: $gray-dark;
-}
-
-.notes-container .note-card .gradient-vertical-line {
-  top: 20px;
-  bottom: 20px;
-  height: auto;
+  @media (min-width: breakpoint-min(xl)) {
+    width: 40%;
+    float: right;
+    margin: 0;
+  }
 }

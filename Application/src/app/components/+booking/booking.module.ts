@@ -11,9 +11,12 @@ import { RouterModule } from '@angular/router';
 import { ProposalResolver } from './proposal.resolver';
 import { ContractService } from '../../services/contract/contract.service';
 import { ModalService } from '../../services/modal/modal.service';
+import { GoogleAddressModule } from '../../directives/google-address';
 import { SharedModule } from '../shared/shared.module';
 import { SignatureResolver } from './client-signature.service';
 import { ContractPreviewModule } from '../+contracts/contract-preview/contract-preview.module';
+import { ProposalScheduleResolver } from './proposal-schedule.resolver';
+import { SQModalModule } from '../sq-modal/sq-modal.module';
 
 
 @NgModule({
@@ -27,6 +30,8 @@ import { ContractPreviewModule } from '../+contracts/contract-preview/contract-p
     ContractPreviewModule,
     PipesModule,
     SharedModule,
+    SQModalModule,
+    GoogleAddressModule
   ],
   declarations: [
     BookingWelcomeScreenComponent,
@@ -38,6 +43,7 @@ import { ContractPreviewModule } from '../+contracts/contract-preview/contract-p
   ],
   providers: [
     ProposalResolver,
+    ProposalScheduleResolver,
     ContractService,
     ModalService,
     SignatureResolver

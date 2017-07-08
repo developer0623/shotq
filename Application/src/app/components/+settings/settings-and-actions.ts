@@ -69,14 +69,33 @@ export const SettingsAndActions = [
     linkTo: '/settings/team',
     isOpen: false
   },
-  // {
-  //   id: 'job-types',
-  //   name: 'Job Types',
-  //   icon: '',
-  //   info: 'Job types allow you to automatically apply workflows to new leads and jobs.',
-  //   actions: [],
-  //   isOpen: false
-  // },
+  {
+    id: 'jobs',
+    name: 'Jobs',
+    icon: 'md md-camera',
+    info: 'Manage, edit, and create job types and job roles.',
+    actions: [
+      {
+        id: 'job-types',
+        name: 'Job Types',
+        linkTo: 'settings/job-types',
+        icon: ''
+      },
+      {
+        id: 'job-roles',
+        name: 'Job Roles',
+        linkTo: 'settings/job-roles',
+        icon: ''
+      },
+      {
+        id: 'event-types',
+        name: 'Event Types',
+        linkTo: 'settings/event-types',
+        icon: ''
+      }
+    ],
+    isOpen: false
+  },
   {
     id: 'templates',
     name: 'Templates',

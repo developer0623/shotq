@@ -11,19 +11,6 @@
         </span>
       </p>
     </div>
-    <div class="description-container" *ngIf="proposal.expired && proposal.status !== proposalStatusArchived">
-      <h3>
-        Your proposal has expired!
-      </h3>
-      <p>
-          Your proposal expired on <strong>{{proposal.expiration_date | date: 'longDate'}}</strong>
-      </p>
-    </div>
-    <div class="description-container" *ngIf="proposal.status === proposalStatusArchived">
-      <h3>
-        Your proposal is archived.
-      </h3>
-    </div>
     <div class="continue-container" *ngIf="canEnter">
       <button type="button" class="continue-container-btn" [routerLink]="['../']">continue</button>
     </div>
@@ -45,6 +32,20 @@
       </button>
     </div>
   </div>
+</div>
+<div class="booking-welcome-screen" style="" *ngIf="message === 'proposal_expired'">
+    <div class="proposal-information">
+        <div class="description-container">
+            <h3>
+                Proposal expired
+            </h3>
+            <p>
+                Sorry, but this proposal is no longer available.
+                We'll get back to you soon with a new proposal for your review!
+                <!--Your proposal expired on <strong>{{proposal.expiration_date | date: 'longDate'}}</strong>-->
+            </p>
+        </div>
+    </div>
 </div>
 <div class="booking-welcome-screen" style="" *ngIf="message === 'proposal_accepted'">
   <div class="proposal-information">

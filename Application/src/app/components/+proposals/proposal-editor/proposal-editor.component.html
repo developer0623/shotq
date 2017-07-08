@@ -90,7 +90,7 @@
               </ul>
             </li>
             <li (click)="changeOption($event,2)" [class.active]="optionActive==2"><span>Discounts</span></li>
-            <li (click)="changeOption($event,3)" [class.active]="optionActive==3"><span>Taxes</span></li>
+            <li (click)="changeOption($event,3)" [class.active]="optionActive==3"><span>Tax</span></li>
             <li (click)="changeOption($event,4)" [class.active]="optionActive==4"><span>Expiration</span></li>
           </ul>
         </div>
@@ -157,7 +157,7 @@
                 <input type="checkbox" [checked]="worker.checked" name="check1"/>
                 <span class="">&nbsp;</span>
               </span>
-              <span class="type">{{ worker.role }}</span>
+              <span class="type m_title">{{ worker.job_role === 'customize' ? worker.custom_job_role : worker.job_role }}</span>
               <span class="image">
                 <img [src]="worker.avatar || 'assets/img/avatar.png'"/>
                 <span class="error" *ngIf="worker.conflicts?.length > 0">
@@ -166,7 +166,8 @@
               </span>
               <span class="name">{{ worker.first_name }} {{ worker.last_name }}</span>
               <span class="email">{{ worker.email }}</span>
-              <span class="number">555-555-5555</span>
+              <span *ngIf="worker.phone" class="number">
+                  {{ worker.phone | phone }}</span>
 
               <div class="checkStyle-item__popover popover" *ngIf="worker.conflicts?.length > 0">
                 <div class="popover__title">CONFLICTS</div>

@@ -1340,17 +1340,21 @@ body {
               padding-bottom: 5px;
               letter-spacing: 0.7px;
               border: none;
+              text-decoration: none;
+              &:hover, &:active {
+                text-decoration: none;
+              }
               &.next {
                 border-radius: 2px;
-                background-color: #086aff;
+                background-color: #57cd75;
                 color: #ffffff;
                 cursor: initial;
 
                 &[disable] {
-                  background-color: rgb(182, 193, 207);
+                  background-color: #57cd75;
                 }
                 &.disable {
-                  background-color: rgb(182, 193, 207);
+                  background-color: #57cd75;
                 }
               }
               &.back {
@@ -1752,7 +1756,9 @@ body {
         padding-bottom: 98px;
         > li {
           width: 200px;
+          height: 240px;
           display: inline-block;
+          vertical-align: top;
           margin-right: 10px;
           border-radius: 8px;
           background-color: #ffffff;
@@ -2606,7 +2612,7 @@ body {
     text-align: right;
     z-index: 1;
     &_mod {
-      z-index: 1600;
+      z-index: 1000;
     }
     .cancel,
     .next {
@@ -2628,7 +2634,7 @@ body {
       border-radius: 2px;
       background-color: #086aff;
       color: #ffffff;
-      cursor: pointer;   
+      cursor: pointer;
       &[disabled] {
         background-color: rgb(182, 193, 207);
         cursor: default;
@@ -3920,4 +3926,18 @@ h1 {
       border-color: #b5c1cf;
     }
   }
+}
+
+.package-description__addons {
+  margin-top: 1rem;
+  span {
+    font-weight: bold;
+  }
+  ul {
+    margin-top: 0;
+  }
+}
+
+.m_title:first-letter {
+    text-transform: uppercase;
 }

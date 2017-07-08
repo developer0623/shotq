@@ -15,7 +15,7 @@
             <tr *ngIf="items.length == 0">
                 <td colspan="4">
                     <div class="empty">
-                        <h4>Your proposal package is empty!</h4>
+                        <h4>Your package is empty!</h4>
                         <p>Begin by dragging and dropping items from your shelf on the right.</p>
                     </div>
                 </td>
@@ -44,9 +44,9 @@
                                                  (ngModelChange)="onChangeItem(product)"></app-spinner>
                                 </div>
                             </td>
-                            <td>{{ product.item.price| currency:'USD':true }}</td>
+                            <td>{{ (product.item.price * 1 + product.item.addons_price * 1) | currency:'USD':true }}</td>
                             <td>
-                                <span>{{ (product.item.price * product.quantity)| currency:'USD':true }}
+                                <span>{{ (product.item.price * 1 + product.item.addons_price * 1) * product.quantity | currency:'USD':true }}
                                   <span (click)="removeProduct(i)" class="icon-close"></span>
                                 </span>
                             </td>
@@ -54,7 +54,8 @@
                         <tr class="additional-info">
                             <td colspan="4">
                                 <item-options [groups]="product.item.option_groups"
-                                              *ngIf="product.item.id === activeItemId"></item-options>
+                                  (onChange)="updateAddonsPrice(product)"
+                                  *ngIf="product.item.id === activeItemId"></item-options>
                             </td>
                         </tr>
                     </table>

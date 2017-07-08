@@ -29,7 +29,9 @@ export class BookingAddonsComponent {
 
   ngOnChanges() {
     if (this.package.addons.length && !this.currentAddon) {
-      this.selectAddon(this.package.addons[0], 0);
+      const first_addon = this.package.addons[0];
+      this.saveItem(first_addon);
+      this.selectAddon(first_addon, 0);
     }
   }
 

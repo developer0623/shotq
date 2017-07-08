@@ -27,7 +27,7 @@
 
       <div class="correspondence__message-body">
         <h2 class="correspondence__message-subject">{{ message.subject }} <span *ngIf="message.body">&ndash;</span></h2>
-        <p class="correspondence__message-text">{{ message.body }}</p>
+        <p class="correspondence__message-text" [innerHTML]="message.$truncatedBody"></p>
       </div>
     </div>
   </li>

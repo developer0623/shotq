@@ -43,7 +43,7 @@ export class DragAndDropImageComponent {
       let json = JSON.parse(str_json_response);
       this.associateImg.emit({file_id: json.file_id, url: json.url});
     };
-  };
+  }
 
   ngDoCheck() {}
 

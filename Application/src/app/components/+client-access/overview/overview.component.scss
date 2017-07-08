@@ -1,221 +1,151 @@
-.public-overview {
-	&.page {
-		margin-left: 0 !important;
-		.loading-ripple {
-			top: 40%;
+@import "../../../../assets/css/variables";
+@import "../../../../assets/css/mixins";
+
+.loading-ripple {
+	top: 40%;
+}
+.infoblock {
+	background-color: #fff;
+	border-top: 4px solid #3a405b;
+	@include box-shadow(0 1px 2px 0 rgba(181, 193, 207, 0.5));
+	color: $gray-dark;
+	&__title {
+		margin-bottom: 20px;
+		font-family: $font-family-base;
+		font-size: 24px;
+		font-weight: bold;
+		color: $gray-dark;
+    &_icon {
+      font-size: 13px;
+      position: absolute;
+      top: 10px;
+      left: 0;
+    }
+	}
+	&__subtitle {
+		margin-bottom: 12px;
+		font-family: $font-family-base;
+		font-size: 18px;
+		letter-spacing: 0.6px;
+		color: $gray-dark;
+	}
+	&__header {
+		padding: 25px 25px 0 25px;
+		&_underlined {
+			border-bottom: 1px solid $gray-lighter;
+			padding-bottom: 5px;
 		}
-		.page-content {
-			padding: 30px 80px 10px 80px;
-			span {
-				font-weight: normal;
-				font-style: normal;
-				font-stretch: normal;
-				line-height: normal;
-				letter-spacing: normal;
-				color: #3a405b;
-				font-size: 14px;
-				font-family: "Titillium Web";
-				&.paid-label {
-					font-weight: bold;
-					letter-spacing: 0.5px;
-					color: #57cd75;
-				}
-				&.paid-date {
-					opacity: 0.5;
-					letter-spacing: 0.5px;
-				}
-				&.non-paid-date {
-					letter-spacing: 0.5px;
-				}
-			}
-			h1 {
-				font-family: "Titillium Web";
-				font-size: 24px;
-			    font-weight: bold;
-			    font-style: normal;
-				font-stretch: normal;
-				line-height: normal;
-				letter-spacing: normal;
-				color: #3a405b;
-			    margin: 0;
-			    &.price {
-			    	font-weight: 600;
-			    }
-			    &.next-payment {
-			    	letter-spacing: 0.9px;
-			    }
-			}
-			h2 {
-				font-family: "Titillium Web";
-				font-size: 18px;
-				font-style: normal;
-				font-stretch: normal;
-				line-height: normal;
-				font-weight: normal;
-				letter-spacing: 0.6px;
-				color: #3a405b;
-				&.price {
-					font-weight: 600;
-					letter-spacing: -0.5px;
-					&.total {
-						font-weight: bold;
-						color: #57cd75;
-					}
-					&.payment {
-			    		margin: 3px 0;
-			    	}
-				}
-				&.paid-amount {
-					opacity: 0.5;
-					letter-spacing: -0.5px;
-				}
-				&.non-paid-amount {
-					letter-spacing: -0.5px;
-				}
-				&.no-payments {
-				    opacity: 0.5;
-				}
-			}
-			h3 {
-				font-family: "Titillium Web";
-				font-style: normal;
-				font-stretch: normal;
-				line-height: normal;
-				letter-spacing: normal;
-				color: #3a405b;
-				font-size: 14px;
-				font-weight: 600;
-				letter-spacing: 0.5px;
-				&.add-ons {
-					opacity: 0.5;
-				}
-				&.total {
-					font-weight: bold;
-					color: #57cd75;
-				}
-			}
-			h4 {
-				font-family: "Titillium Web";
-				opacity: 0.65;
-				font-size: 12px;
-				letter-spacing: 0.4px;
-				margin: 0;
-				color: #3a405b;
-				&.roles {
-					opacity: 0.5;
-					letter-spacing: normal;
-				}
-			}
-			.panel {
-				background-color: #fff;
-				border-top: 3.2px solid #3a405b;
-				margin-top: 40px;
-				margin-bottom: 0;
-				border-radius: 0;
-				box-shadow: 0 1px 2px 0 rgba(181, 193, 207, 0.5);
-				padding: 0 25px 25px 25px;
-				.panel-heading {
-					padding: 25px 0 15px 0;
-				}
-				.panel-body {
-					padding: 0;
-				}
-			}
-			.event-details {
-				.panel {
-					.panel-body {
-						h4.roles {
-							opacity: 0.5;
-							letter-spacing: normal;
-						}
-						.location {
-							padding-bottom: 35px;
-						}
-						.personnel {
-							.personnel-container {
-								padding-bottom: 25px;
-								.personnel-name {
-									padding-bottom: 15px;
-									span {
-										font-weight: bold;
-									}
-								}
-								.personnel-email {
-									padding-bottom: 15px;
-								}
-							}
-						}
-					}
-				}
-			}
-			.package-details {
-				.panel {
-					padding: 0;
-					.panel-heading {
-						padding: 25px 30px 30px 25px;
-						border-bottom: solid 2px #e4e8f0;
-						h1 {
-							padding-bottom: 18px;
-						}
-					}
-					.panel-body {
-						.default-padding {
-							padding: 20px 30px 30px 25px;
-						}
-						.first-panel {
-							border-bottom: solid 1px #e4e8f0;
-							.add-on-item {
-								padding-left: 8px;
-    							border-left: solid 2px #086aff;
-							}
-						}
-						.second-panel {
-							.second-panel-header {
-							    position: relative;
-								padding-bottom: 25px;
-								i {
-									position: absolute;
-									top: 7px;
-									color: #3a405b;
-								}
-								.next-payment {
-									padding-left: 23px;
-								}
-							}
-							.second-panel-body {
-							    padding-left: 25px;
-							}
-							.pay-now {
-								letter-spacing: -0.4px;
-								font-weight: normal;
-							}
-						}
-						.third-panel {
-							background-color: #fafbfb;
-							padding: 20px 30px 20px 25px;
-							.icon-confirm {
-								color: #57cd75;
-								font-size: 16px;
-							}
-							.paid-date {
-								padding-left: 7px;
-							}
-							.paid-amount {
-								padding-left: 40px;
-							}
-							.non-paid-payment {
-							    padding-left: 25px;
-								.non-paid-amount {
-								    margin: 3px 0;
-								}
-							}
-							.no-payments {
-								margin: 0;
-							}
-						}
-					}
-				}
-			}
+    &_topunderlined {
+      border-top: 1px solid $gray-lighter;
+    }
+
+	}
+	&__body {
+		padding: 0 25px 25px 25px;
+	}
+}
+
+.location {
+	margin-bottom: 30px;
+	color: $gray-dark;
+}
+
+.person {
+	color: $gray-dark;
+	margin-bottom: 20px;
+	&__name {
+		font-weight: bold;
+		margin-bottom: 6px;
+	}
+}
+
+.extra-text {
+	margin: 0;
+	opacity: .65;
+	font-size: 12px;
+	letter-spacing: 0.4px;
+}
+
+.add-ons {
+	margin-top: 20px;
+	margin-bottom: 5px;
+	&__item {
+		display: block;
+		padding: 0 0 0 10px;
+		margin-bottom: 12px;
+		position: relative;
+		&:before {
+			content: '';
+			background-color: $bright-blue;
+			width: 2px;
+			height: 100%;
+			display: block;
+			position: absolute;
+			top: 0;
+			left: 0;
 		}
 	}
+	.package-expense {
+		margin-bottom: 10px;
+	}
+}
+
+.package-price {
+	font-family: $font-family-base;
+	font-weight: bold;
+	color: $gray-dark;
+	&_lg {
+		font-size: 24px;
+	}
+	&_sm {
+		font-size: 18px;
+		letter-spacing: -0.5px;
+	}
+	&_total {
+		color: $dark-mint;
+	}
+}
+
+.package-description {
+	color: $gray-dark;
+	margin-bottom: 20px;
+}
+.package-total {
+	margin-top: 10px;
+}
+.package-expense {
+	font-family: $font-family-base;
+	font-size: 14px;
+ 	font-weight: 600;
+ 	letter-spacing: 0.5px;
+ 	text-transform: uppercase;
+ 	color: $gray-dark;
+ 	margin-bottom: 0;
+ 	&_gray {
+		opacity: .5;
+ 	}
+ 	&_total {
+ 		color: $dark-mint;
+ 	}
+}
+
+.pay-button {
+	cursor: pointer;
+	width: 80px;
+	height: 34px;
+	border: 0;
+	outline: 0;
+	border-radius: 4px;
+	background-color: #57cd75;
+	text-align: center;
+	margin-right: 10px;
+	-webkit-appearance: none;
+	-moz-appearance: none;
+	-o-appearance: none;
+	appearance: none;
+	color: #ffffff;
+	font-family: 'Titillium Web';
+	font-size: 14px;
+	letter-spacing: normal;
+	line-height: normal;
 }

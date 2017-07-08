@@ -89,6 +89,12 @@
 		}
 	}
 
+  &.select-field {
+    /deep/button.dropdown {
+      padding-top: 0;
+    }
+  }
+
 	label {
 		position: absolute;
     	top: 12px;
@@ -160,49 +166,62 @@
 	}
 }
 
-/deep/.checkbox {
-	position: relative;
-	/deep/input[type="checkbox"] {
-		opacity: 0;
-		width: 16px;
-		height: 16px;
-		margin: 0;
-		top: 3px;
-		z-index: 1;
-		cursor: pointer;
-		&:checked + label::after {
-			font-family: Material-Design-Iconic-Font;
-			content: '\f26b';
-			width: 16px;
-    		height: 16px;
-    		border-radius: 2px;
-    		display: block;
-    		position: absolute;
-    		left: 0;
-			top: 50%;
-			color: #fff;
-			padding-left: 3px;
-			line-height: 1.2;
-			transform: translate(0, -50%);
-    		background-image: linear-gradient(135deg, #e75050, #f7ae18);
-		}
-	}
-	/deep/label {
-		position: relative;
-		z-index: 0;
-		padding-left: 25px;
-		&:before {
-			content: '';
-			position: absolute;
-			width: 16px;
-			height: 16px;
-			display: block;
-			background-color: #fff;
-			border: 1px solid #b6c1cf;
-			border-radius: 2px;
-			left: 0;
-			top: 50%;
-			transform: translate(0, -50%);
-		}
-	}
+.sq-checkbox {
+	top: 11px;
+}
+// /deep/.checkbox {
+// 	position: relative;
+// 	/deep/input[type="checkbox"] {
+// 		opacity: 0;
+// 		width: 16px;
+// 		height: 16px;
+// 		margin: 0;
+// 		top: 3px;
+// 		z-index: 1;
+// 		cursor: pointer;
+// 		&:checked + label::after {
+// 			font-family: Material-Design-Iconic-Font;
+// 			content: '\f26b';
+// 			width: 16px;
+//     		height: 16px;
+//     		border-radius: 2px;
+//     		display: block;
+//     		position: absolute;
+//     		left: 0;
+// 			top: 50%;
+// 			color: #fff;
+// 			padding-left: 3px;
+// 			line-height: 1.2;
+// 			transform: translate(0, -50%);
+//     		background-image: linear-gradient(135deg, #e75050, #f7ae18);
+// 		}
+// 	}
+// 	/deep/label {
+// 		position: relative;
+// 		z-index: 0;
+// 		padding-left: 25px;
+// 		&:before {
+// 			content: '';
+// 			position: absolute;
+// 			width: 16px;
+// 			height: 16px;
+// 			display: block;
+// 			background-color: #fff;
+// 			border: 1px solid #b6c1cf;
+// 			border-radius: 2px;
+// 			left: 0;
+// 			top: 50%;
+// 			transform: translate(0, -50%);
+// 		}
+// 	}
+// }
+
+/deep/.field__datepicker {
+  .btn {
+    font-size: 14px;
+  }
+  .btn-primary {
+    background-color: #337ab7;
+    border-color: #337ab7;
+  }
 }

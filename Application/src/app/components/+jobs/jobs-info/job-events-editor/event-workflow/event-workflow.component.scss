@@ -73,6 +73,9 @@
 		&.is-selected {
 			.event-workflow__outblock {
 				opacity: 1;
+				&:before {
+					background-color: #e4e8f0;
+				}
 			}
 		}
 	}
@@ -86,7 +89,7 @@
 			left: -20px;
 			width: 20px;
 			height: 2px;
-			background-color: #e4e8f0;
+			background-color: #cdd1da;
 			transform: translate(0, -50%);
 		}
 		&:after {

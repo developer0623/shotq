@@ -1,13 +1,22 @@
 // Global button styles
 
-.sq-btn-default {
+.sq-btn-add {
   @include sq-button-base;
   @include sq-button-variant($gray-dark, $gray-lightest, #d8d8d8);
-  @include sq-button-size($btn-padding-y, $btn-padding-x-lg, $font-size-base, $btn-border-radius);
+  @include sq-button-size($btn-padding-y, $btn-padding-x, $font-size-base, $btn-border-radius);
   text-transform: capitalize;
+  min-width: 120px;
   &:hover {
     background-color: $gray-lightest;
   }
+}
+
+.sq-btn-default {
+  @include sq-button-base;
+  @include sq-button-variant($btn-default-color, $btn-default-bg, $btn-default-border);
+  @include sq-button-size($btn-padding-y, $btn-padding-x, $font-size-base, $btn-border-radius);
+  min-width: 120px;
+  text-transform: capitalize;
 }
 
 // The default dialog of page button which starts some destructive action,
@@ -15,7 +24,8 @@
 .sq-btn-danger {
   @include sq-button-base;
   @include sq-button-variant($btn-danger-color, $btn-danger-bg, $btn-danger-border);
-  @include sq-button-size($btn-padding-y, $btn-padding-x-lg, $font-size-base, $btn-border-radius);
+  @include sq-button-size($btn-padding-y, $btn-padding-x, $font-size-base, $btn-border-radius);
+  min-width: 120px;
   text-transform: capitalize;
 }
 
@@ -38,6 +48,7 @@
   text-decoration: none;
   text-transform: capitalize;
   opacity: 0.6;
+  min-width: 90px;
 }
 
 // A button which offers the user alternative version of the default action.
@@ -45,7 +56,8 @@
 .sq-btn-secondary {
   @include sq-button-base;
   @include sq-button-variant($btn-success-color, $btn-success-bg, $btn-success-border);
-  @include sq-button-size($btn-padding-y, $btn-padding-x-lg, $font-size-base, $btn-border-radius);
+  @include sq-button-size($btn-padding-y, $btn-padding-x, $font-size-base, $btn-border-radius);
+  min-width: 120px;
   text-transform: capitalize;
 }
 
@@ -53,7 +65,8 @@
 .sq-btn-submit {
   @include sq-button-base;
   @include sq-button-variant($btn-primary-color, $btn-primary-bg, $btn-primary-border);
-  @include sq-button-size($btn-padding-y, $btn-padding-x-lg, $font-size-base, $btn-border-radius);
+  @include sq-button-size($btn-padding-y, $btn-padding-x, $font-size-base, $btn-border-radius);
+  min-width: 90px;
   text-transform: capitalize;
 }
 

@@ -32,10 +32,10 @@ export class BookingOverviewComponent {
   private taxes: Tax[] = [];
   private itemsAndAddons: Item[];
 
-  constructor(
-    private discountService: DiscountService,
-    private taxesService: TaxService,
-    private proposalService: ProposalService) { }
+  constructor(private discountService: DiscountService,
+              private taxesService: TaxService,
+              private proposalService: ProposalService) {
+  }
 
   ngOnInit() {
     Observable.zip(

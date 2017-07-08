@@ -306,3 +306,16 @@ a.dropdown-toggle {
     }
   }
 }
+.rippleContainer {
+  min-height: 100px !important;
+}
+
+products-search-form {
+  .input-search-icon {
+    left: 0!important;
+  }
+  .input-search-close {
+    right: 0!important;
+    outline: 0;
+  }
+}

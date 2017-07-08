@@ -44,6 +44,7 @@ import { GeneralFunctionsService }                 from '../../../services/gener
 import { TemplateVariable }                        from '../../../models/template-variable.model';
 import { SignalService }                           from '../../../services/signal-service/signal.service';
 import { Subscription } from 'rxjs/Subscription';
+import { TemplateVariableService } from '../../../services/template-variable/template-variable.service';
 
 declare var window: any;
 declare let tinymce: any;
@@ -244,7 +245,7 @@ export class TinymceComponent implements AfterViewInit, OnDestroy, ControlValueA
    */
   get value(): any {
     return this._value;
-  };
+  }
 
   /**
    * [Input description]
@@ -291,10 +292,10 @@ export class TinymceComponent implements AfterViewInit, OnDestroy, ControlValueA
         let varName = match[2];
         let tempVar = this.templateVariables.find(item => item.key === varName);
         if (!tempVar) {
-          tempVar = {
+          tempVar = TemplateVariableService.newObject({
             name: varName,
             key: varName,
-          };
+          });
           if (errors.findIndex(item => item.key === tempVar.key) === -1) {
             errors.push(tempVar);
           }

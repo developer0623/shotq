@@ -137,7 +137,8 @@
                         <div class="field">
                             <input name="website" type="url" formControlName="website"
                                    [ngClass]="{'has-error': form.controls['website'].errors}"
-                                   [attr.data-empty]="!form.controls['website'].value"/>
+                                   [attr.data-empty]="!form.controls['website'].value"
+                                   pattern="(?:(ftp|http|https)?:\/\/)?(?:[\w-]+\.)+([a-z]|[A-Z]|[0-9]){2,6}$"/>
                             <label for="website">Website</label>
                             <validation-messages class="error" [control]="form.controls.website"></validation-messages>
                         </div>

@@ -133,7 +133,7 @@
       width: 200px;
     }
     .actions-col {
-      width: 99px;
+      width: 115px;
     }
   }
 
@@ -210,6 +210,12 @@
           margin-top: -2px;
           font-size: 6px;
 
+        }
+      }
+      .form-field {
+        &__text {
+          max-width: 120px;
+          overflow: hidden;
         }
       }
       .dropdown-menu {

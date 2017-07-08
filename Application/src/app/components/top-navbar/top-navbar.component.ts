@@ -1,31 +1,27 @@
 import {
-  Component,
-  Input,
-  Output,
-  EventEmitter,
-  OnInit,
-  ViewEncapsulation, ViewChild, ViewContainerRef
-}                                       from '@angular/core';
-import { Router }                       from '@angular/router';
-import {
-  cameraIconActions,
-  accountActions
-}                                       from './camera-icon-actions';
-/* Services */
-import { ModalService }                 from '../../services/modal/';
-import { ContactService }               from '../../services/contact/contact.service';
-import { JobService }                   from '../../services/job/job.service';
-import { GeneralFunctionsService }      from '../../services/general-functions';
-/* Modules */
-import { QuickContactModule }           from '../quick-contact/quick-contact.module';
-import { JobTypeService }               from '../../services/job-type/';
-import { ApiService }                   from '../../services/api/';
-import { FlashMessageService }          from '../../services/flash-message';
-import { ContractsAddModalService }     from '../+contracts/contracts-add/contracts-add-modal.service';
-import { Modal } from 'single-angular-modal/plugins/bootstrap';
-import { QuickContractComponent, QuickContractWindowData } from './quick-contract/quick-contract.component';
+  Component, EventEmitter, Input, Output, ViewEncapsulation
+} from '@angular/core';
+import { Router } from '@angular/router';
 import { overlayConfigFactory } from 'single-angular-modal';
-import { QuickJobComponent, QuickJobWindowData } from './quick-job/quick-job.component';
+import { Modal } from 'single-angular-modal/plugins/bootstrap';
+
+import { archivedJobStatus } from '../../models/job';
+import { CurrentUser } from '../../models/user';
+import { AccessService } from '../../services/access/access.service';
+import { ApiService } from '../../services/api/';
+import { ContactService } from '../../services/contact/contact.service';
+import { GeneralFunctionsService } from '../../services/general-functions';
+import { JobTypeService } from '../../services/job-type/';
+import { JobService } from '../../services/job/job.service';
+import { ModalService } from '../../services/modal/';
+import { ContactsUiService } from '../shared/contacts-ui/contacts-ui.service';
+import { accountActions, cameraIconActions } from './camera-icon-actions';
+import {
+  QuickContractComponent, QuickContractWindowData
+} from './quick-contract/quick-contract.component';
+import {
+  QuickJobComponent, QuickJobWindowData
+} from './quick-job/quick-job.component';
 
 
 @Component({
@@ -38,7 +34,6 @@ import { QuickJobComponent, QuickJobWindowData } from './quick-job/quick-job.com
     JobTypeService,
     ApiService,
     GeneralFunctionsService,
-    ContractsAddModalService
   ],
   encapsulation: ViewEncapsulation.None
 })
@@ -48,6 +43,7 @@ export class TopNavbarComponent {
   @Output() toggleSidebar: EventEmitter<Boolean> = new EventEmitter<Boolean>();
   @Output() canDisplay: EventEmitter<Boolean> = new EventEmitter<Boolean>();
 
+  public currentUser: CurrentUser = CurrentUser.Empty;
   public search_box: string;
   public contactResults: any[] = [];
   public jobResults: any[] = [];
@@ -60,24 +56,18 @@ export class TopNavbarComponent {
   cameraIconActions = cameraIconActions;
   accountActions = accountActions;
 
-  constructor(private modalService: ModalService,
+  constructor(public modal: Modal,
+              private modalService: ModalService,
               private contactService: ContactService,
               private jobService: JobService,
               private generalFunctions: GeneralFunctionsService,
-              private jobTypeService: JobTypeService,
-              private apiService: ApiService,
-              private flash: FlashMessageService,
-              private contractsAddModalService: ContractsAddModalService,
-              public modal: Modal,
-              private router: Router) {
+              private accessService: AccessService,
+              private router: Router,
+              private contactsUi: ContactsUiService) {
+    this.accessService.currentUser$.subscribe(value => this.currentUser = value);
   }
 
   ngOnInit() {
-    this.jobsListSelect = [
-      {'id': 1, 'name': 'Virginia & Bill\'s Wedding'},
-      {'id': 2, 'name': 'Marian & Johnny\'s Wedding'},
-      {'id': 3, 'name': 'Jack & Greta\'s Wedding'}
-    ];
     this.currentDate = new Date();
   }
 
@@ -96,9 +86,7 @@ export class TopNavbarComponent {
   }
 
   logOut() {
-    sessionStorage.removeItem('OAuthInfo');
-    sessionStorage.removeItem('accountInfo');
-    sessionStorage.removeItem('refererUrl');
+    this.accessService.logout();
     setTimeout(() => {
       this.generalFunctions.navigateTo('/login');
     }, 100);
@@ -108,37 +96,49 @@ export class TopNavbarComponent {
    * Open modal with the create quick contact content
    */
   private openCreateQuickContactModal() {
-    let title = 'Quick Contact';
-    let submitText = 'SAVE';
-    let style = 'quickContactModal';
-    this.modalService.setModalContent(QuickContactModule, title, style);
-    this.modalService.setModalFooterBar(submitText.toUpperCase(), true, true);
-    this.modalService.showModal();
+    this.contactsUi.displayAddOrUpdateDialog(ContactService.newObject())
+      .subscribe(contact => {
+        //noinspection JSIgnoredPromiseFromCall
+        this.contactService.create(contact)
+          .subscribe(response => {
+              this.contactsUi.displaySuccessMessage(
+                `The contact ${contact.fullName} has been created`);
+              setTimeout(() => {
+                this.router.navigate(['/contacts/profile', response.id]);
+              }, 300);
+            },
+            err => {
+              console.error(err);
+              this.contactsUi.displayErrorMessage(
+                'An error has occurred creating the contact, please try again later.'
+              );
+            }
+          );
+      });
   }
 
   /**
    * Open modal with the create quick job
    */
   private createQuickJob() {
-
     this.modal
       .open(QuickJobComponent, overlayConfigFactory({job: {}}, QuickJobWindowData))
       .then(dialogRef => {
         dialogRef.result
           .then(result => {
+            setTimeout(() => {
+              this.router.navigate(['/jobs', result.id]);
+            }, 300);
             // Catching close event with result data from modal
-            // console.log(result)
           })
           .catch(() => {
             // Catching dismiss event with no results
-            // console.log('rejected')
           });
       });
   }
 
 
   private createQuickContract() {
-
     this.modal
       .open(QuickContractComponent,
         overlayConfigFactory({}, QuickContractWindowData))
@@ -146,11 +146,9 @@ export class TopNavbarComponent {
         dialogRef.result
           .then(result => {
             // Catching close event with result data from modal
-            // console.log(result)
           })
           .catch(() => {
             // Catching dismiss event with no results
-            // console.log('rejected')
           });
       });
   }
@@ -165,7 +163,9 @@ export class TopNavbarComponent {
     this.isContactLoading = true;
     this.isJobLoading = true;
     if (searchTerm !== '' && typeof searchTerm !== undefined) {
-      this.contactService.searchContact(searchTerm, {page_size: this.perPage})
+      this.contactService.searchContact(
+        searchTerm, {page_size: this.perPage}
+      )
         .subscribe(response => {
             this.contactResults = response.contacts;
           },
@@ -177,7 +177,11 @@ export class TopNavbarComponent {
             this.isContactLoading = false;
           }
         );
-      this.jobService.getList({search: searchTerm, page_size: this.perPage})
+      this.jobService.getList({
+        search: searchTerm,
+        page_size: this.perPage,
+        'status!': `${archivedJobStatus}`
+      })
         .subscribe(response => {
             this.jobResults = response.jobs;
           },

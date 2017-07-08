@@ -2,8 +2,9 @@
 	position: relative;
 	i {
 	    position: absolute;
-	    top: 8px;
+	    top: 50%;
 	    right: 2px;
+	    transform: translate(0, -50%);
 	}
 
 	i.new-style {

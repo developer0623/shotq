@@ -12,5 +12,5 @@ export interface ProposalSettingTemplate {
   collect_manually: boolean;
   schedule_template: ProposalSchedulePaymentTemplate;
   discount_templates: DiscountTemplate[];
-  tax_templates?: TaxTemplate[];
+  tax_template?: TaxTemplate;
 }

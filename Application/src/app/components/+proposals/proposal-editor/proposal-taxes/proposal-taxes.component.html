@@ -20,12 +20,13 @@
       </label>
       <span *ngIf="obj.id" (click)="obj.editing = !obj.editing" class="pointer">VIEW/EDIT</span>
       <app-proposal-tax-form [tax]="obj"
-                             *ngIf="obj.editing || !obj.id "
-                             (onCancel)="onFormCancel(obj)"
-                             (savedAsTemplate)="onSaveAsTemplate($event)">
+        [proposalHasTax]="objects.length > 1"
+        *ngIf="obj.editing || !obj.id "
+        (onCancel)="onFormCancel(obj)"
+        (savedAsTemplate)="onSaveAsTemplate($event)">
       </app-proposal-tax-form>
     </li>
-    <div class="list-title border-title" *ngIf="objectTemplates?.length"><h3>{{ modelName }} templates</h3></div>
+    <div class="list-title border-title" *ngIf="objectTemplates?.length"><h3>Select {{ modelName }}</h3></div>
     <li class="edit" *ngFor="let template of objectTemplates">
       <label>
         <input type="radio"

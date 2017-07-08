@@ -36,10 +36,10 @@
       </ul>
       <!-- End Navbar Toolbar -->
       <!-- Navbar Toolbar Right -->
-      <ul class="nav navbar-toolbar navbar-right navbar-toolbar-right">
+      <ul class="nav navbar-toolbar navbar-right navbar-toolbar-right" *ngIf="currentJob?.account_logo">
         <li class="logo-block">
           <div class="client-logo">
-            <img src="/assets/img/vanBurenLogo.png" alt="Van Buren" />
+            <img [src]="currentJob?.account_logo" />
           </div>
         </li>
       </ul>

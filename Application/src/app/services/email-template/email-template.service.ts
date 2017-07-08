@@ -10,6 +10,10 @@ import { RestClientService } from '../rest-client/rest-client.service';
 @Injectable()
 export class EmailTemplateService extends BaseTemplateService<EmailTemplate> {
   baseUrl = 'template/email_template';
+
+  public static newObject(data?: object): EmailTemplate {
+    return Object.assign(new EmailTemplate(), data || {});
+  }
 }
 
 @Injectable()

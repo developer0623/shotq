@@ -199,6 +199,7 @@ export class EmailTemplateAddComponent {
   enterEditMode() {
     this.readOnly = false;
     this.editableMode = 'active';
+    this.mode = 'edit';
     setTimeout(() => this.tinymceEditor.focus());
   }
 

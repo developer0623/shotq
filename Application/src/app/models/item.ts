@@ -1,4 +1,5 @@
 import { BaseItem } from './base-item';
+import { ItemOptionGroup } from './item-option-group';
 
 
 export const ITEM_TYPE_PRODUCT = 'product';
@@ -8,7 +9,7 @@ export class Item extends BaseItem {
   item_template?: number;
   approved?: boolean;
   quantity?: number;
-  option_groups?: any[];
+  option_groups?: ItemOptionGroup[];
   total_price?: number | string;
   final_price?: number | string;
 }

@@ -14,7 +14,7 @@
     <!-- <div class="booking-event-expires">
       This Proposal Expires on <span class="booking-event-expire-date">December 10, 2016</span>
     </div> -->
-    <div class="photographers-wrap">
+    <div class="photographers-wrap" *ngIf="workers?.length > 0">
       <div class="photographers-title">PHOTOGRAPHERS</div>
       <ul class="photographers">
         <li *ngFor="let worker of workers">
@@ -88,38 +88,16 @@
           <div class="col-md-12">
             <div class="form-group">
               <label>Address*</label>
-              <input type="text" class="form-control" formControlName="address1"  placeholder="Street Address">
+              <input type="text"
+                class="form-control"
+                formControlName="address1"
+                placeholder="Street Address"
+                googleplace
+                (setAddress)="updateLocation($event)">
             </div>
           </div>
         </div>
-
-        <div class="row primary-contact-form-line">
-          <div class="col-md-6">
-            <div class="form-group">
-              <label>CITY*</label>
-              <input type="text" class="form-control" formControlName="city" placeholder="City">
-            </div>
-          </div>
-          <div class="col-md-6">
-            <div class="form-group">
-              <label>STATE*</label>
-              <input type="text" class="form-control" formControlName="state" placeholder="State">
-            </div>
-          </div>
-        </div>
-
-        <div class="row primary-contact-form-line">
-          <div class="col-md-12">
-            <div class="form-group">
-              <label>ZIP CODE*</label>
-              <input type="text" class="form-control" formControlName="zip" placeholder="Zip Code">
-            </div>
-          </div>
-        </div>
-
-
       </form>
-
 
       <ng-container *ngIf="false">
         <div class="primary-contact-form-header">
@@ -128,7 +106,6 @@
         <div class="primary-contact-form-header primary-contact-form-header_mod ">
           Wedding
         </div>
-
 
         <div class="row primary-contact-form-line">
           <div class="col-md-12">

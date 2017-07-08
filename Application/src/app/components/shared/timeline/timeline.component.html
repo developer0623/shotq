@@ -1,5 +1,5 @@
-<div id="timelineBlock">
-  <div class="timeline-title">
+<div class="timeline-block" id="timelineBlock">
+  <div class="timeline-block__title">
     <h1 *ngIf="showTitle">Event Timeline</h1>
   </div>
   <div class="action" *ngIf="showEditButton">
@@ -9,10 +9,10 @@
   <div *ngIf="events.length === 0" class="no-events-to-display">
     There are no events to display.
   </div>
-  <ul *ngIf="events.length > 0">
-    <li *ngFor="let e of events" [class.gray]="e.past" [class.expanded]="e.expanded">
-      <p class="date" *ngIf="e.date.start">{{e.date.start | date:'MMMM d' }}</p>
-      <p class="date" *ngIf="!e.date.start">No date selected</p>
+  <ul class="timeline-list" *ngIf="events.length > 0">
+    <li class="timeline-list__item" *ngFor="let e of events" [class.gray]="e.past" [class.expanded]="e.expanded">
+      <p class="timeline-date" *ngIf="e.start">{{e.start | date:'MMMM d' }}</p>
+      <p class="date" *ngIf="!e.start">No date selected</p>
       <accordion>
         <accordion-group [isOpened]="e.mainEvent" (onOpen)="onOpenAccordion($event, e)" (onClose)="onCloseAccordion($event, e)" (onToggle)="onToggleAccordion($event, e)">
           <accordion-heading>
@@ -32,9 +32,9 @@
                 <ng-template [ngIf]="!collapsibleAppointments">
                   <h4 [class.conflict-event]="sub.hasConflict && !e.past" (click)="solveConflict(sub, e)">{{sub.name}}</h4>
                   <br *ngIf="sub.hasConflict">
-                  <p class="dateInfo">{{sub.date.start | date:'shortTime'}} - {{sub.date.end | date:'shortTime'}}</p>
-                  <br>
-                  <p class="info" (click)="addressClick(sub, e)">
+                  <p class="date-info">{{sub.start | date:'shortTime'}} - {{sub.end | date:'shortTime'}}</p>
+                  <!-- <br> -->
+                  <p class="location-info" (click)="addressClick(sub, e)">
                     <span>{{sub.location.name}}</span>
                     <!--span>{{sub.location.street}}</span>
                     <span>{{sub.location.city}}, {{sub.location.state}} {{sub.location.zip}}</span-->
@@ -64,9 +64,9 @@
                         <h4>{{sub.name}}</h4>
                       </accordion-heading>
                       <div class="contentAccordion">
-                        <p class="dateInfo">{{sub.date.start | date:'shortTime'}} - {{sub.date.end | date:'shortTime'}}</p>
-                        <br>
-                        <p class="info" (click)="addressClick(sub, e)">
+                        <p class="date-info">{{sub.start | date:'shortTime'}} - {{sub.end | date:'shortTime'}}</p>
+                        <!-- <br> -->
+                        <p class="location-info" (click)="addressClick(sub, e)">
                           <span>{{sub.location.name}}</span>
                           <!--span>{{sub.location.street}}</span>
                           <span>{{sub.location.city}}, {{sub.location.state}} {{sub.location.zip}}</span-->

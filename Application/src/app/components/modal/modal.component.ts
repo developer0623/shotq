@@ -25,13 +25,13 @@ export class ModalComponent implements OnInit {
   @Input() cssClass: String;
   @Input() bodyCssClass: String;
   @Input() config: any = {
-      backdrop: true,
-      keyboard: false,
+      backdrop: 'static',
+      keyboard: true,
       focus: true,
       show: false,
-      ignoreBackdropClick: true,
+      ignoreBackdropClick: false,
     };
-  @Input('close') closeButton: boolean = true;
+  @Input('close') closeButton: boolean = false;
   @ViewChild('bsModalInstance') public bsModalInstance: ModalDirective;
   @ViewChild('dynamicModalContent') public dynamicModalContent: DynamicModalContent;
 

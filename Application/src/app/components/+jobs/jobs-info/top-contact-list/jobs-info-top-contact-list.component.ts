@@ -29,6 +29,11 @@ export class JobTopContactListComponent implements OnChanges {
     }
   }
 
+  getProposalId() {
+    let proposal = _.last(this.job.proposals);
+    return proposal['id'];
+  }
+
   private resetContactsFromJob(job: Job) {
     if (_.isNil(job))
       return;

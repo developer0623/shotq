@@ -1,36 +1,38 @@
 /**
  * Component ContactProfileComponent
  */
-import * as _ from 'lodash';
 import { Component, Inject, ViewContainerRef } from '@angular/core';
-import { Observable } from 'rxjs/Rx';
-import { Router } from '@angular/router';
 import { DOCUMENT } from '@angular/platform-browser';
-/* Services */
-import { ContactNoteService } from '../../../services/contact-note';
-import { ContactService } from '../../../services/contact';
-import { JobService } from '../../../services/job/job.service';
-import { AccessService } from '../../../services/access';
-import { GeneralFunctionsService } from '../../../services/general-functions';
-import { FlashMessageService } from '../../../services/flash-message';
-import { EmailTypeService } from '../../../services/email-type';
-import { PhoneTypeService } from '../../../services/phone-type';
-import { AddressTypeService } from '../../../services/address-type/address-type.service';
-import { JobTypeService } from '../../../services/job-type';
-import { ApiService } from '../../../services/api/';
-import { BreadcrumbService } from '../../../components/shared/breadcrumb/components/breadcrumb.service';
-/* Models */
-import { ContactNote } from '../../../models/contact-note';
-import { ContractsAddModalService } from '../../+contracts/contracts-add/contracts-add-modal.service';
-import { contactProfileActions } from './contact-profile-actions';
+import { Router } from '@angular/router';
+import { ContactsUiService } from 'app/components/shared/contacts-ui/contacts-ui.service';
+import { MessagingUiService } from 'app/components/shared/messaging-ui';
+import * as _ from 'lodash';
 import { FileUploader } from 'ng2-file-upload';
 import { FileItem } from 'ng2-file-upload/components/file-upload/file-item.class';
 import { SubscribableOrPromise } from 'rxjs/Observable';
-import { BaseNote } from '../../../models/notes';
+import { Observable } from 'rxjs/Rx';
+import { Modal, Overlay, overlayConfigFactory } from 'single-angular-modal/esm';
 import { Contact } from '../../../models/contact';
-import { ContactsUiService } from 'app/components/shared/contacts-ui/contacts-ui.service';
-import { Overlay } from 'single-angular-modal/esm';
+import { ContactNote } from '../../../models/contact-note';
+import { BaseNote } from '../../../models/notes';
 import { SentCorrespondence } from '../../../models/sentcorrespondence';
+import { AccessService } from '../../../services/access';
+import { ApiService } from '../../../services/api/';
+import { ContactService } from '../../../services/contact';
+import { ContactNoteService } from '../../../services/contact-note';
+import { EmailTypeService } from '../../../services/email-type';
+import { FlashMessageService } from '../../../services/flash-message';
+import { GeneralFunctionsService } from '../../../services/general-functions';
+import { JobTypeService } from '../../../services/job-type';
+import { JobService } from '../../../services/job/job.service';
+import { PhoneTypeService } from '../../../services/phone-type';
+import { BreadcrumbService } from '../../shared/breadcrumb/components/breadcrumb.service';
+import { contactProfileActions } from './contact-profile-actions';
+import { ContractService } from '../../../services/contract/contract.service';
+import {
+  ContractAddModalContext,
+  ContractsAddModalComponent
+} from '../../+contracts/contracts-add/contracts-add.component';
 
 /* Other variables */
 declare let require: any;
@@ -50,19 +52,17 @@ declare let require: any;
     PhoneTypeService,
     ApiService,
     JobTypeService,
-    AddressTypeService,
-    ContractsAddModalService
   ]
 })
 export class ContactProfileComponent {
-  public isLoading =                 false;
-  public authorized =                false;
-  public isJobsLoading =             false;
-  public tabActive =                 1;
-  public exampleSelect =             false;
-  public valueSelect =               'Filter';
-  public showMore:                   boolean = false;
-  public contactNotes:               Array<ContactNote>;
+  public isLoading = false;
+  public authorized = false;
+  public isJobsLoading = false;
+  public tabActive = 1;
+  public exampleSelect = false;
+  public valueSelect = 'Filter';
+  public showMore: boolean = false;
+  public contactNotes: Array<ContactNote>;
   public categoriesCorrespondence: Array<any> = [
     {
       id: 0,
@@ -84,79 +84,78 @@ export class ContactProfileComponent {
     }
   ];
   private contactQuestionnaires: Array<any> = [
-  {
-    'date': '2016-12-12T18:53:16.197072',
-    'name': 'Fake Questionnaire 3',
-    'status': 'Fake Status'
-  },
-  {
-    'date': '2016-12-12T18:53:16.197073',
-    'name': 'Fake Questionnaire 4',
-    'status': 'Fake Status'
-  },
-  {
-    'date': '2016-12-12T18:53:16.197074',
-    'name': 'Fake Questionnaire 5',
-    'status': 'Fake Status'
-  }
-];
+    {
+      'date': '2016-12-12T18:53:16.197072',
+      'name': 'Fake Questionnaire 3',
+      'status': 'Fake Status'
+    },
+    {
+      'date': '2016-12-12T18:53:16.197073',
+      'name': 'Fake Questionnaire 4',
+      'status': 'Fake Status'
+    },
+    {
+      'date': '2016-12-12T18:53:16.197074',
+      'name': 'Fake Questionnaire 5',
+      'status': 'Fake Status'
+    }
+  ];
   private selectedCategoryId: number = 0;
   private oldSelectedCategoryId: number = 0;
-  private fileSaver =                require('../../../../../node_modules/file-saver/FileSaver.js');
-  private alertify =                 require('../../../assets/theme/assets/vendor/alertify-js/alertify.js');
-  private totalItems =               100;
-  private perPage =                  0;
-  private hasPages:                  boolean = false;
+  private fileSaver = require('../../../../../node_modules/file-saver/FileSaver.js');
+  private alertify = require('../../../assets/theme/assets/vendor/alertify-js/alertify.js');
+  private totalItems = 100;
+  private perPage = 0;
+  private hasPages: boolean = false;
   private subscriber;
-  private isSubscribed:              boolean;
-  private notesLoading:              boolean;
-  private contactId:                 any;
-  private responseOK:                boolean = false;
+  private isSubscribed: boolean;
+  private notesLoading: boolean;
+  private contactId: any;
+  private responseOK: boolean = false;
   private contact: Contact;
-  private contactData:               any;
-  private contactDataFormatted:      any;
-  private userInfoHeight:            string;
-  private divHeight:                 string = '0px';
-  private paddingTop:                string = '0px';
-  private paddingBottom:             string = '0px';
-  private currentSocials:            any;
-  private currentUrl:                any = undefined;
-  private addressTypes =             [];
-  private router:                    Router;
-  private birthday:                  any;
-  private anniversary:               any;
-  private contactJobs:               Array<any> = [];
-  private listPhones:                Array<any> = [];
-  private listEmails:                Array<any> = [];
-  private contactCorrespondence:     Array<any> = [];
-  private contactContracts:          Array<any> = [];
-  private contactInvoices:           Array<any> = [];
-  private contactProfileActions:     any = contactProfileActions;
-  private dropdownIcon:              string = 'icon-down-arrow';
-  private dropdownIconEmail:         string = 'icon-down-arrow';
-  private dropdownIconPhone:         string = 'icon-down-arrow';
-  private tabSectionName:            string = 'jobs';
-  private contactFullName:           string;
+  private contactData: any;
+  private contactDataFormatted: any;
+  private userInfoHeight: string;
+  private divHeight: string = '0px';
+  private paddingTop: string = '0px';
+  private paddingBottom: string = '0px';
+  private currentSocials: any;
+  private currentUrl: any = undefined;
+  private router: Router;
+  private birthday: any;
+  private anniversary: any;
+  private contactJobs: Array<any> = [];
+  private listPhones: Array<any> = [];
+  private listEmails: Array<any> = [];
+  private contactCorrespondence: Array<any> = [];
+  private contactContracts: Array<any> = [];
+  private contactInvoices: Array<any> = [];
+  private contactProfileActions: any = contactProfileActions;
+  private dropdownIcon: string = 'icon-down-arrow';
+  private dropdownIconEmail: string = 'icon-down-arrow';
+  private dropdownIconPhone: string = 'icon-down-arrow';
+  private tabSectionName: string = 'jobs';
+  private contactFullName: string;
   private checkTable: boolean = true;
-  private contractSelectOpened:      boolean = false;
+  private contractSelectOpened: boolean = false;
 
   // Sort flags
   private sort = {
-    sortedBy:       'date',
+    sortedBy: 'date',
     dateCreatedAsc: false,
   };
   /* Notes Paginator */
   private notesPaginator = {
-    totalItems:     0,
-    currentPage:    1,
-    perPage:        null,
+    totalItems: 0,
+    currentPage: 1,
+    perPage: null,
   };
   private jobsPaginator = {
-    totalItems:     0,
-    page:           1,
-    perPage:        0,
-    first:          0,
-    last:           0
+    totalItems: 0,
+    page: 1,
+    perPage: 0,
+    first: 0,
+    last: 0
   };
   private invoicesPaginator = {
     totalItems: 100,
@@ -199,26 +198,24 @@ export class ContactProfileComponent {
   private uploader: FileUploader = new FileUploader({});
   private uploaderQueue: Array<FileItem> = [];
 
-  constructor(
-    @Inject(DOCUMENT) private document: Document,
-    private presenter: ContactsUiService,
-    private generalFunctions:         GeneralFunctionsService,
-    private flash:                    FlashMessageService,
-    private contactService:           ContactService,
-    private jobService:               JobService,
-    private accessService:            AccessService,
-    private contactNoteService:       ContactNoteService,
-    private emailTypeService:         EmailTypeService,
-    private phoneTypeService:         PhoneTypeService,
-    private contractsAddModalService: ContractsAddModalService,
-    private apiService:               ApiService,
-    private jobTypeService:           JobTypeService,
-    private addressTypeService:       AddressTypeService,
-    private breadcrumbService:        BreadcrumbService,
-    private overlay: Overlay,
-    private vcRef: ViewContainerRef,
-    _router: Router
-  ) {
+  constructor(@Inject(DOCUMENT) private document: Document,
+              private presenter: ContactsUiService,
+              private generalFunctions: GeneralFunctionsService,
+              private flash: FlashMessageService,
+              private contactService: ContactService,
+              private jobService: JobService,
+              private accessService: AccessService,
+              private contactNoteService: ContactNoteService,
+              private emailTypeService: EmailTypeService,
+              private phoneTypeService: PhoneTypeService,
+              private messagingUiService: MessagingUiService,
+              private modal: Modal,
+              private apiService: ApiService,
+              private jobTypeService: JobTypeService,
+              private breadcrumbService: BreadcrumbService,
+              private overlay: Overlay,
+              private vcRef: ViewContainerRef,
+              _router: Router) {
     this.router = _router;
     this.uploader = new FileUploader({
       url: this.apiService.apiUrl + '/storage/upload/' + this.apiService.auth.id + '/',
@@ -231,19 +228,20 @@ export class ContactProfileComponent {
     this.router = _router;
     breadcrumbService.addFriendlyNameForRouteRegex('^/contacts/profile/[0-9]+', 'Profile');
   }
+
   public ngOnInit() {
     this.alertify.theme('bootstrap-shootq');
     this.alertify.okBtn('OK');
-    let currentUrl =                  this.generalFunctions.getCurrentUrl();
-    this.currentUrl =                 currentUrl;
-    this.contactId =                  undefined;
-    this.contactNotes =               [];
-    this.contactData =                [];
-    this.notesPaginator.totalItems =  0;
-    this.isSubscribed =               false;
-    this.notesLoading =               false;
-    this.responseOK =                 false;
-    this.userInfoHeight =             '348px';
+    let currentUrl = this.generalFunctions.getCurrentUrl();
+    this.currentUrl = currentUrl;
+    this.contactId = undefined;
+    this.contactNotes = [];
+    this.contactData = [];
+    this.notesPaginator.totalItems = 0;
+    this.isSubscribed = false;
+    this.notesLoading = false;
+    this.responseOK = false;
+    this.userInfoHeight = '348px';
     /* Get contact id from url params */
     this.generalFunctions.getUrlParams()
       .subscribe(
@@ -275,12 +273,8 @@ export class ContactProfileComponent {
         },
         console.error.bind(console)
       );
-  /* Get Address Types*/
-    this.addressTypeService.getList()
-          .subscribe(types => {
-            this.addressTypes = types.results;
-    });
   }
+
   public ngDoCheck() {
     let cUrl = localStorage.getItem('currentUrl');
     if (this.currentUrl === undefined || this.currentUrl === null || this.currentUrl === '') {
@@ -291,33 +285,35 @@ export class ContactProfileComponent {
     }
     if (this.checkTable) {
       let aux;
-      this.generalFunctions.setTableHeight(document, aux);
-      this.generalFunctions.setTableWidth(document);
+      // this.generalFunctions.setTableHeight(document, aux);
+      // this.generalFunctions.setTableWidth(document);
     }
   }
+
   public ngOnDestroy() {
     let currentUrl = this.generalFunctions.getCurrentUrl();
     if (currentUrl !== `/contacts/edit/${this.contactId}`) { // check before delete.
       localStorage.removeItem('currentUrl');
     }
-    this.contactId =                 undefined;
-    this.contactNotes =              [];
-    this.contactData =               [];
+    this.contactId = undefined;
+    this.contactNotes = [];
+    this.contactData = [];
     this.notesPaginator.totalItems = 0;
-    this.isSubscribed =              false;
-    this.notesLoading =              false;
-    this.responseOK =                false;
+    this.isSubscribed = false;
+    this.notesLoading = false;
+    this.responseOK = false;
   }
+
   ngAfterViewInit() {
     let $this = this;
     let aux;
     this.generalFunctions.setTableHeight(document, aux);
 
     // Add handler to recalculate table height when window is resized
-    window.onresize = function() {
-      $this.generalFunctions.setTableHeight(document, aux);
-      $this.generalFunctions.setTableWidth(document);
-    };
+    // window.onresize = function() {
+    //   $this.generalFunctions.setTableHeight(document, aux);
+    //   $this.generalFunctions.setTableWidth(document);
+    // };
 
     // Add scripts to handle the dropdown menu inside the responsive table
     let el: any = document.getElementById('table-container');
@@ -342,16 +338,32 @@ export class ContactProfileComponent {
       });
     }
   }
+
   createContract($event?) {
     if ($event !== undefined) {
       $event.preventDefault();
     }
-    this.contractsAddModalService.openModal(this, {
-      contract: {
-        contacts: [this.contactId],
-      },
-    });
+    this.modal
+      .open(ContractsAddModalComponent,
+        overlayConfigFactory({
+          contract: ContractService.newObject({
+            contacts: [this.contactId],
+          }),
+        }, ContractAddModalContext))
+      .then(dialogRef => {
+        dialogRef.result
+          .then(result => {
+            // Catching close event with result data from modal
+            // console.log(result)
+          })
+          .catch(() => {
+            // Catching dismiss event with no results
+            // console.log('rejected')
+          });
+      });
+
   }
+
   /**
    * change tab handler.
    * @param {[type]} index [description]
@@ -375,6 +387,7 @@ export class ContactProfileComponent {
     this.selectedCategoryId = 0;
     this.toggleActionButtonBar();
   }
+
   /**
    * Function toggleSelect
    * @param {[type]} id [description]
@@ -383,6 +396,7 @@ export class ContactProfileComponent {
     this[id] = !this[id];
     this.contractSelectOpened = !this.contractSelectOpened;
   }
+
   /**
    * Function SelectOption
    * @param {[type]} value [description]
@@ -391,6 +405,7 @@ export class ContactProfileComponent {
     this.valueSelect = value;
     this.exampleSelect = !this.exampleSelect;
   }
+
   /**
    * Handle actions when see more link is clicked.
    */
@@ -412,38 +427,39 @@ export class ContactProfileComponent {
     obserbableArray.push(this.contactService.getContactJobs(this.contactId));
     Observable.forkJoin(obserbableArray)
       .subscribe((data: any) => {
-        if (data.length === 2) {
-          this.contactJobs = [];
-          if (data[1] && data[1].length > 0) {
-            for (let j of data[1]) {
-              let aux = {
-                id: j.id,
-                name: j.name,
-                type: undefined,
-                date: j.main_event_date,
-                status: j.status
-              };
-              for (let type of data[0].results) {
-                if (type.id === j.job_type) {
-                  aux.type = type.name;
-                  break;
+          if (data.length === 2) {
+            this.contactJobs = [];
+            if (data[1] && data[1].length > 0) {
+              for (let j of data[1]) {
+                let aux = {
+                  id: j.id,
+                  name: j.name,
+                  type: undefined,
+                  date: j.main_event_date,
+                  status: j.status
+                };
+                for (let type of data[0].results) {
+                  if (type.id === j.job_type) {
+                    aux.type = type.name;
+                    break;
+                  }
                 }
+                this.contactJobs.push(aux);
               }
-              this.contactJobs.push(aux);
             }
           }
-        }
-        this.jobsPaginator.totalItems = this.contactJobs.length;
-        this.jobsPaginator.last = this.contactJobs.length;
-      },
-      err => console.error(err),
-      () => this.isJobsLoading = false);
+          this.jobsPaginator.totalItems = this.contactJobs.length;
+          this.jobsPaginator.last = this.contactJobs.length;
+        },
+        err => console.error(err),
+        () => this.isJobsLoading = false);
   }
+
   /**
    * Function to get contact correspondence (Emails).
    */
-   public getContactCorrespondence() {
-      this.contactService.getContactCorrespondence(this.contactId)
+  public getContactCorrespondence() {
+    this.contactService.getContactCorrespondence(this.contactId)
       .subscribe((data: any) => {
         // Convert the response data to the format suitable to use
         // by `CorrespondenceListComponent`.
@@ -461,29 +477,32 @@ export class ContactProfileComponent {
           });
         });
       });
-    }
+  }
+
   /**
    * Function to get contact invoices information.
    */
   public getContactInvoice() {
     this.contactService.getContactInvoices(this.contactId)
-    .subscribe((data: any) => {
-        this.contactInvoices = data;
-      },
-      err => console.error(err),
-      () => this.isJobsLoading = false);
+      .subscribe((data: any) => {
+          this.contactInvoices = data;
+        },
+        err => console.error(err),
+        () => this.isJobsLoading = false);
   }
+
   /**
    * Function to get contact invoices information.
    */
   public getContactContract() {
     this.contactService.getContactContracts(this.contactId)
-    .subscribe((data: any) => {
-        this.contactContracts = data;
-      },
-      err => console.error(err),
-      () => this.isJobsLoading = false);
+      .subscribe((data: any) => {
+          this.contactContracts = data;
+        },
+        err => console.error(err),
+        () => this.isJobsLoading = false);
   }
+
   /**
    * Function to get contact information to present in view.
    */
@@ -493,52 +512,55 @@ export class ContactProfileComponent {
       .subscribe(
         contactData => { // Get response from the contact endpoint.
           this.contact = ContactService.newObject(contactData);
+          // cache the website name
+          this.contact['$websiteDisplayName'] = this.contact.websiteDisplayName;
+          this.contact['$websiteUrl'] = this.contact.websiteUrl;
+          this.contact['$facebookId'] = this.contact.facebookUserId;
+          this.contact['$twitterId'] = this.contact.twitterUserId;
+          this.contact['$instagramId'] = this.contact.instagramUserId;
+          this.contact['$hasSocialProfiles'] = this.contact.hasSocialProfiles;
           // Format contact data.
-          if (contactData.active === false || contactData.archived === true) {
-            this.flash.error('The contact you are trying to access does not exist.');
-            this.router.navigate(['/contacts']);
+          this.authorized = true;
+          this.contactDataFormatted = this.contactService.formatContact(contactData);
+          this.getSocialNetworksDisabled();
+          this.createListPhones();
+          this.createListEmails();
+          if (contactData['contact_types'].length > 0) {
+            this.contactTypeId = contactData['contact_types'][0];
+          }
+
+        },
+        err => {
+          console.error(err);
+          if (err.status === 404) {
+            this.isLoading = false;
+            this.router.navigate(['/not-authorized']);
           } else {
-            this.authorized = true;
-            this.contactDataFormatted = this.contactService.formatContact(contactData);
-            this.getSocialNetworksDisabled();
-            this.createListPhones();
-            this.createListEmails();
-            if (contactData['contact_types'].length > 0) {
-              this.contactTypeId = contactData['contact_types'][0];
-            }
+            this.isLoading = false;
+            this.router.navigate(['/contacts']);
+            this.flash.error('The contact you are trying to access does not exist.');
           }
         },
-      err => {
-        console.error(err);
-        if (err.status === 404) {
+        () => {
+          let aux;
+          // this.generalFunctions.setTableHeight(document, aux);
+          // this.generalFunctions.setTableWidth(document);
           this.isLoading = false;
-          this.router.navigate(['/not-authorized']);
-        } else {
-          this.isLoading = false;
-          this.router.navigate(['/contacts']);
-          this.flash.error('The contact you are trying to access does not exist.');
+          this.userInfoHeight = 'auto';
+          /* Set current contact name in breadcrumb */
+          this.contactFullName = this.generalFunctions.getContactFullName(this.contactDataFormatted);
+          if (this.tabSectionName !== undefined) {
+            this.breadcrumbService.addFriendlyNameForRouteRegex(
+              '^/contacts/profile/[0-9]+',
+              `${this.generalFunctions.toTitleCase(this.contactFullName)} > ${this.generalFunctions.toTitleCase(this.tabSectionName)}`
+            );
+          } else {
+            this.breadcrumbService.addFriendlyNameForRouteRegex(
+              '^/contacts/profile/[0-9]+',
+              this.generalFunctions.toTitleCase(this.contactFullName)
+            );
+          }
         }
-      },
-      () => {
-        let aux;
-        this.generalFunctions.setTableHeight(document, aux);
-        this.generalFunctions.setTableWidth(document);
-        this.isLoading = false;
-        this.userInfoHeight = 'auto';
-        /* Set current contact name in breadcrumb */
-        this.contactFullName = this.generalFunctions.getContactFullName(this.contactDataFormatted);
-        if (this.tabSectionName !== undefined) {
-          this.breadcrumbService.addFriendlyNameForRouteRegex(
-            '^/contacts/profile/[0-9]+',
-            `${this.generalFunctions.toTitleCase(this.contactFullName)} > ${this.generalFunctions.toTitleCase(this.tabSectionName)}`
-          );
-        } else {
-          this.breadcrumbService.addFriendlyNameForRouteRegex(
-            '^/contacts/profile/[0-9]+',
-            this.generalFunctions.toTitleCase(this.contactFullName)
-          );
-        }
-      }
       );
   }
 
@@ -570,7 +592,7 @@ export class ContactProfileComponent {
 
   validateFiles(files: Object[], types: string[], maxsize: number = 10000000): boolean {
     for (let file of files) {
-      if (file['size'] > maxsize || types.indexOf(file['type']) === -1 )
+      if (file['size'] > maxsize || types.indexOf(file['type']) === -1)
         return true;
     }
     return false;
@@ -600,6 +622,7 @@ export class ContactProfileComponent {
     this.perPage = e.perPage;
     this.hasPages = this.paginatorHasPages();
   }
+
   /**
    * return if the paginator has pages to display or not
    * @return {boolean} [description]
@@ -627,7 +650,9 @@ export class ContactProfileComponent {
     let message = requests.length === 1 ?
       `Do you really want to delete this note from the contact?` :
       `Do you really want to delete ${requests.length} notes from the contact?`;
-    this.alertify.confirm(message, () => { performDelete.call(this); });
+    this.alertify.confirm(message, () => {
+      performDelete.call(this);
+    });
 
     function performDelete() {
       this.isLoading = true;
@@ -665,6 +690,7 @@ export class ContactProfileComponent {
     this.notesPaginator.perPage = e.perPage;
     this.getContactNotes();
   }
+
   /**
    * Function to get contact notes form the API.
    */
@@ -692,9 +718,12 @@ export class ContactProfileComponent {
           console.error(err);
           this.notesLoading = false;
         },
-        () => { this.notesLoading = false; }
+        () => {
+          this.notesLoading = false;
+        }
       );
   }
+
   /**
    * Function to get contact full name associated to a note (user profile)
    * by replacing created_by / last_modified_by field on note object.
@@ -710,7 +739,7 @@ export class ContactProfileComponent {
                 note.created_by = this.generalFunctions.getContactFullName(response);
               },
               console.error.bind(console)
-          );
+            );
         }
         if (note.last_modified_by !== undefined && note.last_modified_by !== null) {
           this.accessService.getUserProfileInfo()
@@ -719,7 +748,7 @@ export class ContactProfileComponent {
                 note.last_modified_by = this.generalFunctions.getContactFullName(response);
               },
               console.error.bind(console)
-          );
+            );
         }
       }
     }
@@ -729,8 +758,8 @@ export class ContactProfileComponent {
     let note = new ContactNote(data.id, data.subject, data.body, this.contactId);
     let isNewObject = !note.id;
     let request = isNewObject ?
-        this.contactNoteService.create(note) :
-        this.contactNoteService.update(note.id, note);
+      this.contactNoteService.create(note) :
+      this.contactNoteService.update(note.id, note);
     request.subscribe(
       response => {
         this.flash.success(
@@ -757,6 +786,7 @@ export class ContactProfileComponent {
       return this.contactDataFormatted.first_name.charAt(0) + this.contactDataFormatted.last_name.charAt(0);
     }
   }
+
   /**
    * Function to get the contact full name.
    */
@@ -765,29 +795,32 @@ export class ContactProfileComponent {
       return this.generalFunctions.getContactFullName(this.contactDataFormatted);
     }
   }
+
   /**
    * Function to get the contact maiden name.
    */
   private getMaidenName() {
     if (this.contactDataFormatted !== undefined
-     && this.contactDataFormatted.maiden_name !== undefined
-     && this.contactDataFormatted.maiden_name !== null
-     && this.contactDataFormatted.maiden_name !== '') {
+      && this.contactDataFormatted.maiden_name !== undefined
+      && this.contactDataFormatted.maiden_name !== null
+      && this.contactDataFormatted.maiden_name !== '') {
       return this.contactDataFormatted.maiden_name;
     } else {
       return '-';
     }
   }
+
   /**
    * Function to get the contact priamry phone.
    */
   private getPrimaryPhone() {
     if (this.contactDataFormatted !== undefined
-     && this.contactDataFormatted.default_phone_details !== undefined
-     && this.contactDataFormatted.default_phone_details !== null) {
+      && this.contactDataFormatted.default_phone_details !== undefined
+      && this.contactDataFormatted.default_phone_details !== null) {
       return this.generalFunctions.formatPhone(this.contactDataFormatted.default_phone_details.number);
     }
   }
+
   /**
    * Function to get the contact priamry email.
    */
@@ -796,16 +829,18 @@ export class ContactProfileComponent {
       return this.contactDataFormatted.default_email;
     }
   }
+
   /**
    * Function to get the contact anniversary
    */
   private getAnniversary() {
     if (this.contactDataFormatted !== undefined && this.contactDataFormatted.anniversary !== undefined) {
-     this.anniversary = new Date(this.contactDataFormatted.anniversary.toString() + 'T23:59:59Z');
+      this.anniversary = new Date(this.contactDataFormatted.anniversary.toString() + 'T23:59:59Z');
       return true;
     }
     return false;
   }
+
   /**
    * Function to get the contact birthday
    */
@@ -816,12 +851,15 @@ export class ContactProfileComponent {
     }
     return false;
   }
+
   /**
    * Function to get the type phone
    */
-  private getTypePhone (phone: any) {
+  private getTypePhone(phone: any) {
     let aux = '';
-    if (this.contactDataFormatted !== undefined && phone !== undefined) {
+    if (!phone)
+      return;
+    if (this.contactDataFormatted && phone.phone_type_details) {
       aux = phone.phone_type_details.name;
     }
     return aux;
@@ -834,27 +872,16 @@ export class ContactProfileComponent {
    */
   private getAddressField(field: string): string {
     if (this.contactDataFormatted !== undefined
-     && this.contactDataFormatted.default_address[field] !== undefined
-     && this.contactDataFormatted.default_address[field] !== null
-     && this.contactDataFormatted.default_address[field] !== ''
-     && this.contactDataFormatted.default_address[field] !== false) {
+      && this.contactDataFormatted.default_address[field] !== undefined
+      && this.contactDataFormatted.default_address[field] !== null
+      && this.contactDataFormatted.default_address[field] !== ''
+      && this.contactDataFormatted.default_address[field] !== false) {
       return this.contactDataFormatted.default_address[field];
     } else {
       return '-';
     }
   }
-  /**
-   * Function to get the address type
-   */
-  private getAddressType(id: any) {
-    let name = '';
-    for (let type of this.addressTypes){
-      if (id === type.id) {
-        name = type.name;
-      }
-    }
-    return name;
-  }
+
   /**
    * Function to archive contact.
    * @param {number} contactId / The id of the contact that need to be archived.
@@ -864,19 +891,20 @@ export class ContactProfileComponent {
       this.isLoading = true;
       this.contactService.archiveContact(contactId)
         .subscribe(res => {
-          this.flash.success('The contact has been archived.');
-          this.generalFunctions.navigateTo('contacts');
-        },
-        err => {
-          console.error(err);
-          this.isLoading = false;
-          this.flash.error('An error has occurred, the contact cannot be archived, please try again later.');
-        },
-        () => {
-          this.isLoading = false;
-        });
+            this.flash.success('The contact has been archived.');
+            this.generalFunctions.navigateTo('contacts');
+          },
+          err => {
+            console.error(err);
+            this.isLoading = false;
+            this.flash.error('An error has occurred, the contact cannot be archived, please try again later.');
+          },
+          () => {
+            this.isLoading = false;
+          });
     });
   }
+
   /**
    * ExportVCard function.
    * @param {number} id [description]
@@ -884,24 +912,25 @@ export class ContactProfileComponent {
   private exportVCard(id: number) {
     this.contactService.exportVCard([id])
       .subscribe(data => {
-        this.flash.success('VCard exported correctly.');
-        let file = new Blob([data['_body']], { type: 'text/vcard' });
-        let filename = `contact-${id}.vcf`;
-        this.fileSaver.saveAs(file, filename);
-      },
-      err => {
-        this.flash.error('VCard cannot be exported, please try again later.');
-      });
+          this.flash.success('VCard exported correctly.');
+          let file = new Blob([data['_body']], {type: 'text/vcard'});
+          let filename = `contact-${id}.vcf`;
+          this.fileSaver.saveAs(file, filename);
+        },
+        err => {
+          this.flash.error('VCard cannot be exported, please try again later.');
+        });
   }
+
   /**
    * Function to map socials and disable not existent.
    */
   private getSocialNetworksDisabled() {
     if (this.contactDataFormatted !== undefined) {
       this.currentSocials = {
-        'facebook' :  false,
-        'twitter'  :  false,
-        'instagram':  false
+        'facebook': false,
+        'twitter': false,
+        'instagram': false
       };
       for (let social of this.contactDataFormatted.social_networks) {
         if (social.network !== undefined && social.network !== null) {
@@ -914,14 +943,7 @@ export class ContactProfileComponent {
       }
     }
   }
-  /**
-   * Function that handle redirect for modal.
-   * @param {any} e [description]
-   */
-  private handleRedirect(e: any) {
-    let ids: any = {'id': this.contactId, 'referer': 1};
-    this.generalFunctions.navigateTo('contacts/edit', ids);
-  }
+
   /**
    * Function to get the website information of the contact.
    */
@@ -939,62 +961,66 @@ export class ContactProfileComponent {
     user = this.apiService.getAccount();
     if (user) {
       let data = {
-        'name' : 'Untitled',
-        'account' : user,
-        'external_owner' : this.contactId
+        'name': 'Untitled',
+        'account': user,
+        'external_owner': this.contactId
       };
       this.jobService.create(data)
-        .subscribe( types1 => {
-          localStorage.setItem('fromRecentlyCreatedJob', '1');
-          this.router.navigate(['/jobs', types1.id]);
-          this.flash.success('The job has been created.');
-        },
-      err => {
-          this.flash.error('An error has occurred creating the job, please try again later.');
-        });
+        .subscribe(types1 => {
+            localStorage.setItem('fromRecentlyCreatedJob', '1');
+            this.router.navigate(['/jobs', types1.id]);
+            this.flash.success('The job has been created.');
+          },
+          err => {
+            this.flash.error('An error has occurred creating the job, please try again later.');
+          });
     } else {
       this.flash.error('An error has occurred creating the job, please try again later.');
     }
   }
+
   /**
    * Function returns the phone / email type to display
    * @param {string} type [complete name the type]
    */
-  private getType (type: string) {
-     let typePE: string;
-     switch (type) {
-          case 'Home':
-            typePE = '(H)';
-            break;
-          case 'Work':
-            typePE = '(W)';
-            break;
-          case 'Mobile':
-            typePE = '(M)';
-            break;
-          default:
-            break;
-        }
-     return typePE;
-   }
+  private getType(type: string) {
+    let typePE: string;
+    switch (type) {
+      case 'Home':
+        typePE = '(H)';
+        break;
+      case 'Work':
+        typePE = '(W)';
+        break;
+      case 'Mobile':
+        typePE = '(M)';
+        break;
+      default:
+        break;
+    }
+    return typePE;
+  }
+
   /**
    * Function creates a list of phones to display in the dropdown
    */
   private createListPhones() {
     if (this.contactDataFormatted.default_phone_details !== null) {
+      let type = this.contactDataFormatted.default_phone_details.phone_type_details ?
+        this.contactDataFormatted.default_phone_details.phone_type_details.name : '';
       let phoneDefault = {
-            id: this.contactDataFormatted.default_phone_details.id,
-            type: this.getType(this.contactDataFormatted.default_phone_details.phone_type_details.name),
-            type_name: this.contactDataFormatted.default_phone_details.phone_type_details.name + ' phone',
-            name: this.contactDataFormatted.default_phone_details.number
-          };
+        id: this.contactDataFormatted.default_phone_details.id,
+        type: this.getType(type),
+        type_name: type + ' phone',
+        name: this.contactDataFormatted.default_phone_details.number
+      };
       this.listPhones.push(phoneDefault);
       for (let p of this.contactDataFormatted.phones) {
         if (p.id !== this.contactDataFormatted.default_phone_details.id) {
           let phone = {
             id: p.id,
             type: this.getType(p.phone_type_details.name),
-            type_name: p.phone_type_details.name + ' phone',
+            type_name: p.phone_type_details ? p.phone_type_details.name : '' + ' phone',
             name: p.number
           };
           this.listPhones.push(phone);
@@ -1002,17 +1028,18 @@ export class ContactProfileComponent {
       }
     }
   }
+
   /**
    * Function creates a list of emails to display in the dropdown
    */
   private createListEmails() {
     if (this.contactDataFormatted.default_email_details !== null) {
       let emailDefault = {
-            id: this.contactDataFormatted.default_email_details.id,
-            type: this.getType(this.contactDataFormatted.default_email_details.email_type_details.name),
-            type_name: this.contactDataFormatted.default_email_details.email_type_details.name + ' email',
-            name: this.contactDataFormatted.default_email_details.address
-          };
+        id: this.contactDataFormatted.default_email_details.id,
+        type: this.getType(this.contactDataFormatted.default_email_details.email_type_details.name),
+        type_name: this.contactDataFormatted.default_email_details.email_type_details.name + ' email',
+        name: this.contactDataFormatted.default_email_details.address
+      };
       this.listEmails.push(emailDefault);
       for (let e of this.contactDataFormatted.emails) {
         if (e.id !== this.contactDataFormatted.default_email_details.id) {
@@ -1027,6 +1054,7 @@ export class ContactProfileComponent {
       }
     }
   }
+
   /**
    * Function to execute action coming from dropdown.
    */
@@ -1045,6 +1073,7 @@ export class ContactProfileComponent {
         break;
     }
   }
+
   /**
    * Function to change arrow icon on open or close dropdown event.
    *
@@ -1057,7 +1086,7 @@ export class ContactProfileComponent {
       } else if (entity === 'phone') {
         this.dropdownIconPhone = 'icon-up-arrow';
       } else {
-        this.dropdownIcon      = 'icon-up-arrow';
+        this.dropdownIcon = 'icon-up-arrow';
       }
     } else {
       if (entity === 'email') {
@@ -1065,10 +1094,11 @@ export class ContactProfileComponent {
       } else if (entity === 'phone') {
         this.dropdownIconPhone = 'icon-down-arrow';
       } else {
-        this.dropdownIcon      = 'icon-down-arrow';
+        this.dropdownIcon = 'icon-down-arrow';
       }
     }
   }
+
   /**
    * Function that sets the string of contacts to which the email is sent
    */
@@ -1080,6 +1110,14 @@ export class ContactProfileComponent {
     }
     return names;
   }
+
+  //noinspection JSUnusedLocalSymbols
+  private onDisplayMessage(message: SentCorrespondence) {
+    this.messagingUiService.displayViewMessageDialog(message).subscribe();
+  }
+
+
+  // <editor-fold desc="Item selection management">
   /**
    * Check if given item is checked
    * @param {[type]}
@@ -1087,6 +1125,7 @@ export class ContactProfileComponent {
   private isChecked(item) {
     return (this.itemsChecked.indexOf(item.id) !== -1);
   }
+
   /**
    * Toogle the item selected status
    * @param {[Contact]}
@@ -1099,6 +1138,7 @@ export class ContactProfileComponent {
     }
     this.toggleActionButtonBar();
   }
+
   /**
    * Check an item
    * @param {[type]}
@@ -1128,6 +1168,7 @@ export class ContactProfileComponent {
       this.selectAllChecked = false;
     }
   }
+
   /**
    * Uncheck an item
    * @param {[type]}
@@ -1137,6 +1178,7 @@ export class ContactProfileComponent {
     this.itemsChecked.splice(i, 1);
     this.selectAllChecked = false;
   }
+
   /**
    * toogle enabled/disabled status of the action button bar
    */
@@ -1147,6 +1189,7 @@ export class ContactProfileComponent {
       this.actionsBar.enabled = false;
     }
   }
+
   /**
    * Check all the contacts
    */
@@ -1175,19 +1218,23 @@ export class ContactProfileComponent {
             this.checkItem(item, name);
           }
           break;
-          default:
-            break;
+        default:
+          break;
       }
     }
     this.toggleActionButtonBar();
   }
+
+  // </editor-fold>
+
+
   /**
    * Change category in menu(contract/invoices or email/questionnaries)
    */
   private changeCategory(e: any) {
     if (this.oldSelectedCategoryId !== this.selectedCategoryId) {
-        this.oldSelectedCategoryId = this.selectedCategoryId;
-        this.itemsChecked = [];
+      this.oldSelectedCategoryId = this.selectedCategoryId;
+      this.itemsChecked = [];
     }
   }
 
@@ -1217,15 +1264,15 @@ export class ContactProfileComponent {
     };
     this.contactService.update(minData)
       .subscribe(data => {
-        this.flash.success('The contact has been updated.');
-      },
-      err => {
-        this.flash.error('An error has occurred updating the contact, please try again later.');
-      },
-      () => {
-        this.isLoading = false;
-      }
-    );
+          this.flash.success('The contact has been updated.');
+        },
+        err => {
+          this.flash.error('An error has occurred updating the contact, please try again later.');
+        },
+        () => {
+          this.isLoading = false;
+        }
+      );
   }
 
   /**

@@ -4,7 +4,7 @@
     </div>
 </div>
 <div class="modal-body">
-    <form [formGroup]="form">
+    <form [formGroup]="form" (keydown.enter)="$event.preventDefault()">
         <div class="form-group">
             <div class="field">
                 <input placeholder="First Name" formControlName="first_name">
@@ -22,6 +22,17 @@
                                  [control]="form.controls.last_name"></validation-messages>
         </div>
         <div class="form-group">
+            <form formGroupName="default_phone_details">
+                <div class="field">
+                    <input placeholder="Phone" formControlName="number">
+                    <label class="is-selected">Phone</label>
+                </div>
+                <validation-messages class="errors"
+                                     [control]="form.controls.default_phone_details.controls.number">
+                </validation-messages>
+            </form>
+        </div>
+        <div class="form-group">
             <form formGroupName="default_email_details">
                 <div class="field">
                     <input placeholder="Email" formControlName="address">
@@ -33,15 +44,17 @@
             </form>
         </div>
         <div class="form-group">
-            <form formGroupName="default_address_details">
+            <div formGroupName="default_address_details">
                 <div class="field">
-                    <input placeholder="Address" formControlName="address1">
+                    <input placeholder="Address" formControlName="address1"
+                      googleplace
+                      (setAddress)="updateLocation($event)">
                     <label class="is-selected">Address</label>
                 </div>
                 <validation-messages class="errors"
                                      [control]="form.controls.default_address_details.controls.address1">
                 </validation-messages>
-            </form>
+            </div>
         </div>
     </form>
 </div>

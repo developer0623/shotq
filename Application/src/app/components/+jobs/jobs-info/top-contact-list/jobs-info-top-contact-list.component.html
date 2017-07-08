@@ -1,7 +1,7 @@
 <div class="jobs-info-top-contacts__container">
   <div class="jobs-info-top-contacts__header">
     <h1>Contacts</h1>
-    <button type="button" class="btn jobs-info-top-contacts__btn"
+    <button type="button" class="sq-btn-add pull-right"
             (click)="onAddContactClicked($event)">
         New Contact</button>
   </div>
@@ -9,7 +9,6 @@
         There are no job contacts to display.</p>
   <ul class="jobs-info-top-contacts__list" *ngIf="contacts.length">
     <li *ngFor="let contact of contacts" class="jobs-info-top-contacts__list-item vcard">
-      <img class="u-photo" alt="photo of {{ contact.name }}" src="assets/img/avatar.png"/>
       <a class="fn" [routerLink]="['/contacts/profile', contact.contact]">{{ contact.name }}</a>
       <strong class="role">{{ contact.primaryRole.name }}</strong>
       <em *ngIf="job.isPrimaryJobContact(contact)">Primary</em>
@@ -26,7 +25,7 @@
       </div>
       <div *ngIf="contact.$accessToken && job.proposals.length > 0">
         <a target="_blank"
-           [routerLink]="['/booking', job.proposals[0].id, 'welcome']"
+           [routerLink]="['/booking', getProposalId(), 'welcome']"
            [queryParams]="{access_token: contact.$accessToken}"
            (click)="$event.stopPropagation()"
         >View Booking Site</a>

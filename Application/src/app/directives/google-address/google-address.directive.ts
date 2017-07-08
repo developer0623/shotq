@@ -1,5 +1,5 @@
 import { Directive, ElementRef, EventEmitter, Output } from '@angular/core';
-import { NgModel } from '@angular/forms';
+import { NgModel, NgControl } from '@angular/forms';
 
 declare let google: any;
 

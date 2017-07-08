@@ -7,9 +7,9 @@ import { Email } from './email';
 import { Address, BaseAddress } from './address';
 import { SocialNetwork } from './social-network';
 import { CustomField } from './custom-field';
-import { AddressType } from './address-type';
 import { EmailType } from './email-type';
 import { PhoneType } from './phone-type';
+import { GeneralFunctionsService } from '../services/general-functions/general-functions.service';
 
 export const DEFAULT_CONTACT_PICTURE_URL = 'assets/img/avatar.png';
 
@@ -24,11 +24,9 @@ export class ContactType {
 
 export class DefaultAddressDetails extends BaseAddress {
   id: number = null;
-  address_type_details: AddressType;
   created: Date;
   modified: Date;
   visible: boolean;
-  address_type: number;
   contact: number;
 }
 
@@ -59,7 +57,7 @@ export class DefaultPhoneDetails {
  * Contact post definition in ShootQ API: http://54.201.93.194:8000/apidocs/#!/contact/post_api_v1_person_contact
  */
 export class Contact {
-  public static Empty = new Contact(-1);
+  static readonly Empty: Contact = Object.assign(new Contact(), {id: -1});
   id: number = 0;
   emails: Array<Email> = []; // required
   phones: Array<Phone> = []; // required
@@ -77,11 +75,11 @@ export class Contact {
   user: string;
   account: string; // required
   default_email: string | number;
-  default_email_details?: DefaultEmailDetails | any;
+  default_email_details?: DefaultEmailDetails | any = {};
   default_phone: string | number;
-  default_phone_details: DefaultPhoneDetails | any;
+  default_phone_details: DefaultPhoneDetails | any = {};
   default_address: string | number;
-  default_address_details?: DefaultAddressDetails;
+  default_address_details?: DefaultAddressDetails | any = {};
   address: any;
   default_social_network: string;
   default_social_network_details: any;
@@ -105,6 +103,7 @@ export class Contact {
   next_due_date: number;
   total_revenue: number;
   /* virtual fields */
+  has_relations?: boolean;
   over: boolean; // used on job header
   equal_phones: Array<Phone> = []; // used on merge contact
   equal_addresses: Array<Address> = []; // used on merge contact
@@ -132,7 +131,7 @@ export class Contact {
   }
 
   get fullName(): string {
-    return [this.first_name, this.last_name].join(' ');
+    return [this.first_name, this.last_name].join(' ').trim();
   }
 
   set fullName(newName: string) {
@@ -149,5 +148,43 @@ export class Contact {
     if (_.isNil(this.avatar_url) || this.avatar_url === '')
       return DEFAULT_CONTACT_PICTURE_URL;
     return this.img;
+  }
+
+  get hasSocialProfiles(): boolean {
+    let networks = this.social_networks
+      .filter((value) => value.network !== SocialNetwork.WEBSITE);
+    return networks.length > 0;
+  }
+
+  get facebookUserId(): string {
+    let network = this.social_networks
+      .find((value) => value.network === SocialNetwork.FACEBOOK);
+    return network ? network.toString() : undefined;
+  }
+
+  get instagramUserId(): string {
+    let network = this.social_networks
+      .find((value) => value.network === SocialNetwork.INSTAGRAM);
+    return network ? network.toString() : undefined;
+  }
+
+  get twitterUserId(): string {
+    let network = this.social_networks
+      .find((value) => value.network === SocialNetwork.TWITTER);
+    return network ? network.toString() : undefined;
+  }
+
+  get websiteDisplayName(): string {
+    let url = this.websiteUrl;
+    if (url) {
+      let parsedUrl = GeneralFunctionsService.parseUrl(url);
+      return parsedUrl.hostname ? parsedUrl.hostname : undefined;
+    }
+  }
+
+  get websiteUrl(): string {
+    let network = this.social_networks
+      .find((value) => value.network === SocialNetwork.WEBSITE);
+    return network ? network.toString() : undefined;
   }
 }

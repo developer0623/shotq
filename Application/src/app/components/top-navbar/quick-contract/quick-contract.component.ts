@@ -1,4 +1,4 @@
-import { Component } from '@angular/core';
+import { Component, ViewChild } from '@angular/core';
 import { FormBuilder, FormGroup } from '@angular/forms';
 import { Contact } from '../../../models/contact';
 import { ContactService } from '../../../services/contact/contact.service';
@@ -9,12 +9,15 @@ import { JobTypeService } from '../../../services/job-type/job-type.service';
 import { JobType } from '../../../models/job-type';
 import { ContractTemplateService } from '../../../services/contract-template/contract-template.service';
 import { ContractTemplate } from '../../../models/contract-template.model';
-import { ContractsAddModalService } from '../../+contracts/contracts-add/contracts-add-modal.service';
 
 import { BSModalContext } from 'single-angular-modal/plugins/bootstrap/index';
 
-import { DialogRef, ModalComponent } from 'single-angular-modal';
-import { modalConfig } from '../../+contracts/contracts-add/contracts-add.component';
+import { DialogRef, Modal, ModalComponent, overlayConfigFactory } from 'single-angular-modal';
+import {
+  ContractAddModalContext, ContractsAddModalComponent,
+  modalConfig
+} from '../../+contracts/contracts-add/contracts-add.component';
+import { ContactSetOrCreateComponent } from '../../+contacts/contact-set-or-create/contact-set-or-create.component';
 
 export class QuickContractWindowData extends BSModalContext {
   public job?: any;
@@ -28,8 +31,8 @@ export class QuickContractWindowData extends BSModalContext {
     './quick-contract.component.scss'
   ],
   providers: [
+    ContactSetOrCreateComponent,
     JobTypeService,
-
   ]
 })
 export class QuickContractComponent implements ModalComponent<QuickContractWindowData> {
@@ -44,19 +47,21 @@ export class QuickContractComponent implements ModalComponent<QuickContractWindo
   private job: Job;
   private jobType: number;
   private jobInitialized: boolean = false;
+  private isLoading: boolean = false;
+  private showFormErrors: boolean = false;
   private jobTypes: JobType[] = [];
   private contractTemplates: any[] = [];
   private contractTemplate: ContractTemplate;
   private contractTemplateId: number;
+  @ViewChild(ContactSetOrCreateComponent) private childContactSetOrCreateComponent: ContactSetOrCreateComponent;
 
   constructor(private fb: FormBuilder,
+              private modal: Modal,
               private contactService: ContactService,
               private jobService: JobService,
               private jobTypeService: JobTypeService,
-              private contractsAddModalService: ContractsAddModalService,
               private contractTemplateService: ContractTemplateService,
-              public dialog: DialogRef<QuickContractWindowData>
-  ) {
+              public dialog: DialogRef<QuickContractWindowData>) {
     this.clientSuggestions = Observable
       .create((observer: any) => {
         observer.next(this.clientName);
@@ -77,9 +82,8 @@ export class QuickContractComponent implements ModalComponent<QuickContractWindo
   }
 
   ngOnInit() {
+    this.isLoading = true;
     this.clearForm();
-    this.getJobTypes();
-    this.getContractTemplates();
     this.job = this.dialog.context['job'];
     if (this.job) {
       this.jobInitialized = true;
@@ -88,16 +92,29 @@ export class QuickContractComponent implements ModalComponent<QuickContractWindo
     }
   }
 
-  onContactSelect(selectedData) {
-    this.contact = selectedData.item;
+  ngAfterViewInit() {
+    this.initData();
+  }
+
+  initData() {
+    Observable.forkJoin([
+      this.getJobTypes(),
+      this.contractTemplateService.getList(),
+      this.childContactSetOrCreateComponent.initData()
+    ]).finally(() => {
+      this.isLoading = false;
+    })
+      .subscribe(([jobTypesResp, contractTemplatesResp, ...nill]: [JobType[], any, null]) => {
+        this.jobTypes = [...jobTypesResp];
+        this.contractTemplates = contractTemplatesResp['results'].filter(
+          result => result.status !== 'archived');
+      });
   }
 
   onJobSelect(selectedData) {
     this.job = selectedData.item;
     this.jobType = this.job.job_type;
   }
-
-
 
   clearForm() {
     this.jobName = '';
@@ -110,44 +127,22 @@ export class QuickContractComponent implements ModalComponent<QuickContractWindo
   }
 
   getJobTypes() {
-    this.jobTypeService.getList()
-      .map(res => res.results.map(item => ({value: item.id, label: item.name})))
-      .subscribe(res => {
-        this.jobTypes = [
-          ...res
-        ];
-      });
+    return this.jobTypeService.getList().map(
+      res => res.results.map(item => ({value: item.id, label: item.name}))
+    );
   }
-
-  getContractTemplates() {
-    this.contractTemplateService.getList()
-      .subscribe(res => {
-        this.contractTemplates = res.results;
-      });
-  }
-
 
   saveContact() {
     return Observable.create(observer => {
-      if (this.contact) {
-        observer.next(this.contact);
-        observer.complete();
-      } else {
-        let fullName = this.clientName.split(' ');
-        let contact = {
-          first_name: fullName[0],
-          last_name: fullName[1]
-        };
-        this.contactService.create(contact)
-          .subscribe(res => {
-            observer.next(res);
-            observer.complete();
-          });
-      }
+      this.childContactSetOrCreateComponent.getValue().subscribe((contactID) => {
+          observer.next(contactID);
+          observer.complete();
+        }
+      );
     });
   }
 
-  saveJob() {
+  saveJob(contactId: number | null) {
     return Observable.create(observer => {
       if (this.job) {
         observer.next(this.job);
@@ -155,7 +150,8 @@ export class QuickContractComponent implements ModalComponent<QuickContractWindo
       } else if (this.jobName) {
         this.jobService.create({
           name: this.jobName,
-          job_type: this.jobType
+          job_type: this.jobType,
+          external_owner: contactId
         }).subscribe(res => {
           observer.next(res);
           observer.complete();
@@ -168,30 +164,46 @@ export class QuickContractComponent implements ModalComponent<QuickContractWindo
   }
 
   save() {
-    Observable.zip(this.saveContact(), this.saveJob())
-      .subscribe(([contact, job]: [Contact, Job]) => {
+    this.saveContact().subscribe((contactId) => {
+      this.saveJob(contactId).subscribe(job => {
         this.close();
-        this.contractsAddModalService.openModal(this, <modalConfig>{
-          contract: {
-            contacts: [contact.id],
-            template: this.contractTemplate.id,
-            contents: this.contractTemplate.contents,
-            title: this.contractTemplate.name,
-            job: job ? job.id : null
-          },
-          enabledSteps: [],
-          showOnErrors: true
-        });
+        this.modal
+          .open(ContractsAddModalComponent,
+            overlayConfigFactory({
+              contract: {
+                contacts: [contactId],
+                template: this.contractTemplate.id,
+                contents: this.contractTemplate.contents,
+                title: this.contractTemplate.name,
+                job: job ? job.id : null
+              },
+              enabledSteps: [],
+              showOnErrors: true
+            }, ContractAddModalContext))
+          .then(dialogRef => {
+            dialogRef.result
+              .then(result => {
+                // Catching close event with result data from modal
+                // console.log(result)
+              })
+              .catch(() => {
+                // Catching dismiss event with no results
+                // console.log('rejected')
+              });
+          });
       });
+    });
   }
 
 
   valid() {
-    return !!this.contractTemplate && !!this.contact;
+    return !!this.contractTemplate && this.childContactSetOrCreateComponent.isValid();
   }
 
   close() {
     this.dialog.dismiss();
+    // On safari modal-open(which hide scrollbar) class not removed from body tag
+    document.querySelector('body').classList.remove('modal-open');
   }
 
 }

@@ -74,12 +74,12 @@
 <div *ngIf="onlySelect" [id]="inputGroupId" class="input-group">
   <div [id]="dropDownGroupId" class="input-group-btn">
     <button [id]="buttonId" type="button" class="btn form-field" (click)="toggleOpen()" (focus)="addSelectedClass()" (blur)="removeFocusStyle()" [disabled]="disabled">
-      {{selectedOptionName | truncateWords: truncateWords}}
+      <span class="form-field__text">{{selectedOptionName | truncateWords: truncateWords}}</span>
       <span *ngIf="!isOpen" class="icon-down-arrow"></span>
       <span *ngIf="isOpen" class="icon-up-arrow"></span>
     </button>
     <ul [id]="listId" (blur)="removeFocusStyle()" tabindex="-1" role="menu" class="dropdown-menu">
-      <li tabindex="-1" role="menuitem" id="{{listId}}-{{option.id}}" [class.link]="option.link" [class.selected]="selectedOptionName == option.name" *ngFor="let option of options" (blur)="removeFocusStyle()" (click)="onSelectChange(option.id)"><span></span>{{option.name | truncateWords: truncateOptionWords }}</li>
+      <li tabindex="-1" role="menuitem" id="{{listId}}-{{option.id}}" [class.link]="option.link" [class.selected]="selectedOptionName == option.name" *ngFor="let option of options" (blur)="removeFocusStyle()" (click)="onSelectChange(option.id)">{{option.name | truncateWords: truncateOptionWords }}</li>
     </ul>
   </div>
 </div>

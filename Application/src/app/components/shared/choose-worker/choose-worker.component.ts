@@ -10,6 +10,7 @@ import { WorkerService } from '../../../services/worker';
 import { JobWorkerService } from '../../../services/job-worker';
 import { JobRoleService } from '../../../services/job-role';
 import { Job } from '../../../models/job';
+import { JobService } from '../../../services/client-access/job/job.service';
 
 
 
@@ -22,7 +23,7 @@ export class ChooseWorkerWindowData extends BSModalContext {
   selector: 'choose-worker',
   templateUrl: './choose-worker.component.html',
   styleUrls : ['./choose-worker.component.scss'],
-  providers: [GeneralFunctionsService, WorkerService, JobWorkerService, JobRoleService]
+  providers: [GeneralFunctionsService, WorkerService, JobWorkerService, JobRoleService, JobService]
 })
 export class ChooseWorkerComponent {
   openAddEvent: boolean = false;
@@ -47,7 +48,8 @@ export class ChooseWorkerComponent {
     private generalFunctions: GeneralFunctionsService,
     private workerService: WorkerService,
     private jobWorkerService: JobWorkerService,
-    private jobRoleService: JobRoleService
+    private jobRoleService: JobRoleService,
+    private jobService: JobService
   ) {
     // Initialize search input.
     this.search_box = '';
@@ -126,8 +128,11 @@ export class ChooseWorkerComponent {
         .subscribe(response => {
             for (let worker of response.workers) {
               worker.role = null;
-              worker.selected = Boolean(_.find(this.jobData.job_workers, {'worker': worker.id}));
-              this.workers.push(worker);
+              if (!!_.find(this.jobData.job_workers, {'worker': worker.id})) {
+                worker.selected = true;
+              }
+              if ((worker.active && !!worker.job_role) || worker.selected)
+                this.workers.push(worker);
             }
             this.totalItems = this.workers.length;
           },
@@ -190,15 +195,14 @@ export class ChooseWorkerComponent {
     _.remove(this.workersToSave, (w) => w.id === workerId);
     if (!this.workersToSave.length) {
       this.isLoading = false;
-      // if (this.currentUrl.indexOf('/jobs') >= 0) {
-      //   this.componentRef.ngOnInit();
-      // }
       if (this.openAddEvent) {
         this.componentRef.loadEventsData(this.componentRef);
       }
-      this.close();
       this.currentFilter = 'all';
       this.search_box = '';
+      this.jobService.get(this.jobData.id).subscribe((jobData) => {
+        this.dialog.close(jobData);
+      });
     }
 
   }

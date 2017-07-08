@@ -1,5 +1,5 @@
 <ul class="steps" [ngClass]="styleType">
-  <li *ngFor="let step of steps; let ind = index"
+  <li *ngFor="let step of _steps; let ind = index"
       [ngClass]="{
         'first': ind == 0,
         'pointer': canActivateStep(step),

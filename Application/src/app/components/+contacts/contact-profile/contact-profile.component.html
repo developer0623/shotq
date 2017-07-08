@@ -23,9 +23,8 @@
             </div>
             <div class="col-2">
                 <div class="add-new-options">
-                    <a class="btn btn-file" (click)="editContact()"><i class="icon-document-text"></i></a>
-                    <button class="btn btn-edit" (click)="editContact()">Edit</button>
-                    <dropdown btnClass="btn btn-success btn-xs" iconClass="icon {{dropdownIcon}}" [button]="false" [actions]="contactProfileActions" (optionSelected)="executeAction($event)" (openCloseEvent)="openCloseEvHandler($event)"></dropdown>
+                    <button class="sq-btn-default" (click)="editContact()">Edit</button>
+                    <dropdown btnClass="sq-btn-secondary" iconClass="icon {{dropdownIcon}}" [button]="false" [actions]="contactProfileActions" (optionSelected)="executeAction($event)" (openCloseEvent)="openCloseEvHandler($event)"></dropdown>
                 </div>
             </div>
         </div>
@@ -38,11 +37,11 @@
                 </div>
                 <div class="field">
                     <i class="icon-letter"></i><a href="mailto:{{ getPrimaryEmail() }}">{{ getPrimaryEmail() }} </a>
-                     <span class="number" *ngIf ="contactDataFormatted.default_email_details !== null" >{{getType(contactDataFormatted.default_email_details.email_type_details.name)}}</span>
+                     <span class="number" *ngIf ="contactDataFormatted.default_email_details !== null" >{{getType(contactDataFormatted.default_email_details.email_type_details?.name)}}</span>
                 </div>
                 <div class="field">
                     <i class="icon-phone"></i><a href="tel:{{ getPrimaryPhone() }}">{{ getPrimaryPhone() }} </a>
-                        <span  class="number" *ngIf="contactDataFormatted.default_phone_details !== null" >{{getType(contactDataFormatted.default_phone_details.phone_type_details.name)}}</span>
+                        <span  class="number" *ngIf="contactDataFormatted.default_phone_details !== null" >{{getType(contactDataFormatted.default_phone_details.phone_type_details?.name)}}</span>
                 </div>
 
                 <div *ngIf="contactDataFormatted" class="seeMore">
@@ -93,10 +92,7 @@
         </div>
         <div class="seeMoreBlock" [style.height]="divHeight" [style.paddingTop]="paddingTop" [style.paddingBottom]="paddingBottom">
             <div class='row'>
-                <div class="edit-link" *ngIf="contactDataFormatted">
-	            	<a href="javascript:void(0)" (click)="handleRedirect($event)">EDIT</a>
-	            </div>
-                <div class='col-sm-3'>
+              <div class='col-sm-3'>
                     <h4>Additional Information</h4>
                     <ul>
                         <li>
@@ -104,62 +100,40 @@
                         </li>
                         <li class="see-more-website">
                             <span>WEBSITE</span>
-                            <ng-template ngIf="contactDataFormatted">
-                                <a target="_blank" href="{{ getWebsite() }}">{{ getWebsite() }}</a>
+                            <ng-template ngIf="contact.$websiteUrl">
+                                <a target="_blank" href="{{ contact.$websiteUrl }}">{{ contact.$websiteDisplayName }}</a>
                             </ng-template>
                         </li>
                     </ul>
-                    <h4>Social</h4>
-                    <ng-template [ngIf]="contactDataFormatted && contactDataFormatted.social_networks">
-	                    <div class="socialLinks">
-                            <ng-template ngFor let-social [ngForOf]="contactDataFormatted.social_networks">
-                                <ng-template [ngIf]="social.network == 'facebook'">
-                                    <a  class="facebook" target="_blank" href="https://web.facebook.com/{{ social.network_id }}/" title="{{ social.network_id }}">
-                                        <span class="facebook">
-                                            <i class="fa-facebook"></i>
-                                        </span>
-                                    </a>
-                                </ng-template>
 
-    	                    	<ng-template [ngIf]="social.network == 'twitter'">
-    	                        	<a target="_blank" href="https://twitter.com/{{ social.network_id }}/" title="{{ social.network_id }}">
-    	                        		<span class="twitter">
-    	                        			<i class="fa-twitter"></i>
-    	                    			</span>
-    	                			</a>
-    	                    	</ng-template>
-    							<ng-template [ngIf]="social.network == 'instagram'">
-    	                        	<a target="_blank" href="https://www.instagram.com/{{ social.network_id }}/" title="{{ social.network_id }}">
-    	                        		<span class="instagram">
-    	                        			<i class="fa-instagram"></i>
-    	                    			</span>
-    	                			</a>
-    	                    	</ng-template>
-                            </ng-template>
-                            <ng-template [ngIf]="currentSocials.facebook == false">
-                                <a href="javascript:void(0)">
-                                    <span class="facebook-disabled">
-                                        <i class="fa-facebook"></i>
-                                    </span>
-                                </a>
-                            </ng-template>
-                            <ng-template [ngIf]="currentSocials.twitter == false">
-                                <a href="javascript:void(0)">
-                                    <span class="twitter-disabled">
-                                        <i class="fa-twitter"></i>
-                                    </span>
-                                </a>
-                            </ng-template>
-                            <ng-template [ngIf]="currentSocials.instagram == false">
-                                <a href="javascript:void(0)">
-                                    <span class="instagram-disabled">
-                                        <i class="fa-instagram"></i>
-                                    </span>
-                                </a>
-                            </ng-template>
-	                    </div>
-                	</ng-template>
-                </div>
+                    <h4>Social</h4>
+                    <div class="socialLinks">
+                      <a *ngIf="contact.$facebookId" class="facebook"
+                         target="_blank" href="https://facebook.com/{{ contact.$facebookId }}"
+                         title="{{ contact.$facebookId }}">
+                        <span class="facebook"><i class="fa fa-facebook"></i></span>
+                      </a>
+                      <a *ngIf="!contact.$facebookId" class="facebook" href="javascript:void(0)">
+                        <span class="facebook-disabled"><i class="fa fa-facebook"></i></span>
+                      </a>
+                      <a *ngIf="contact.$twitterId" class="twitter"
+                         target="_blank" href="https://twitter.com/{{ contact.$twitterId }}"
+                         title="{{ contact.$twitterId }}">
+                        <span class="twitter"><i class="fa fa-twitter"></i></span>
+                      </a>
+                      <a *ngIf="!contact.$twitterId" class="twitter" href="javascript:void(0)">
+                        <span class="twitter-disabled"><i class="fa fa-twitter"></i></span>
+                      </a>
+                      <a *ngIf="contact.$instagramId" class="instagram"
+                         target="_blank" href="https://instagram.com/{{ contact.$instagramId }}"
+                         title="{{ contact.$instagramId }}">
+                        <span class="instagram"><i class="fa fa-instagram"></i></span>
+                      </a>
+                      <a *ngIf="!contact.$instagramId" class="instagram" href="javascript:void(0)">
+                        <span class="instagram-disabled"><i class="fa fa-instagram"></i></span>
+                      </a>
+                    </div>
+              </div>
                 <div class='col-sm-3'>
                     <h4>Phone & Fax</h4>
                     <ul *ngIf="contactDataFormatted && contactDataFormatted.default_phone_details">
@@ -176,7 +150,6 @@
                 <div class='col-sm-3' *ngIf="contactDataFormatted">
                     <h4>Address</h4>
                     <ul *ngIf="contactDataFormatted">
-                        <li class='addressType' *ngIf="contactDataFormatted.default_address !== null"><span>{{getAddressType(contactDataFormatted.default_address.address_type)}} Address</span></li>
                         <li>
                             <span>Country</span>
 							<ng-template [ngIf]="contactDataFormatted.default_address && contactDataFormatted.default_address.country_name != false">
@@ -236,11 +209,12 @@
         </div>
         <div class="tab-row">
             <ul class="tab-list">
-                <li (click)="changeTab(1, 'jobs')"               [class.active]="tabActive == 1">JOBS</li>
-                <li (click)="changeTab(2, 'contracts_invoices')" [class.active]="tabActive == 2">CONTRACTS &amp; INVOICES</li>
-                <li (click)="changeTab(3, 'conversations')"      [class.active]="tabActive == 3">EMAILS</li>
-                <li (click)="changeTab(4, 'activity')"           [class.active]="tabActive == 4">ACTIVITY</li>
-                <li (click)="changeTab(5, 'notes')"              [class.active]="tabActive == 5">NOTES</li>
+                <li (click)="changeTab(1, 'jobs')" [class.active]="tabActive == 1">JOBS</li>
+                <li (click)="changeTab(2, 'contracts')" [class.active]="tabActive == 2">CONTRACTS</li>
+                <li (click)="changeTab(3, 'invoices')" [class.active]="tabActive == 3">INVOICES</li>
+                <li (click)="changeTab(4, 'conversations')" [class.active]="tabActive == 4">EMAILS</li>
+                <li (click)="changeTab(5, 'activity')" [class.active]="tabActive == 5">ACTIVITY</li>
+                <li (click)="changeTab(6, 'notes')" [class.active]="tabActive == 6">NOTES</li>
             </ul>
         </div>
     </div>
@@ -309,117 +283,27 @@
             </div>
         </div>
         <div class="contractsBlock" *ngIf="tabActive == 2">
-            <div class="filterBlock">
-                <div class="col-sm-6 default-dropdown pl-0">
-                    <form-field [onlySelect]="true" [options]="categories" [(ngSelectValue)]="selectedCategoryId" (click)=changeCategory($event)></form-field>
-                </div>
-                <div class="col-sm-6 padding-right-25">
-                    <div class="pull-right">
-                        <button class="new-invoice">New Invoice</button>
-                    </div>
-                    <div class="input-search input-search-dark search-contact pull-right">
-                        <i class="input-search-icon icon-search" aria-hidden="true"></i>
-                        <input type="text" class="form-control" name="" placeholder="Search" />
-                    </div>
-                </div>
-                <div class="clearfix"></div>
-            </div>
-            <div class="btn-group action-buttons">
-              <button type="button" class="btn btn-default delete" [disabled]="!actionsBar.enabled" (click)="navigateTo('contacts/merge')">
-                <i class="icon-archive"></i>
-              </button>
-              <button type="button" class="btn btn-default second" [disabled]="!actionsBar.enabled" (click)="navigateTo('contacts/merge')">
-                <i class="icon-trash"></i>
-              </button>
-            </div>
-            <div id="table-container" class="table-responsive">
-            <!-- Contracts -->
-            <div class="noScroll" *ngIf="selectedCategoryId === 0">
-                <table class="table table-hover scroll contract">
-                    <thead>
-                        <tr>
-                           <th><div class="checkbox-custom checkbox-default"><input type="checkbox" (click)="checkAll('Contracts')" [checked]="selectAllChecked" /><label></label></div></th>
-                            <th class="pl-0">TITLE</th>
-                            <th>STATUS</th>
-                            <th>SENT</th>
-                            <th class="br-none">LAST VIEWED</th>
-                            <th class="text-middle"></th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        <tr *ngFor="let contract of contactContracts">
-                            <td class="text-middle">
-                                <div class="checkbox-custom checkbox-default">
-                                     <input type="checkbox" [checked]="isChecked(contract)" (click)="toggleCheck(contract, 'Contracts')"/><label></label>
-                                </div>
-                            </td>
-                            <td class="pl-0 font-weight-600">{{contract.title}}</td>
-                             <td >{{contract.status}}</td>
-                            <td>{{contract.sent}}</td>
-                            <td>{{contract.last_viewed}}</td>
-                            <td class="text-middle action-button">
-                                <dropdown [button]="false" listClass="blue-circle pad" iconClass="icon-more-icon-o font-size-10"></dropdown>
-                            </td>
-                        </tr>
-                    </tbody>
-                </table>
-                <div class="paginate-container" [class.has-pages]="hasPages">
-                    <paginate [totalItems]="contractsPaginator.totalItems" [currentPage]="contractsPaginator.currentPage" [newDesign]="true" (ngChange)="handlePageChange($event)" [perPageOptions]="[5, 10, 50, 100]" [perPage]="contractsPaginator.perPage" customClass="contacts-pagination"></paginate>
-                </div>
-            </div>
-
-            <!-- Invoices -->
-            <div class="noScroll" *ngIf="selectedCategoryId === 1">
-                <table class="table table-hover scroll invoice">
-                    <thead>
-                        <tr>
-                            <th><div class="checkbox-custom checkbox-default"><input type="checkbox" (click)="checkAll('Invoices')" [checked]="selectAllChecked" /><label></label></div></th>
-                            <th>Invoice</th>
-                            <th>Job</th>
-                            <th>Amount</th>
-                            <th>Due</th>
-                            <th class="br-none">Status</th>
-                            <th class="text-middle"></th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        <tr  *ngFor="let invoice of contactInvoices">
-                            <td class="text-middle">
-                                <div class="checkbox-custom checkbox-default">
-                                     <input type="checkbox" [checked]="isChecked(invoice)" (click)="toggleCheck(invoice, 'Invoices')"/><label></label>
-                                </div>
-                            </td>
-                            <td class="pl-0 font-weight-600">{{invoice.id}}</td>
-                            <td>{{invoice.job_name}}</td>
-                            <td>{{invoice.total | currency:'USD':true:'1.2-2'}}</td>
-                            <td [class.red]="invoice.balance > 0"
-                                [class.grey]="invoice.balance === 0">
-                                 {{invoice.balance | currency:'USD':true:'1.2-2'}}</td>
-                            <td>{{invoice.status | capitalize}}</td>
-                            <td class="text-middle action-button">
-                                <dropdown [button]="false" listClass="blue-circle pad" iconClass="icon-more-icon-o font-size-10"></dropdown>
-                            </td>
-                        </tr>
-                    </tbody>
-                </table>
-                 <div class="paginate-container" [class.has-pages]="hasPages" >
-                    <paginate [totalItems]="invoicesPaginator.totalItems" [currentPage]="invoicesPaginator.currentPage" [newDesign]="true" (ngChange)="handlePageChange($event)" [perPageOptions]="[5, 10, 50, 100]" [perPage]="invoicesPaginator.perPage" customClass="contacts-pagination"></paginate>
-                </div>
-            </div>
-            </div>
+            <injected-contracts-list [query]="{signatures__contact: contact.id}"></injected-contracts-list>
         </div>
-        <div class="conversationsBlock" *ngIf="tabActive == 3">
+        <div class="invoicesBlock" *ngIf="tabActive == 3">
+            <invoices [targetType]="'contact'" [targetId]="contact.id"
+                      [adminMode]="true" ></invoices>
+        </div>
+        <div class="conversationsBlock" *ngIf="tabActive == 4">
             <div class="contacts-correspondence__container">
               <div class="contacts-correspondence__header">
                 <h1>Communication</h1>
                 <button type="button" class="btn contacts-correspondence__new-message-btn hidden">New Email</button>
               </div>
-              <correspondence-list [correspondence]="contactCorrespondence"></correspondence-list>
+              <correspondence-list
+                [correspondence]="contactCorrespondence"
+                (displayMessage)="onDisplayMessage($event)"
+              ></correspondence-list>
             </div>
-        <div class="activityBlock" *ngIf="tabActive == 4">
-            <activity-feed></activity-feed>
+        <div class="activityBlock" *ngIf="tabActive == 5">
+            <!--<activity-feed></activity-feed>-->
         </div>
-        <div class="notesBlock" *ngIf="tabActive == 5">
+        <div class="notesBlock" *ngIf="tabActive == 6">
             <notes [notes]="contactNotes"
                    [notesLoading]="notesLoading"
                    [requestRes]="responseOK"

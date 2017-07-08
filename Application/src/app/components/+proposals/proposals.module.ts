@@ -59,7 +59,6 @@ import { DragulaModule } from 'ng2-dragula/ng2-dragula';
 import { ModalModule } from 'ngx-bootstrap';
 import { WorkerService } from '../../services/worker/worker.service';
 import { ContractTemplateService } from '../../services/contract-template/contract-template.service';
-import { ContractsAddModalService } from '../+contracts/contracts-add/contracts-add-modal.service';
 import { ProposalDiscountsComponent, ProposalDiscountFormComponent } from './proposal-editor/proposal-discounts';
 import { ProposalTaxesComponent } from './proposal-editor/proposal-taxes/proposal-taxes.component';
 import { ProposalExpirationComponent } from './proposal-editor/proposal-expiration/proposal-expiration.component';
@@ -72,6 +71,8 @@ import { CommonModule }                    from '@angular/common';
 import { TemplateVariableService } from '../../services/template-variable/template-variable.service';
 import { SpinnerModule } from '../shared/spinner/spinner.module';
 import { ProposalResolver } from 'app/components/+booking/proposal.resolver';
+import { ContractsAddModule } from '../+contracts/contracts-add/contracts-add.module';
+import { PipesModule } from '../../pipes/pipes.module';
 
 @NgModule({
   providers: [
@@ -93,7 +94,6 @@ import { ProposalResolver } from 'app/components/+booking/proposal.resolver';
     StateSaverService,
     WorkerService,
     ContractTemplateService,
-    ContractsAddModalService,
     ProposalResolver
   ],
   imports: [
@@ -109,7 +109,9 @@ import { ProposalResolver } from 'app/components/+booking/proposal.resolver';
     MultiselectDropdownModule,
     DropdownSelectModule,
     SpinnerModule,
-    PreventClickModule
+    PreventClickModule,
+    ContractsAddModule,
+    PipesModule
   ],
   declarations: [
     DragulaScrollerDirective,

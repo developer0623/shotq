@@ -16,8 +16,8 @@
   </ul>
   <div class='checksBlock'>
     <div class="checkStyle">
-      <label>
-        <input type="checkbox" name="collect_manually" formControlName="collect_manually"/>
+      <label [ngClass]="{'disable-all-events': form.value.collect_manually}">
+        <input type="checkbox" name="collect_manually" formControlName="collect_manually" tabindex="-1"/>
         <span>Collect Manually</span>
       </label>
     </div>

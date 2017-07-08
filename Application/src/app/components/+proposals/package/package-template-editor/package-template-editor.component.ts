@@ -1,5 +1,5 @@
 import * as _ from 'lodash';
-import { Component, OnInit, ViewEncapsulation } from '@angular/core';
+import { Component, OnInit, ViewEncapsulation, ViewChild } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
 import { Location } from '@angular/common';
 import { DragulaService } from 'ng2-dragula/ng2-dragula';
@@ -11,6 +11,7 @@ import { ItemTemplateService } from '../../../../services/product/item-template'
 import { PackageTemplateService } from '../../../../services/product/package-template';
 import { FlashMessageService } from '../../../../services/flash-message';
 import { StateSaverService } from '../../../../services/state-saver';
+import { PackageTemplateContentsComponent } from './package-template-contents';
 
 
 @Component({
@@ -33,6 +34,7 @@ export class PackageTemplateEditorComponent implements OnInit {
   };
   selectedIds: number[] = [];
   nextUrl: string;
+  @ViewChild(PackageTemplateContentsComponent) contentsComponent: PackageTemplateContentsComponent;
 
   constructor(private route: ActivatedRoute,
               private router: Router,
@@ -81,11 +83,15 @@ export class PackageTemplateEditorComponent implements OnInit {
 
   addItem(data: { item: ItemTemplate, destination: string }) {
     if (data.destination === 'package') {
-      this.package.items = _.concat(this.package.items, {
+      let newItem = {
+        id: this.contentsComponent.generateRandomId(),
         item_template: data.item.id,
         item_template_data: data.item,
-        quantity: 1
-      });
+        quantity: 1,
+        addons_price: 0
+      };
+      this.package.items = _.concat(this.package.items, newItem);
+      this.contentsComponent.activeItemId = newItem.id;
     } else {
       this.package.addons = _.concat(this.package.addons, data.item.id);
     }
@@ -112,30 +118,15 @@ export class PackageTemplateEditorComponent implements OnInit {
     setTimeout(toggle, 0);
   }
 
-  getItemPrice(itemId: number, quantity: number): number {
-    let item = _.find(this.allTemplateItems, {id: itemId});
-    return parseFloat(item.price) * quantity;
-  }
-
-  getItemCostPrice(itemId: number, quantity: number): number {
-    let item = _.find(this.allTemplateItems, {id: itemId});
-    return parseFloat(item.cost_of_goods_sold) * quantity;
-  }
-
-  getItemShippingCost(itemId: number, quantity: number): number {
-    let item = _.find(this.allTemplateItems, {id: itemId});
-    return parseFloat(item.shipping_cost) * quantity;
-  }
-
   recalculate() {
     let itemsPrice = _.sum(this.package.items.map(
-      i => this.getItemPrice(i.item_template, i.quantity)
+      i => (parseFloat(i.item_template_data.price) + parseFloat(<string>i.addons_price)) * i.quantity
     ));
     let costItemsPrice = _.sum(this.package.items.map(
-      i => this.getItemCostPrice(i.item_template, i.quantity)
+      i => parseFloat(i.item_template_data.cost_of_goods_sold) * i.quantity
     ));
     let shippingCostItems = _.sum(this.package.items.map(
-      i => this.getItemShippingCost(i.item_template, i.quantity)
+      i => parseFloat(i.item_template_data.shipping_cost) * i.quantity
     ));
     this.package.cogs_total = costItemsPrice;
     this.package.shipping_cost = shippingCostItems;
@@ -148,11 +139,7 @@ export class PackageTemplateEditorComponent implements OnInit {
 
   save() {
     if (!this.package.name) {
-      this.flashMessageService.error('Title is required field');
-      return;
-    }
-    if (this.package.items.length < 1) {
-      this.flashMessageService.error('Please add at least one item to contents list');
+      this.flashMessageService.error('Name is required field');
       return;
     }
     this.packageTemplateService.save(this.package).subscribe((packageTemplate) => {

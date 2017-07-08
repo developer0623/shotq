@@ -68,11 +68,9 @@ export class ContractTemplateAddComponent {
       );
 
 
-    this.contractTemplateService
-      .listGet('variables')
-      .subscribe((result) => {
-        this.variablesList = result;
-      });
+    this.contractTemplateService.variables().subscribe((result) => {
+      this.variablesList = result;
+    });
   }
 
   persistTemplate(template: ContractTemplate) {

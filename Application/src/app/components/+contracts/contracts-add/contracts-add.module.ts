@@ -2,7 +2,7 @@ import { NgModule } from '@angular/core';
 import { FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { FormFieldModule } from '../../shared/form-field';
 import { FormNgSelectWrapModule } from '../../shared/form-ng-select-wrap';
-import { ContractsAddComponent } from './contracts-add.component';
+import { ContractsAddModalComponent } from './contracts-add.component';
 import { ChooseContactModule } from '../../shared/choose-contact/choose-contact.module';
 import { RouterModule } from '@angular/router';
 import { PerfectScrollbarModule } from 'angular2-perfect-scrollbar';
@@ -22,12 +22,16 @@ const PERFECT_SCROLLBAR_CONFIG: PerfectScrollbarConfigInterface = {
     FormNgSelectWrapModule,
     RouterModule,
     DropdownSelectModule,
-    ReactiveFormsModule, ChooseContactModule,
-        PerfectScrollbarModule.forRoot(PERFECT_SCROLLBAR_CONFIG),
+    ReactiveFormsModule,
+    ChooseContactModule,
+    PerfectScrollbarModule.forChild(),
 
   ],
-  declarations: [ContractsAddComponent],
-  exports: [ContractsAddComponent]
+  declarations: [ContractsAddModalComponent],
+  exports: [ContractsAddModalComponent],
+  entryComponents: [
+    ContractsAddModalComponent
+  ]
 })
 export class ContractsAddModule {
 }

@@ -1,9 +1,5 @@
 <!-- Address contact  add && edit  -->
 <div *ngIf="fullAddressView">
-<div class="form-group" *ngIf="!hideAddressType">
-  <form-field   [showPrimary]=showPri label="Address Type" [spanWithSelect]="true" auxLabel="Address" [(ngSelectValue)]="ngValue.address_type" [options]="options">
-  </form-field>
-</div>
 <form-field-wrap  [label]="label" [floating]="floating" [errors]="getErrors(inputAddress1, 'Address 1')">
   <div [id]="inputGroupId" class="input-group input-group-icon form-group">
     <span id="span-address-1" class="input-group-addon">Address 1</span>

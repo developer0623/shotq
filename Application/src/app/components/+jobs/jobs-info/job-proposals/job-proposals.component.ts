@@ -4,10 +4,7 @@ import { ActivatedRoute, Router } from '@angular/router';
 import * as _ from 'lodash';
 import { Modal } from 'single-angular-modal/plugins/bootstrap';
 
-import {
-  Proposal, proposalStatusAccepted, proposalStatusArchived,
-  proposalStatusDraft, proposalStatusSent
-} from '../../../../models/proposal';
+import { Proposal } from '../../../../models/proposal';
 import { ProposalService } from '../../../../services/proposal/proposal.service';
 import { FlashMessageService } from '../../../../services/flash-message/flash-message.service';
 
@@ -32,20 +29,28 @@ export class JobProposalsComponent implements OnInit {
       name: 'View',
       icon: 'icon-open-eye',
       title: 'View',
-      active: (proposal) => proposal.status === proposalStatusAccepted
+      active: (proposal) => proposal.isAccepted
     }, {
       id: 'proposal-edit',
       name: 'Edit',
       icon: 'icon-edit',
       title: 'Edit',
-      active: (proposal) => proposal.status === proposalStatusDraft || proposal.status === proposalStatusSent
+      active: (proposal) => proposal.isDraft || proposal.isSent
     }, {
       id: 'proposal-archive',
       name: 'Archive',
       icon: 'icon-archive',
       title: 'Archive',
-      active: (proposal) => proposal.status === proposalStatusDraft || proposal.status === proposalStatusSent
-    }];
+      active: (proposal) => proposal.isDraft || proposal.isSent
+    },
+    {
+      id: 'proposal-send',
+      name: 'Send',
+      icon: 'fa fa-paper-plane-o',
+      title: 'Send',
+      active: (proposal) => proposal.isDraft || proposal.isSent
+    },
+  ];
 
   constructor(public proposalService: ProposalService,
               public router: Router,
@@ -65,11 +70,10 @@ export class JobProposalsComponent implements OnInit {
   }
 
   openProposal(proposal) {
-    if (proposal.status === proposalStatusAccepted) {
+    if (proposal.isAccepted) {
       this.showProposal.emit(proposal.id);
       return;
     }
-
     this.router.navigate(['../', 'proposal'], {relativeTo: this.route});
   }
 
@@ -80,9 +84,9 @@ export class JobProposalsComponent implements OnInit {
       job: this.jobId
     };
     if (this.isArchived)
-      filter['status'] = proposalStatusArchived;
+      filter['status'] = Proposal.STATUS_CANCELED;
     else
-      filter['status!'] = proposalStatusArchived;
+      filter['status!'] = Proposal.STATUS_CANCELED;
 
     return filter;
   }
@@ -95,7 +99,7 @@ export class JobProposalsComponent implements OnInit {
       .getList(filter)
       .subscribe(
         (result) => {
-          this.proposals = result.results;
+          this.proposals = _.map(result.results, ProposalService.newObject);
           this.proposals.map((proposal) => {
             proposal['actions'] = this.getProposalActions(proposal);
           });
@@ -146,7 +150,7 @@ export class JobProposalsComponent implements OnInit {
       .then(dialogRef => {
         dialogRef.result
           .then(result => {
-            this.update(proposal, {status: proposalStatusArchived});
+            this.update(proposal, {status: Proposal.STATUS_CANCELED});
           })
           .catch(() => {});
       });
@@ -166,9 +170,12 @@ export class JobProposalsComponent implements OnInit {
         this.showProposal.emit(proposal.id);
         break;
 
+      case 'proposal-send':
+        this.router.navigate(['..', 'proposal', 'send'], {relativeTo: this.route});
+        break;
+
       default:
         break;
     }
   }
-
 }

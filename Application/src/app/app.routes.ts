@@ -7,13 +7,7 @@ import { Home }                            from './components/home';
 import { EventsComponent }                 from './components/events';
 import { NoContentComponent }              from './components/no-content';
 import { NoAuthorizedComponent }           from './components/no-authorized';
-import { ProposalEditorComponent }         from './components/+proposals/proposal-editor';
-import { PackageEditorComponent }          from './components/+proposals/package/package-editor';
 import { PackageTemplateEditorComponent }  from './components/+proposals/package/package-template-editor';
-import { BookingWizardComponent }          from './components/+booking/booking-wizard';
-import { BookingWelcomeScreenComponent }   from './components/+booking/welcome-screen';
-import { ProposalSendComponent }           from './components/+proposals/proposal-editor/proposal-send/proposal-send.component';
-import { SettingsComponent }               from './components/+settings/settings.component';
 /* Login */
 import { LogInComponent }                  from './components/+access/log-in';
 import { SignUpComponent }                 from './components/+access/sign-up/sign-up.component';
@@ -24,6 +18,7 @@ import { AccessService }                   from './services/access/access.servic
 /* Other */
 import { BOOKING_ROUTES }                  from './components/+booking/booking.routes';
 import { SETTINGS_ROUTES } from './components/+settings/settings.routes';
+import { CALENDAR_ROUTES } from './components/+calendar/calendar.routes';
 
 /**
  * INNER_ROUTES
@@ -35,7 +30,7 @@ import { SETTINGS_ROUTES } from './components/+settings/settings.routes';
 const INNER_ROUTES = [
   /* General */
   { path: '',                                          component: Home },
-  { path: 'dashboard',                                 component: Home },
+  { path: 'dashboard', loadChildren: './components/dashboard/dashboard.module#DashboardModule' },
   { path: 'home',                                      component: Home },
   /* Contacts Lazy Loaded */
   { path: 'contacts',                                  loadChildren: './components/+contacts/contacts.module#ContactsModule' },
@@ -50,6 +45,8 @@ const INNER_ROUTES = [
   { path: 'proposals/package-template/edit/:id',       component: PackageTemplateEditorComponent },
   /* Booking */
   { path: 'booking',                                   children: BOOKING_ROUTES },
+  /* Calendar */
+  { path: 'calendar',                                   children: CALENDAR_ROUTES },
   /* Pricing Lazy Loaded */
   { path: 'pricing',                                   loadChildren: './components/+pricing/pricing.module#PricingModule' },
   { path: 'settings', children: SETTINGS_ROUTES},
@@ -69,10 +66,12 @@ const OUTER_ROUTES = [
   { path: 'sign-up', component: SignUpComponent },
   { path: 'forgot-password', component: ForgotPasswordComponent },
   { path: 'forgot-password/:key', component: ChangePasswordComponent },
+  { path: 'set-password/:signed_id', component: ChangePasswordComponent },
   { path: 'not-authorized', component: NoAuthorizedComponent },
   /* Client Access Lazy Loaded */
   { path: 'public/client-access', loadChildren: './components/+client-access/client-access.module#ClientAccessModule' },
   { path: 'booking', children: BOOKING_ROUTES },
+  { path: '', redirectTo: '/contacts', pathMatch: 'full' },
 ];
 /**
  * Routes

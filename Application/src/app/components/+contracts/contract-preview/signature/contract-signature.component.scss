@@ -1,6 +1,9 @@
+@import "../../../../../assets/css/variables";
+@import "../../../../../assets/css/mixins";
+
 .title {
   font-size: 14px;
-  font-weight: bold;
+  font-weight: 600;
   color: #3a405b;
   margin-bottom: 9px;
   &_md {
@@ -18,7 +21,9 @@
   // font-size: 18px;
   color: #3a405b;
   margin-bottom: 24px;
+
   // font-family: 'brush-script', sans-serif;
+  //box-shadow: 0px 0 31px 6px rgba(0,0,0,0.15);
   &:after {
     content: '';
     position: absolute;
@@ -40,8 +45,8 @@
   }
   &__select {
     position: absolute;
-    left: 0;
-    right: 0;
+    left: -1px;
+    right: -1px;
     // top: 0;
     bottom: 0;
     z-index: 4;
@@ -49,7 +54,9 @@
     background: #FFF;
     border-radius: 1.7px;
     border: solid 1px #e4e7ef;
-    box-shadow: 0px 0 31px 6px rgba(0,0,0,0.15);
+    border-bottom: 0;
+    box-shadow: 0px -3px 15px -3px rgba(0, 0, 0, 0.15);
+    width: calc(100% + 2px);
 
   }
   &__list {
@@ -88,24 +95,33 @@
     }
   }
   &__title {
-    margin-bottom: 36px;
+    margin-bottom: 20px;
     padding: 0 13px;
+    text-align: left;
+
   }
 }
 
 .edit-block {
   position: relative;
-  margin-bottom: 23px;
+  //margin-bottom: 23px;
+  //padding: 0;
+  // &.signature.is-selected {
+  //   border-color: transparent;
+  // }
+  
   &__content {
     position: absolute;
     top: 100%;
     left: -1px;
     right: -1px;
+    width: calc(100% + 2px);
     z-index: 3;
     padding: 0px 15px;
     background-color: #fafbfb;
     border: solid 1px #e4e7ef;
     text-align: right;
+    box-shadow: 1px 1px 13px 0px rgba(0, 0, 0, 0.15);
     .btn {
       background: transparent;
       border: none;

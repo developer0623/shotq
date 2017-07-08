@@ -16,7 +16,6 @@ import { FlashMessageService }            from '../../../services/flash-message'
 import { GeneralFunctionsService }        from '../../../services/general-functions';
 import { EmailTypeService }               from '../../../services/email-type/email-type.service';
 import { PhoneTypeService }               from '../../../services/phone-type/phone-type.service';
-import { AddressTypeService }             from '../../../services/address-type/address-type.service';
 import { BreadcrumbService }              from '../../../components/shared/breadcrumb/components/breadcrumb.service';
 import { DateService }                    from '../../../services/date/date.service';
 import { ModalService }                   from '../../../services/modal/';
@@ -36,7 +35,6 @@ declare let require: (any);
     GeneralFunctionsService,
     EmailTypeService,
     PhoneTypeService,
-    AddressTypeService,
     DateService,
     CapitalizePipe
   ],
@@ -62,7 +60,6 @@ export class ContactsMergeComponent {
   private visibleFields: Array<string>;
   private emailTypes;
   private phoneTypes;
-  private addressTypes;
   private contactTypes;
   private dateTypes;
   private alertify = require('../../../assets/theme/assets/vendor/alertify-js/alertify.js');
@@ -109,7 +106,6 @@ export class ContactsMergeComponent {
     private generalFunctionsService:       GeneralFunctionsService,
     private emailTypeService:              EmailTypeService,
     private phoneTypeService:              PhoneTypeService,
-    private addressTypeService:            AddressTypeService,
     private dateService:                   DateService,
     private modalService:                  ModalService,
     private capitalizePipe:                CapitalizePipe,
@@ -118,7 +114,6 @@ export class ContactsMergeComponent {
   ) { this.generalFunctions = generalFunctionsService;
       this.emailTypeService = emailTypeService;
       this.phoneTypeService = phoneTypeService;
-      this.addressTypeService = addressTypeService;
       this.visibleFields = [
         'first_name',
         'last_name',
@@ -155,7 +150,6 @@ export class ContactsMergeComponent {
     let observableArray = [];
     observableArray.push(this.emailTypeService.getList());
     observableArray.push(this.phoneTypeService.getList());
-    observableArray.push(this.addressTypeService.getList());
     observableArray.push(this.dateService.getTypes());
     observableArray.push(this.contactService.getRequestContactTypes());
 
@@ -169,23 +163,20 @@ export class ContactsMergeComponent {
             this.phoneTypes = data[1]['results'];
           }
           if (data[2] && data[2]['results'] !== undefined) {
-            this.addressTypes = data[2]['results'];
+            this.dateTypes = data[2]['results'];
           }
-          if (data[3] && data[3]['results'] !== undefined) {
-            this.dateTypes = data[3]['results'];
-          }
-          if (data[4] !== undefined) {
-            this.contactTypes = data[4];
+          if (data[3] !== undefined) {
+            this.contactTypes = data[3];
           }
         }
         if (this.id1 !== undefined && this.id2 !== undefined) {
           this.contactService.getContact(this.id1).subscribe(contact1 => {
             if (typeof contact1 !== undefined) {
-              this.aux1 = this.formatContactObject(contact1, this.emailTypes, this.phoneTypes, this.addressTypes);
+              this.aux1 = this.formatContactObject(contact1, this.emailTypes, this.phoneTypes);
             }
             this.contactService.getContact(this.id2).subscribe(contact2 => {
               if (typeof contact2 !== undefined) {
-                this.aux2 = this.formatContactObject(contact2, this.emailTypes, this.phoneTypes, this.addressTypes);
+                this.aux2 = this.formatContactObject(contact2, this.emailTypes, this.phoneTypes);
               }
               if (this.aux1.archived) {
                 this.flash.error(`The contact ${this.capitalizeString(this.aux1.first_name[0]['first_name'])} ${this.capitalizeString(this.aux1.last_name[0]['last_name'])} doesn't exist`);
@@ -245,8 +236,8 @@ export class ContactsMergeComponent {
     this.aux1.dates = this._.sortBy(this.aux1.dates, ['date_type', 'date']);
     this.aux2.dates = this._.sortBy(this.aux2.dates, ['date_type', 'date']);
     // sort addresses
-    this.aux1.addresses = this._.sortBy(this.aux1.addresses, ['address_type', 'full_address']);
-    this.aux2.addresses = this._.sortBy(this.aux2.addresses, ['address_type', 'full_address']);
+    this.aux1.addresses = this._.sortBy(this.aux1.addresses, ['full_address']);
+    this.aux2.addresses = this._.sortBy(this.aux2.addresses, ['full_address']);
     // sort phones
     this.aux1.phones = this._.sortBy(this.aux1.phones, ['phone_type', 'number']);
     this.aux2.phones = this._.sortBy(this.aux2.phones, ['phone_type', 'number']);
@@ -375,8 +366,8 @@ export class ContactsMergeComponent {
     this.checkQuantities(this.aux1, this.aux2, 'emails', 'email', 'address', this.emailTypes);
     this.checkQuantities(this.aux2, this.aux1, 'emails', 'email', 'address', this.emailTypes);
     // match addresses quantity
-    this.checkQuantities(this.aux1, this.aux2, 'addresses', 'address', 'address1', this.addressTypes);
-    this.checkQuantities(this.aux2, this.aux1, 'addresses', 'address', 'address1', this.addressTypes);
+    this.checkQuantities(this.aux1, this.aux2, 'addresses', 'address', 'address1', []);
+    this.checkQuantities(this.aux2, this.aux1, 'addresses', 'address', 'address1', []);
     // match social networks quantity
     this.checkQuantities(this.aux1, this.aux2, 'social_networks', 'network', 'network_id', undefined);
     this.checkQuantities(this.aux2, this.aux1, 'social_networks', 'network', 'network_id', undefined);
@@ -530,10 +521,9 @@ export class ContactsMergeComponent {
    * @param  {Contact} mObj       The main Object from the API.
    * @param  {type}  emailTypes The Email Types Object from the API.
    * @param  {type}  phoneTypes The Phone Types Object from the API.
-   * @param  {type}  addressTypes The Address Types Object from the API.
    * @return {Contact} The contact model with virtual fields added.
    */
-  public formatContactObject(mObj: Contact, emailTypes, phoneTypes, addressTypes): Contact {
+  public formatContactObject(mObj: Contact, emailTypes, phoneTypes): Contact {
     if (this.generalFunctions.isObject(mObj) === true) {
       let key: any;
       let key2: any;
@@ -549,7 +539,6 @@ export class ContactsMergeComponent {
                 for (key2 in mObj[key][i]) {
                   if (mObj[key][i].hasOwnProperty(key2)) {
                     if (key2 === 'address_type') {
-                      type_name = this.extractData(addressTypes, mObj[key][i][key2]);
                       let components = [mObj[key][i].address1,
                                         mObj[key][i].address2,
                                         mObj[key][i].city,
@@ -557,7 +546,7 @@ export class ContactsMergeComponent {
                                         mObj[key][i].country,
                                         mObj[key][i].zip
                                       ];
-                      mObj[key][i][`${type_name}_address`] = {
+                      mObj[key][i][`address`] = {
                         'full_address': this._.compact(components).join(', '),
                         'address1': mObj[key][i].address1,
                         'address2': mObj[key][i].address2,
@@ -696,7 +685,6 @@ export class ContactsMergeComponent {
     this.checkEntityEquals(this.dateTypes, 'dates', 'date', 'date');
     this.checkEntityEquals(this.phoneTypes, 'phones', 'phone', 'number');
     this.checkEntityEquals(this.emailTypes, 'emails', 'email', 'address');
-    this.checkEntityEquals(this.addressTypes, 'addresses', 'address', 'full_address');
     this.checkEntityEquals(this.contactTypes, 'contact_types', 'contact_type', 'types');
     this.checkEntityEquals(undefined, 'social_networks', 'network', 'network_id');
     // check if first_name, last_name and maiden_name are equals
@@ -903,10 +891,9 @@ export class ContactsMergeComponent {
       this.isLoading = true;
       this.contactService.doMerge(this.id1, this.id2, mergeObj)
         .subscribe(response => {
-          this.modalService.data = {
-            success: true
-          };
           this.closeModal.emit({ action: 'close-modal' });
+          this.router.navigate(['contacts']);
+          this.flash.success('Contacts have been merged.');
           this.isLoading = false;
         },
         err => {
@@ -1113,7 +1100,7 @@ export class ContactsMergeComponent {
               break;
             case 'addresses':
               for (let i = 0; i < model[key].length; i++) {
-                aux.key = this.extractData(this.addressTypes, model[key][i].address_type) + '_address';
+                aux.key = 'address';
                 aux.value = model[key][i];
                 this.checkPropertyAll(side, aux, i);
               }
@@ -1238,10 +1225,9 @@ export class ContactsMergeComponent {
    let validDate = this.isSelectEntity(this.dateTypes, 'dates', 'date', 'date');
    let validPhone = this.isSelectEntity(this.phoneTypes, 'phones', 'phone', 'number');
    let validEmail = this.isSelectEntity(this.emailTypes, 'emails', 'email', 'address');
-   let validAddress = this.isSelectEntity(this.addressTypes, 'addresses', 'address', 'full_address');
    let validType = this.isSelectEntity(this.contactTypes, 'contact_types', 'contact_type', 'types');
    let validSocial = this.isSelectEntity(undefined, 'social_networks', 'network', 'network_id');
-   if (!(validDate && validPhone && validEmail && validAddress && validType && validSocial)) {
+   if (!(validDate && validPhone && validEmail && validType && validSocial)) {
       valid = false;
     }
       // check if first_name, last_name and maiden_name are equals

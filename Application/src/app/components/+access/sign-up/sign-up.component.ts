@@ -72,6 +72,7 @@ export class SignUpComponent implements OnInit {
               .subscribe(_response => {
                 sessionStorage.setItem('OAuthInfo', JSON.stringify(_response));
                 this.accessService.setCredentials();
+
                 /* Get and set account id */
                 this.accessService.getLoggedAccountId()
                   .subscribe(data => {
@@ -83,7 +84,12 @@ export class SignUpComponent implements OnInit {
                       console.error(err);
                       this.isLoading = false;
                     },
-                  );
+                );
+
+                this.accessService.getUserProfileInfo().subscribe(user => {
+                  sessionStorage.setItem('currentUser', JSON.stringify(user));
+                });
+
               });
           },
           err => {

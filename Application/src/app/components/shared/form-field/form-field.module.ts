@@ -3,7 +3,7 @@ import { NgModule }                 from '@angular/core';
 import { FormFieldComponent }       from './form-field.component';
 import { FormFieldWrapComponent }   from '../form-field-wrap/form-field-wrap.component';
 /* Directives */
-import { GoogleAddressDirective }   from '../../../directives/google-address/google-address.directive';
+import { GoogleAddressModule  }   from '../../../directives/google-address';
 /* Modules */
 import { DropdownModule }           from 'ngx-dropdown';
 import { CommonModule }             from '@angular/common';
@@ -19,17 +19,16 @@ import { PipesModule }              from '../../../pipes/pipes.module';
     FormsModule,
     DropdownModule,
     TextMaskModule,
-    PipesModule
+    PipesModule,
+    GoogleAddressModule
   ],
   declarations: [
     FormFieldComponent,
-    FormFieldWrapComponent,
-    GoogleAddressDirective,
+    FormFieldWrapComponent
   ],
   exports: [
     FormFieldComponent,
-    FormFieldWrapComponent,
-    GoogleAddressDirective,
+    FormFieldWrapComponent
   ],
   providers: [DecimalPipe]
 })

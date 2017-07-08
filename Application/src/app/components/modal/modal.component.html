@@ -7,12 +7,12 @@
             <img *ngIf="showLogo" class="white-logo" alt="ShootQ logo" src="/assets/img/logo-white.svg">
           </div>
           <div class="hidden-xs col-sm-10"></div>
-          <!--<div class="hidden-xs col-sm-2">
+          <div class="hidden-xs col-sm-2 pull-right" >
             <div class="close-div" *ngIf="closeButton" (click)="cancelForm()">
               <i class="icon-close"></i>
               <span>CLOSE</span>
             </div>
-          </div>-->
+          </div>
       </div>
       <div class="row">
         <div class="hidden-xs col-sm-2"></div>
@@ -20,7 +20,7 @@
           <div id="container-1" class="container-1">
             <div class="container-2">
               <div class="modal-content" id="modal-content">
-                <div class="modal-header">
+                <div class="modal-header" *ngIf="title">
                   <div class="row">
                     <div class="col-xs-1"></div>
                     <div class="col-xs-11">

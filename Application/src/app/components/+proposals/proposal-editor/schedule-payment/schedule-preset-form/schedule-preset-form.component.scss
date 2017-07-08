@@ -22,8 +22,8 @@
         color: rgb(87, 205, 117);
         letter-spacing: 0.8px;
         text-transform: uppercase;
-        &.delete {
-            color: rgb(233, 78, 76);
+        &.delete, &.cancel{
+            color: #e94e4c;
         }
     }
     &_mod {
@@ -61,9 +61,9 @@
         }
     }
 }
-.cancel {
-  color: #b5c1cf !important;
-}
+// .cancel {
+//   color: #b5c1cf !important;
+// }
 
 schedule-payment-form /deep/ form {
   margin-bottom: 15px;

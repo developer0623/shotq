@@ -11,6 +11,7 @@ import {
   ContractPreviewModalComponent,
   ContractPreviewModalContext
 } from '../../+contracts/contract-preview/contract-preview-modal/contract-preview-modal.component';
+import { StickyButtonsModal } from '../../sq-modal/base-modal-components/sticky-buttons/sticky-buttons-modal.service';
 
 
 @Component({
@@ -27,6 +28,7 @@ export class AccountComponent {
   private contractsInfo: Array<any> = [];
 
   constructor(public modal: Modal,
+              public buttonsModal: StickyButtonsModal,
               private accessService: AccessService,
               private legalDocumentService: LegalDocumentService,
               private generalFunctions: GeneralFunctionsService,
@@ -41,7 +43,7 @@ export class AccountComponent {
     this.getUserInfo();
 
     this.route.parent.params.subscribe((params) => {
-      this.jobId = params['jobId'];
+      this.jobId = +params['id'];
       this.getContractsInfo();
     });
   }
@@ -91,7 +93,7 @@ export class AccountComponent {
 
   public openContract(contract) {
 
-    this.modal
+    this.buttonsModal
       .open(ContractPreviewModalComponent,
         overlayConfigFactory({
           isBlocking: false,

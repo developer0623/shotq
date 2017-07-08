@@ -55,7 +55,7 @@ export class JobRoleSelectComponent implements ControlValueAccessor, Validator {
   }
 
   writeValue(obj: any): void {
-    this.value = obj;
+    this.value = obj ? JobRoleService.newObject(obj) : JobRole.Empty;
   }
 
   registerOnChange(fn: any): void {

@@ -25,7 +25,6 @@ export class FormFieldAddressComponent implements OnInit {
   @Input() showPrimary: boolean = false;
   @Input() fullAddressView: boolean = true;
   @Input() showOnLabel: boolean = false;
-  @Input() hideAddressType: boolean = false;
   @Input() showDelete: boolean = false;
   @Input() isLoading: boolean = false;
   @Input() options: Array<any>;
@@ -54,7 +53,6 @@ export class FormFieldAddressComponent implements OnInit {
   ngOnInit() {
     this.ngValue = this.ngValue || {};
     this.manualMode = this.fullAddressView || false;
-    this.ngValue.address_type = this.ngValue.address_type || 1;
     this.formatCountries();
   }
   /**
@@ -201,7 +199,7 @@ export class FormFieldAddressComponent implements OnInit {
    * Clear existing address and search again
    */
   private clearAndSearchAgain() {
-    this.ngValue = { address_type: 1, visible: this.ngValue.visible };
+    this.ngValue = { visible: this.ngValue.visible };
     this.ngValueChange.emit(this.ngValue);
     this.manualMode = false;
   }
@@ -219,7 +217,6 @@ export class FormFieldAddressComponent implements OnInit {
   private getAddress(googlePlace: Object) {
     let address = new Address();
     address.address1 = googlePlace['name'];
-    address.address_type = this.ngValue.address_type;
     address.visible = this.ngValue.visible;
     const fieldsMappings = {country: 'country', state: 'administrative_area_level_1', city: 'locality', zip: 'postal_code'};
     this._.forEach(googlePlace['address_components'], (component) => {

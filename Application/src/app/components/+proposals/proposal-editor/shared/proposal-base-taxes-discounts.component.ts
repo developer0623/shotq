@@ -22,10 +22,10 @@ export class BaseTaxDiscountsComponent<ObjClass, TempClass> {
   header: string = '';
 
   public objectService: RestClientService<ObjClass>;
+  public objects: ObjClass[] = [];
 
   public templateService: RestClientService<TempClass>;
   private objectTemplates: TempClass[];
-  private objects: ObjClass[] = [];
 
   constructor(private flash: FlashMessageService,
               private proposalService: ProposalService) {

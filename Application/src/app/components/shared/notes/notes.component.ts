@@ -1,15 +1,12 @@
 import * as _ from 'lodash';
 import * as textClipper from 'text-clipper';
-import {
-  Component, ElementRef, EventEmitter, Input, OnChanges, Output, SimpleChanges
-} from '@angular/core';
+import { Component, EventEmitter, Input, Output } from '@angular/core';
 import { ChangeNoteAction, DeleteNoteAction, NoteActions } from './note-actions';
 import { FlashMessageService } from '../../../services/flash-message';
 import { GeneralFunctionsService } from '../../../services/general-functions';
 import { Action } from '../dropdown/dropdown.component';
 import { BaseNote } from '../../../models/notes';
-
-declare let tinymce: any;
+import { BaseUserProfile } from '../../../models/user';
 
 const ORIGINAL_PROPERTY_NAME = '$original';
 const TRUNCATED_TEXT_INDICATOR = '&hellip;';
@@ -22,7 +19,7 @@ const DEFAULT_MAX_WORDS_COUNT = 40;
   styleUrls: ['./notes.component.scss'],
   providers: [FlashMessageService, GeneralFunctionsService]
 })
-export class NotesComponent implements OnChanges {
+export class NotesComponent {
   @Input() notesLoading: boolean = false;
   //noinspection JSUnusedGlobalSymbols
   @Input() requestRes: boolean = false;
@@ -49,14 +46,7 @@ export class NotesComponent implements OnChanges {
   }
 
   constructor(private flash: FlashMessageService,
-              private generalFunctions: GeneralFunctionsService,
-              private element: ElementRef) {
-  }
-
-  ngAfterViewInit() {
-  }
-
-  ngOnChanges(changes: SimpleChanges): void {
+              private generalFunctions: GeneralFunctionsService) {
   }
 
   private resetNote(note: BaseNote): BaseNote {
@@ -68,10 +58,8 @@ export class NotesComponent implements OnChanges {
     note['$body'] = note.body;
     note['$truncatedBody'] = textClipper(note.body, maxCharCount,
       {html: true, indicator: TRUNCATED_TEXT_INDICATOR, maxLines: this.maxLines});
-    note['$modifiedByDisplayName'] = _.isString(note.last_modified_by) ?
-      note.last_modified_by : '';
-    note['$createdByDisplayName'] = _.isString(note.created_by) ?
-      note.created_by : '';
+    note['$modifiedByDisplayName'] = note.last_modified_by_data.name;
+    note['$createdByDisplayName'] = note.created_by_data.name;
     return note;
   }
 
@@ -90,10 +78,14 @@ export class NotesComponent implements OnChanges {
 
   private startChanges(note: BaseNote) {
     this.stopChanges();
-    if (_.isNull(note))
-    // Add some whitespace to the `body` so the tinymce
-    // component could see some content
+    if (_.isNull(note)) {
+      // Add some whitespace to the `body` so the tinymce
+      // component could see some content
       note = new BaseNote(0, '', ' ');
+      let currentUserStub = Object.assign(new BaseUserProfile(), {name: 'N/A'});
+      note.created_by_data = currentUserStub;
+      note.last_modified_by_data = currentUserStub;
+    }
     this.noteChangeBuffer = _.cloneDeep(note);
     // keep a reference to the original object, so we can update it on commit
     this.noteChangeBuffer[ORIGINAL_PROPERTY_NAME] = note;

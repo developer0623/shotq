@@ -1,3 +1,6 @@
+@import "../../../../../assets/css/variables";
+@import "../../../../../assets/css/mixins";
+
 .modal-dialog {
   width: 90%!important;
   margin: 100px auto 50px!important;
@@ -11,6 +14,7 @@
     width: 100%;
     margin: 0 auto;
     position: relative;
+    background: transparent;
 
     .close {
       position: absolute;
@@ -28,16 +32,21 @@
   margin: 0 auto;
   background: #fff;
   box-shadow: 0px 7px 30px 24px rgba(0, 0, 0, .1);
+  &__col {
+    width: 50%;
+  }
   &__header {
-    padding: 15px 26px 15px 26px;
+    padding: 15px 26px 13px 26px;
+    display: flex;
   }
   &__header-line {
     padding: 21px 25px;
   }
   &__body /deep/ {
-    padding: 30px 36px 10px 36px;
+    padding: 30px 36px 10px 30px;
     color: #3a405b;
     font-size: 14px;
+    min-height: 200px;
     em {
       color: #3a405b;
     }
@@ -89,6 +98,20 @@ h3,
   font-size: 24px;
   font-weight: 600;
 }
+.email-template__dropdown {
+  /deep/ button.dropdown {
+    border: 0;
+    line-height: 1.1;
+    height: auto;
+    width: auto;
+    padding-left: 0;
+    /deep/ span {
+      top: 50%!important;
+      right: 0!important;
+      transform: translate(0, -50%);
+    }
+  }
+}
 
 .info-text {
   font-size: 12px;
@@ -96,51 +119,9 @@ h3,
   color: #b5c1cf;
 }
 
-.checkbox {
-  input {
-    display: none;
-    & + label {
-      position: relative;
-      display: inline-block;
-      vertical-align: middle;
-      font-size: 12px;
-      color: #3a405b;
-      padding: 15px 0 13px 23px;
-      cursor: pointer;
-      user-select: none;
-      white-space: nowrap;
-      &:before {
-        content: '';
-        position: absolute;
-        left: 0;
-        top: 50%;
-        margin-top: -8px;
-        width: 16px;
-        height: 16px;
-        border-radius: 2px;
-        background-color: #ffffff;
-        border: solid 1px #b6c1cf;
-      }
-    }
-    &:checked + label {
-      &:after {
-        content: '';
-        position: absolute;
-        left: 0px;
-        top: 50%;
-        margin-top: -8px;
-        text-align: center;
-        background-image: linear-gradient(135deg, #e75050, #f7ae18);
-        border-radius: 2px;
-        font-family: Material-Design-Iconic-Font;
-        content: '\f26b';
-        color: #fff;
-        font-size: 13px;
-        width: 16px;
-        height: 16px;
-      }
-    }
-  }
+.sq-checkbox {
+  display: inline-block;
+  vertical-align: middle;
 }
 
 .edit-block {
@@ -300,22 +281,6 @@ h3,
 
   p {
     line-height: 2;
-  }
-}
-
-.email-template__dropdown {
-  margin-top: 10px;
-
-  /deep/ {
-    .dropdown {
-      border: none;
-
-      span {
-        position: static !important;
-        vertical-align: middle;
-        margin-left: 20px;
-      }
-    }
   }
 }
 

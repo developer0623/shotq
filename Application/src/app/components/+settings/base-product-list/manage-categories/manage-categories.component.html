@@ -36,9 +36,9 @@
     <button class="btn_delete btn btn_xs btn_transparent pull-left"
             *ngIf="canDelete"
             (click)="confirmDelete()">Delete</button>
-    <button type="button" class="btn btn_xs btn_transparent"
+    <button type="button" class="sq-btn-dismiss"
             data-dismiss="modal" (click)="close()">Cancel</button>
-    <button type="button" class="btn btn_xs btn_blue"
+    <button type="button" class="sq-btn-submit"
             [disabled]="!valid()"
             (click)="save()">Done</button>
 </div>

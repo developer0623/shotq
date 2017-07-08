@@ -1,9 +1,11 @@
-import * as _ from 'lodash';
 import { Component, Inject, OnInit, ViewContainerRef } from '@angular/core';
 import { Router } from '@angular/router';
 import { DOCUMENT } from '@angular/platform-browser';
+
+import * as _ from 'lodash';
 import { Observable } from 'rxjs/Observable';
-import { Overlay } from 'single-angular-modal/esm';
+import { Overlay, overlayConfigFactory } from 'single-angular-modal/esm';
+import { Modal } from 'single-angular-modal/plugins/bootstrap';
 
 import { ContactService } from '../../../services/contact/contact.service';
 import { GeneralFunctionsService } from '../../../services/general-functions';
@@ -15,6 +17,9 @@ import {
 } from './menu-items';
 import { CapitalizePipe } from '../../../pipes/capitalize/capitalize.pipe';
 import { ContactPageCursor, ContactsUiService } from '../../shared/contacts-ui/contacts-ui.service';
+import { FlashMessageService } from '../../../services/flash-message/flash-message.service';
+import { DeleteCategoriesWindowData } from '../../+settings/base-product-list/manage-categories/delete-categories/delete-categories.component';
+import { ContactDeleteModalComponent, ContactDeleteWindowData } from './contact-delete/contact-delete-modal.component';
 
 declare let require: (any);
 
@@ -26,11 +31,13 @@ declare let require: (any);
   providers: [CapitalizePipe, GeneralFunctionsService]
 })
 export class ContactsListComponent implements OnInit {
+  public isArchived: boolean = false;
+
   private subscription;
-  private fileSaver                     = require('../../../../../node_modules/file-saver/FileSaver.js');
+  private fileSaver = require('../../../../../node_modules/file-saver/FileSaver.js');
   private router:                       Router;
   /* Contacts list */
-  private contacts:                     Contact[];
+  private contacts: Contact[] = [];
   /* Array with contacts id of those contacts that are checked */
   private contactsChecked:              Array<any> = [];
   private selectAllChecked:             boolean = false;
@@ -44,7 +51,6 @@ export class ContactsListComponent implements OnInit {
   private filterParams:                 string;
   private generalFunctions:             any;
   private isLoading:                    boolean = false;
-  private modalInstance:                any = null;
   private searchTerm:                   string;
   private searching:                    boolean;
   private areUSureMsg:                  string = 'Are you sure that you want to perform this action?';
@@ -52,10 +58,6 @@ export class ContactsListComponent implements OnInit {
   private contactTypes:                 any;
   private scroll:                       boolean = false;
   private contactTypeFilter:            string = 'all';
-  private animateAction:                string = 'show';
-  private animationSearch:              string = 'out';
-  private animationRun:                 boolean = false;
-  private contactsOnInitCounter:        number;
   private dropdownOpenedClass:          string;
   /** @type {Object} Action bar style configuration object */
   private actionsBar = {
@@ -97,7 +99,9 @@ export class ContactsListComponent implements OnInit {
               private modalService: ModalService,
               overlay: Overlay,
               vcRef: ViewContainerRef,
-              private capitalizePipe: CapitalizePipe) {
+              private capitalizePipe: CapitalizePipe,
+              private modal: Modal,
+              private flash: FlashMessageService) {
     this.generalFunctions = generalFunctions;
     // This is a workaround for the issue where Modal doesn't work with lazy
     // modules. See http://bit.ly/2qqlpDX for details.
@@ -180,8 +184,8 @@ export class ContactsListComponent implements OnInit {
    * Optional you can pass ids as params.
    * @param {string} param url to navigate to.
    */
-  public navigateTo(url) {
-    this.generalFunctions.navigateTo(url, this.contactMerge);
+  public navigateTo(url, params = {}) {
+    this.generalFunctions.navigateTo(url, params);
   }
 
   public getContacts() {
@@ -193,8 +197,8 @@ export class ContactsListComponent implements OnInit {
       this.paginator.currentPage -= 1;
     }
     let params = {
-      archived: 'False',
-      active: 'True',
+      archived: this.isArchived,
+      active: true,
       page: this.paginator.currentPage,
       page_size: this.paginator.perPage,
       ordering: o.split('=')[1]
@@ -207,8 +211,79 @@ export class ContactsListComponent implements OnInit {
     this.presenter.fetch(params);
   }
 
+  toggleView() {
+    this.isArchived = !this.isArchived;
+    this.getContacts();
+  }
+
+  confirmRestore() {
+    this.modal
+      .confirm()
+      .isBlocking(true)
+      .showClose(false)
+      .title('Restore contacts?')
+      .dialogClass('modal-dialog modal-confirm')
+      .body('Are you sure you want to restore selected contacts?')
+      .okBtn('Restore')
+      .okBtnClass('btn btn_xs btn_blue pull-right')
+      .cancelBtnClass('btn btn_xs btn_transparent')
+      .open()
+      .then(dialogRef => {
+        dialogRef.result
+          .then(result => {
+            this.updateSelected(this.getCheckedContacts(), {archived: false});
+          })
+          .catch(() => {});
+      });
+  }
+
+  confirmDelete() {
+    let checkedContacts = this.getCheckedContacts();
+    this.modal
+      .open(ContactDeleteModalComponent, overlayConfigFactory({
+        contacts: checkedContacts
+      }, ContactDeleteWindowData))
+      .then(dialogRef => {
+        dialogRef.result
+          .then(result => {
+            let toUpdate = _.filter(checkedContacts, {has_relations: false});
+            this.updateSelected(toUpdate, {active: false});
+          })
+          .catch(() => {
+          });
+      });
+  }
+
+  public getCheckedContacts() {
+    return _.filter(this.contacts, (c) => {
+      return _.includes(this.contactsChecked, c.id);
+    });
+  }
+
+  public updateSelected(contacts, data) {
+    if (!contacts.length)
+      return;
+
+    this.isLoading = true;
+    let updateData = _.map(contacts, (c) => {
+      return Object.assign({id: c['id']}, data);
+    });
+    this.contactService
+      .bulkPatch(updateData)
+      .subscribe(
+        () => {
+          this.flash.success('Contacts are successfully updated.');
+          this.getContacts();
+        },
+        (error) => {
+          console.error(JSON.stringify(error));
+          this.flash.error('Error while updating contacts.');
+          this.isLoading = false;
+        }
+      );
+  }
+
   private setViewValue(pageCursor: ContactPageCursor) {
-      this.contactsOnInitCounter = pageCursor.count;
       this.contacts = _.map(pageCursor.results, item => {
         // item['$default_address'] = this.contactService.getDefaultAddress(item);
         item['$default_email'] = item.defaultEmail;
@@ -410,13 +485,7 @@ export class ContactsListComponent implements OnInit {
    * is the callback passed to the alert component
    */
   private archiveChecked() {
-    // start loader
-    let aContacts = [];
-    this.contacts.forEach((element, index, array) => {
-      if (this.isChecked(element)) {
-        this.archiveContact(element);
-      }
-    });
+    this.updateSelected(this.getCheckedContacts(), {archived: true});
     this.toggleActionButtonBar();
 
   }

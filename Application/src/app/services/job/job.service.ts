@@ -37,6 +37,14 @@ export class JobService extends RestClientService<Job> {
     return this.itemGet(id, 'get_correspondence');
   }
 
+  getInvoices(jobId: number) {
+    return this.itemGet(jobId, 'invoices');
+  }
+
+  getNewLeadsStat() {
+    return this.listGet('new_lead');
+  }
+
   /**
    * Sets the given contact as the primary contact for the job.
    * @param jobId the ID of the job to be updated

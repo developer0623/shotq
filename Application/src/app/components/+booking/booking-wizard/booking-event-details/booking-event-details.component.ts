@@ -1,15 +1,14 @@
+import { } from '@types/googlemaps'; // tslint:disable-line
 import { Component, Input, Output, EventEmitter } from '@angular/core';
 import { Proposal } from '../../../../models/proposal';
 import { FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { Contact } from '../../../../models/contact';
 import { Worker } from '../../../../models/worker';
+import { BaseAddress } from '../../../../models/address';
 
 import { ContactService } from '../../../../services/contact/contact.service';
 import { Observable } from 'rxjs';
 import { ProposalService } from '../../../../services/proposal/proposal.service';
-import { AddressTypeService } from '../../../../services/address-type/address-type.service';
-import { AddressType } from '../../../../models/address-type';
-
 
 @Component({
   selector: 'booking-event-details',
@@ -25,10 +24,8 @@ export class BookingEventDetailsComponent {
   eventForm: FormGroup;
   phoneTypes;
   workers: Worker[];
-  addressTypes: AddressType[] = [];
 
   constructor(private formBuilder: FormBuilder,
-              private addressTypeService: AddressTypeService,
               private contactService: ContactService,
               private proposalService: ProposalService) {
     this.buildForms();
@@ -36,7 +33,6 @@ export class BookingEventDetailsComponent {
 
   ngOnInit() {
     this.getWorkers();
-    this.getAddressTypes();
   }
 
   ngOnChanges(changes) {
@@ -45,10 +41,7 @@ export class BookingEventDetailsComponent {
         .subscribe(contact => {
           this.contact = contact;
           this.contact.social_networks = [];
-          this.contact.address = this.contact.addresses &&
-            this.contact.addresses.find(item => item.id === this.contact.default_address) ||
-            this.contact.addresses[0] ||
-            {};
+          this.contact.address = this.contact.default_address_details || {};
 
           this.contact.default_phone_details = this.contact.phones &&
             this.contact.phones.find(item => item.id === this.contact.default_phone) ||
@@ -85,15 +78,9 @@ export class BookingEventDetailsComponent {
         address1: ['', Validators.compose([
           Validators.required,
         ])],
-        city: ['', Validators.compose([
-          Validators.required,
-        ])],
-        state: ['', Validators.compose([
-          Validators.required,
-        ])],
-        zip: ['', Validators.compose([
-          Validators.required,
-        ])],
+        city: '',
+        state: '',
+        zip: '',
       }),
     });
 
@@ -128,10 +115,9 @@ export class BookingEventDetailsComponent {
         this.contact.phones.push(this.contactForm.value.default_phone_details);
       }
       let formAddress = this.contactForm.value.address;
-      formAddress.address_type = this.addressTypes[0].id;
       let address = this.contact.addresses.find(a => a.id === this.contact.default_address);
       if (address) {
-        Object.assign(address, this.contactForm.value.address);
+        Object.assign(address, this.contactForm.value.address, {default: true});
       } else {
         this.contact.addresses.push(this.contactForm.value.address);
       }
@@ -166,11 +152,11 @@ export class BookingEventDetailsComponent {
       });
   }
 
-  private getAddressTypes() {
-    this.addressTypeService.getList()
-      .map(res => res.results)
-      .subscribe((res: AddressType[]) => {
-        this.addressTypes = res;
-      });
+  updateLocation(place: google.maps.places.PlaceResult) {
+    let address = BaseAddress.extractFromGooglePlaceResult(place);
+    this.contactForm.patchValue({
+      address: address
+    });
+    this.contactForm.markAsDirty();
   }
 }

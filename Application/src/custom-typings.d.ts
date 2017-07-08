@@ -138,3 +138,6 @@ interface SystemJS {
 }
 
 declare var SqPaymentForm: any;
+declare var StripeCheckout: any;
+declare var braintree: any;
+declare var AuthorizeNetPopup: any;

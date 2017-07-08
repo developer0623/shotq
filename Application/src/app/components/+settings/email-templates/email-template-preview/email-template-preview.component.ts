@@ -23,7 +23,7 @@ export class EmailTemplatePreviewComponent {
   isLoading: boolean = false;
   isContactsActive: boolean = false;
 
-  template: EmailTemplate | any = {};
+  template: EmailTemplate;
   variants: EmailTemplate[] | any = undefined;
   tempContents: string = '';
   variablesList: TemplateVariable[] = [];
@@ -46,16 +46,14 @@ export class EmailTemplatePreviewComponent {
       .getList({short: true, ordering: 'name', status: 'draft'})
       .subscribe(
         (result) => {
+          this.isLoading = false;
           this.variants = result.results;
           if (this.variants.length === 0) {
-            this.isLoading = false;
             this.initConfirmModal();
             this.confirmModal.show();
             return;
           }
-
-          this.selectedTemplate = this.variants[0];
-          this.loadTemplate(this.selectedTemplate['id']);
+          this.modal.show();
         },
         (errors) => {
           this.isLoading = false;
@@ -66,10 +64,12 @@ export class EmailTemplatePreviewComponent {
   }
 
   loadTemplate(templateId) {
-    if (!templateId)
+    if (!templateId) {
+      this.template = undefined;
       return;
+    }
 
-    // this.isLoading = true;
+    this.isLoading = true;
     this.templateService
       .get(templateId)
       .subscribe(
@@ -77,8 +77,6 @@ export class EmailTemplatePreviewComponent {
           this.template = template;
           this.tempContents = template.contents;
           this.isLoading = false;
-          this.modal.show();
-          jQuery('.modal-backdrop')[0].classList.add('modal-backdrop_grey');
         },
         (errors) => {
           this.isLoading = false;

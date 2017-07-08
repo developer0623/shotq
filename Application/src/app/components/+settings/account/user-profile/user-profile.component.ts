@@ -10,6 +10,7 @@ import { FlashMessageService } from '../../../../services/flash-message/flash-me
 import { ApiService } from '../../../../services/api/api.service';
 import { BreadcrumbService } from '../../../shared/breadcrumb/components/breadcrumb.service';
 import { EqualValidator } from '../../../../validators/equal.validator';
+import { SignalService } from '../../../../services/signal-service/signal.service';
 
 
 @Component({
@@ -34,7 +35,8 @@ export class UserProfileSettingsComponent {
               private fb: FormBuilder,
               private router: Router,
               private breadcrumbService: BreadcrumbService,
-              private apiService: ApiService) {
+              private apiService: ApiService,
+              private signal: SignalService) {
     this.uploader = new FileUploader({
       url: this.apiService.apiUrl + '/storage/upload/' + this.apiService.auth.id + '/',
       authToken: this.apiService.getOauthAutorization()
@@ -135,12 +137,17 @@ export class UserProfileSettingsComponent {
     return this.accessService
       .updateUserProfileInfo(data)
       .subscribe(
-        () => {
+        (result) => {
           this.passwordErrors = [];
           this.passwordForm.reset();
           this.flash.success('Your profile details were successfully saved.');
           this.userForm.markAsPristine();
           this.isLoading = false;
+          this.signal.send({
+            group: 'currentUser',
+            type: 'edit',
+            instance: result
+          });
         },
         (errors) => {
           this.passwordErrors = [];

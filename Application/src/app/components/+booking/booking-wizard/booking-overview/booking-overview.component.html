@@ -39,7 +39,7 @@
 
         <div class="item black" *ngIf="overview.discounts">
           <div class="item-description">DISCOUNT</div>
-          <div class="item-price">${{ overview.discounts | number:'1.2-2' }}</div>
+          <div class="item-price">-${{ overview.discounts | number:'1.2-2' }}</div>
         </div>
         <div class="item black" *ngIf="overview.tax">
           <div class="item-description">TAX</div>
@@ -67,6 +67,7 @@
       </ul>
     </div>
   </div>
+  <hr class="split-line"/>
 
   <div class="payment-schedule-wrap">
     <div class="payment-schedule-title title title_bold ">
@@ -75,6 +76,8 @@
     <schedule-payment-table [proposal]="proposal"
                             [subtotalPrice]="overview.subtotal"
                             [totalPrice]="overview.totalPrice"
-                            [shippingPrice]="overview.shipping"></schedule-payment-table>
+                            [shippingPrice]="overview.shipping">
+
+    </schedule-payment-table>
   </div>
 </div>

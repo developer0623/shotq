@@ -18,8 +18,7 @@ import { ContractPreviewModalComponent } from './contract-preview-modal/contract
     FormFieldModule,
     FormNgSelectWrapModule,
     ReactiveFormsModule,
-    ChooseContactModule,
-    SharedModule
+    ChooseContactModule
   ],
   declarations: [
     ContractPreviewComponent,

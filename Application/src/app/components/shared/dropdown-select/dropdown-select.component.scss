@@ -40,6 +40,7 @@ div.dropdown-menu {
     font-size: 14px;
     font-weight: normal;
     padding: 5px 10px;
+    word-wrap: break-word;
     &:hover {
       cursor: pointer;
       background-color: #f0f2f7;
@@ -104,6 +105,9 @@ button.dropdown {
     padding-left: 12px;
     padding-top: 15px;
     padding-right: 23px;
+    &.transparent {
+      opacity: 0;
+    }
   }
   span {
     font-size: 6px !important;
@@ -142,4 +146,8 @@ button.dropdown {
 
 .disabled {
   pointer-events: none;
+}
+
+.option-archived{
+  text-decoration: line-through;
 }

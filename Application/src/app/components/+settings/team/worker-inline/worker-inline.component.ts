@@ -1,5 +1,4 @@
 import { Component, Input } from '@angular/core';
-import { Router } from '@angular/router';
 import * as choices from '../team.constants';
 
 @Component({
@@ -14,9 +13,6 @@ export class WorkerInlineComponent {
   @Input() worker: Worker;
   public choices: any = choices;
 
-  constructor(
-    private router: Router,
-  ) {
-  }
+  constructor() {}
 
 }

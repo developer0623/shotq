@@ -1,39 +1,59 @@
 import * as _ from 'lodash';
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, ViewContainerRef } from '@angular/core';
 import { ActivatedRoute } from '@angular/router';
 import { Observable } from 'rxjs/Observable';
 /* Components */
 import { TimelineComponent } from '../../shared/timeline/timeline.component';
+
+/* Sign modal */
+import {
+  ContractPreviewModalComponent,
+  ContractPreviewModalContext
+} from '../../+contracts/contract-preview/contract-preview-modal/contract-preview-modal.component';
+import { Modal, Overlay, overlayConfigFactory } from 'single-angular-modal';
+import { StickyButtonsModal } from '../../sq-modal/base-modal-components/sticky-buttons/sticky-buttons-modal.service';
+
 /* Services */
+import { ContractService } from '../../../services/contract/contract.service';
 import { JobService } from '../../../services/job';
 import { TaxService } from '../../../services/tax';
 import { DiscountService } from '../../../services/discount';
 import { ProposalService } from '../../../services/proposal';
-import { JobTypeService } from '../../../services/client-access/job-type/';
-import { FlashMessageService } from '../../../services/flash-message';
 import { InvoiceService } from '../../../services/client-access/billing';
+import { SignalService } from '../../../services/signal-service/signal.service';
+import { ScheduledPaymentService } from '../../../services/scheduled-payment/scheduled-payment.service';
+import { MerchantAccountService } from '../../../services/merchant-account/merchant-account.service';
 /* Models */
+import { Contract } from '../../../models/contract';
+import { Signature } from '../../../models/signature.model';
 import { Package } from '../../../models/package';
 import { Proposal } from '../../../models/proposal';
-import { JobType } from '../../../models/job-type';
 import { Job } from '../../../models/job';
 import { Discount } from '../../../models/discount.model';
 import { Tax } from '../../../models/tax.model';
 import { BookingOverview } from '../../../models/proposal-payment-overview.model';
+import { Invoice } from '../../../models/invoice';
+import { ScheduledPayment } from '../../../models/scheduled-payment.model';
 
 @Component({
   selector: 'overview',
   templateUrl: 'overview.component.html',
   styleUrls: ['overview.component.scss'],
-  providers: [JobService, JobTypeService, InvoiceService, TaxService, DiscountService, ProposalService]
+  providers: [
+    JobService, InvoiceService,
+    TaxService, DiscountService,
+    ProposalService, ScheduledPaymentService,
+    MerchantAccountService]
 })
 export class OverviewComponent {
   private job: Job;
+  private contract: Contract;
+  private signature: Signature;
   private overview: BookingOverview;
   private isLoading: boolean = false;
-  private jobTypes: JobType[] = [];
   private pckg: Package;
-  private packageInvoices: Array<any> = [];
+  private activeInvoice: Invoice;
+  private nextPayment: ScheduledPayment;
   private examplePackageInvoices: Array<any> = [
     {
       'due': '2017-11-30',
@@ -56,18 +76,24 @@ export class OverviewComponent {
       'status': 'new'
     }
   ];
-  private nextPayment: any = {};
 
   constructor(
     private route: ActivatedRoute,
     private jobService: JobService,
     private discountService: DiscountService,
     private taxesService: TaxService,
-    private jobTypeService: JobTypeService,
     private proposalService: ProposalService,
     private billingService: InvoiceService,
-    private flash: FlashMessageService
-  ) { }
+    private scheduledPaymentService: ScheduledPaymentService,
+    private merchantAccountService: MerchantAccountService,
+    private signalService: SignalService,
+    private overlay: Overlay,
+    private vcRef: ViewContainerRef,
+    private contractService: ContractService,
+    public buttonsModal: StickyButtonsModal
+  ) {
+    overlay.defaultViewContainer = vcRef;
+  }
 
   ngOnInit() {
     this.route.parent.data.subscribe(data => {
@@ -80,10 +106,13 @@ export class OverviewComponent {
     this.isLoading = true;
 
     let observableArray = [
-      this.jobService.getOrCreateProposal(this.job.id)
+      this.jobService.getOrCreateProposal(this.job.id),
+      this.billingService.getInvoiceInfoByJob(this.job.id)
     ];
     Observable.forkJoin(observableArray)
-      .subscribe(([proposal]: [Proposal]) => {
+      .subscribe(([proposal, invoices]: [Proposal, Invoice[]]) => {
+        this.activeInvoice = invoices[0];
+        this.getNextPayment();
         this.formatWorkerRoles();
 
         Observable.zip(
@@ -93,7 +122,42 @@ export class OverviewComponent {
           this.overview = this.proposalService.generateProposalPaymentOverview(proposal, discounts, taxes);
         });
         this.pckg = proposal.approved_package_data;
+        this.contract = proposal.contract_data;
+        this.loadSignature();
         this.isLoading = false;
+      });
+  }
+
+  sign($event?) {
+    if ($event) {
+      $event.stopPropagation();
+      $event.preventDefault();
+    }
+
+    this.buttonsModal
+      .open(ContractPreviewModalComponent,
+        overlayConfigFactory({
+          isBlocking: false,
+          confirmText: 'Sign and Continue',
+          canSign: true,
+          contract: this.contract
+        }, ContractPreviewModalContext)
+      ).then(dialogRef => {
+        dialogRef.result.then(result => {
+          this.loadSignature();
+        });
+    });
+  }
+
+  pay() {
+    this.merchantAccountService.openChargeForm(this.activeInvoice, this.nextPayment)
+      .subscribe(res => {
+        this.getNextPayment();
+        this.signalService.send({
+          group: 'payment',
+          type: 'applied',
+          instance: res
+        });
       });
   }
 
@@ -116,48 +180,17 @@ export class OverviewComponent {
     }
   }
 
-  /**
-   * Format payment due (convert to Date) and amount (convert to float)
-   */
-  public formatPayments() {
-    for (let i = 0; i < this.packageInvoices.length; i++) {
-      if (this.packageInvoices[i].due) {
-        this.packageInvoices[i].due = new Date(this.packageInvoices[i].due + 'T23:59:59Z');
-      }
-      if (this.packageInvoices[i].amount && typeof this.packageInvoices[i].amount === 'String') {
-        this.packageInvoices[i].amount = parseFloat(this.packageInvoices[i].amount);
-      }
-    }
-    this.getNextPayment();
+  private loadSignature() {
+    this.contractService.mySignature(this.contract.id).subscribe((signature) => {
+      this.signature = signature;
+    });
   }
 
-  /**
-   * Get the next payment to show on its section
-   */
-  public getNextPayment() {
-    let today = new Date();
-    let smallerPayDiff = null;
-    let smallerPayIdx = null;
-    for (let i = 0; i < this.packageInvoices.length; i++) {
-      if (this.packageInvoices[i].status && this.packageInvoices[i].status === 'new' && this.packageInvoices[i].due) {
-        let paymentDue = this.packageInvoices[i].due;
-        // check if is the closest date
-        if (this.packageInvoices[i].due.getTime() >= today.getTime()) {
-          // assign the first 'new' payment as closest
-          if (!smallerPayDiff) {
-            smallerPayDiff = this.packageInvoices[i].due.getTime();
-            smallerPayIdx = i;
-          } else if (smallerPayDiff && smallerPayDiff > this.packageInvoices[i].due.getTime()) {
-            smallerPayDiff = this.packageInvoices[i].due.getTime();
-            smallerPayIdx = i;
-          }
-        }
-      }
-    }
-    // assign the closest payment
-    if (smallerPayIdx && this.packageInvoices[smallerPayIdx]) {
-      this.nextPayment = this.packageInvoices[smallerPayIdx];
-      this.packageInvoices.splice(smallerPayIdx, 1);
-    }
+  private getNextPayment() {
+    this.scheduledPaymentService.getList({invoice: this.activeInvoice.id})
+      .map(res => res.results)
+      .subscribe((scheduledPayments: ScheduledPayment[]) => {
+        this.nextPayment = _.find(scheduledPayments, s => s.balance > 0);
+      });
   }
 }

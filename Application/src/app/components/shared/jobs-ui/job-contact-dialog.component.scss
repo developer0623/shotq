@@ -1,110 +1,42 @@
+@import "../../../../assets/css/variables";
+@import "../../../../assets/css/mixins";
+
+.job-contact-dialog__header {
+  @include sq-dialog-header();
+}
+
+.job-contact-dialog__title {
+  @include sq-dialog-title;
+}
+
+.job-contact-dialog__body {
+  @include sq-dialog-body;
+}
+
+.job-contact-dialog__footer {
+  @include sq-dialog-footer();
+}
+
 /deep/ .modal-dialog--job-contact {
-  -webkit-box-shadow: 0 1px 1px 1px rgba(0, 0, 0, .1);
-  box-shadow: 0 10px 20px 0 rgba(0, 0, 0, .2);
-  font-family: 'Titillium Web', sans-serif;
-  width: 540px !important;
-  margin: 7vh auto !important;
-
-  .modal-header {
-    margin: 0;
-    padding: 20px 40px !important;
-  }
-
-  .modal-title {
-    padding: 0;
-    font-size: 24px;
-    font-weight: bold;
-    font-family: 'Titillium Web', sans-serif;
-    color: #3a405b;
-    text-align: left;
-  }
-
-  .modal-body {
-    font-size: 14px;
-    color: #3a405b;
-    line-height: 1.2;
-  }
-
-  .modal-footer {
-    position: static;
-    height: 50px;
-    padding: 8px 40px;
-    background-color: #fafbfb;
-    box-shadow: inset 0 1px 0 0 #e4e8f0;
-  }
-
-  .btn {
-    border: 1px solid transparent;
-    padding: 0 30px;
-    height: 34px;
-    font-size: 14px;
-    font-weight: normal;
-  }
-  .btn-primary {
-    border-radius: 4px;
-    background-color: #086aff;
-  }
-
-  .btn-link {
-    color: rgba(55, 57, 76, 0.5);
-  }
-
-  legend {
-    float: left;
-    font-size: 14px;
-    font-weight: 600;
-    margin: 0 0 12px 0 !important;
-  }
-
-  form, fieldset {
-    .row {
-      & > div:first-child {
-        padding-left: 0;
-      }
-      & > div:last-child {
-        padding-right: 0;
-      }
-      @media (max-width: 991px) {
-        & > div:first-child {
-          padding-right: 0;
-        }
-        & > div:last-child {
-          padding-left: 0;
-        }
-      }
-    }
-  }
-
-  fieldset {
-    margin: 0;
-    padding: 24px 40px 12px 40px;
-  }
-
-  fieldset:nth-child(odd) {
-    background-color: #fafbfb;
-  }
-
-  fieldset:nth-child(even) {
-    background-color: #fff;
-  }
+  @include sq-modal-dialog(md);
 
   .field {
     position: relative;
-    margin-bottom: 10px;
+    margin-bottom: $spacer-y;
 
     label {
       position: absolute;
       top: 15px;
       left: 20px;
       z-index: 2;
-      color: #9da0ad;
+      color: $input-color-placeholder;
       transform: translate3d(0, 0, 0);
       transition: all 0.2s ease-in-out;
       user-select: none;
       pointer-events: none;
       &.is-selected {
-        color: #898c9d;
-        font-size: 10px;
+        color: $input-color-placeholder;
+        font-size: 0.714rem;
         transform: translate3d(0, -10px, 0);
       }
     }
@@ -112,57 +44,52 @@
     .form-control {
       width: 100%;
       height: 44px;
-      border-radius: 2px;
-      background-color: #fff;
-      border: solid 1px #e4e8f0;
+      border-radius: $border-radius;
+      background-color: $input-bg;
+      border: solid 1px $input-border-color;
       padding: 15px 15px 0 20px;
-      font-size: 14px;
-      color: #3a405b;
+      font-size: $font-size-base;
+      color: $input-color;
       outline: none !important;
 
       &:-webkit-autofill {
-        border-color: #b6c1cf;
-        -webkit-box-shadow: 0 0 0px 1000px white inset;
-        color: #3a405b;
+        border-color: $input-border-focus;
+        -webkit-box-shadow: 0 0 0 1000px white inset;
+        color: $input-color;
       }
       &:focus, &:active {
-        border-color: #b6c1cf;
+        border-color: $input-border-focus;
       }
       &[data-empty="false"] + label,
       &[data-empty="false"] + /deep/ngx-my-date-picker + label,
       &:focus + label {
-        color: #898c9d;
-        font-size: 10px;
+        color: $input-color-placeholder;
+        font-size: 0.714rem;
         transform: translate3d(0, -10px, 0);
       }
-      // &.is-invalid {
-      //   border: solid 1px #e94e4c;
-      //   -webkit-box-shadow: 0 0 4px 1px rgba(233, 77, 75, 0.5);
-      //   box-shadow: 0 0 4px 1px rgba(233, 77, 75, 0.5);
-      // }
     }
 
     .form-control--job-role {
       &[data-empty="false"] + label,
       &:focus + label {
-        color: #898c9d;
-        font-size: 10px;
+        color: $input-color-placeholder;
+        font-size: 0.714rem;
         transform: translate3d(0, -10px, 0);
       }
     }
 
     .dropdown-datepicker_wrap {
       height: 44px;
-      border-radius: 2px;
-      background-color: #fff;
-      border: solid 1px #e4e8f0;
+      border-radius: $border-radius;
+      background-color: $body-bg;
+      border: solid 1px $input-border-color;
     }
   }
   .field.has-error {
     input + label,
     input + /deep/ngx-my-date-picker + label {
-      color: #898c9d;
-      font-size: 10px;
+      color: $input-color-placeholder;
+      font-size: 0.714rem;
       transform: translate3d(0, -10px, 0);
     }
   }
@@ -174,7 +101,7 @@
       bottom: 290px;
       left: 210px;
     }
-    /deep/.ngxmdp .monthinput, 
+    /deep/.ngxmdp .monthinput,
     /deep/.ngxmdp .yearinput {
       width: 40px;
       height: 22px;
@@ -192,7 +119,7 @@
     border-right: 0;
     position: static;
     &:focus + label + .input-group-btn > .btn-calendar {
-      border: 1px solid #b6c1cf;
+      border: 1px solid $gray-border;
       border-left: 0;
     }
   }
@@ -202,15 +129,12 @@
   transition: all 0.2s ease-in-out;
   width: 44px;
   height: 44px;
-  border: 1px solid #e4e8f0;
+  border: 1px solid $input-border-color;
   border-left: none;
   background-color: transparent;
-  -webkit-appearance: none;
-  -moz-appearance: none;
-  appearance: none;
+  @include appearance(none);
   outline: none;
 }
 .icon-ios-calendar {
   font-size: 16px;
 }
-
